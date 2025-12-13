@@ -75,19 +75,19 @@ struct NavigationButton: View {
         case .methodology:
             return "Methodology"
         case .mathematicalModel:
-            return "Math Model"
+            return "Mathematical Model"
         case .apgiMapping:
             return "APGI Mapping"
         case .parameterIdentifiability:
-            return "Parameters"
+            return "Parameter Identifiability"
         case .biologicalImplementation:
-            return "Biology"
+            return "Biological Implementation"
         case .neuromodulatorEffects:
-            return "Neuromod Effects"
+            return "Neuromodulator Effects"
         case .neuromodulatoryImplementation:
-            return "Neuromod Impl"
+            return "Neuromodulatory Implementation"
         case .explicitNeuromodulator:
-            return "Explicit Neuro"
+            return "Explicit Neuromodulator"
         case .mappingCognitiveToApgi:
             return "Cognitive→APGI"
         case .apgiToCognitive:
@@ -95,19 +95,19 @@ struct NavigationButton: View {
         case .ignitionTimeline:
             return "Timeline"
         case .neuromodulatoryControl:
-            return "Neuro Control"
+            return "Neuromodulatory Control"
         case .psychiatricDisorders:
-            return "Psych Disorders"
+            return "Psychiatric Disorders"
         case .thermodynamicEfficiency:
-            return "Thermo/Efficiency"
+            return "Thermodynamic Efficiency"
         case .epistemicStandards:
-            return "Epistemic Std."
+            return "Epistemic Standards"
         case .bibliography:
             return "Bibliography"
         case .glossary:
             return "Glossary"
         case .targetAudience:
-            return "Audience"
+            return "Target Audience"
         }
     }
 }

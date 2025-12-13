@@ -3,6 +3,9 @@ import SwiftUI
 struct ContentView: View {
     @State private var selectedTab: Tab = .methodology
     
+    init() {
+    }
+    
     var body: some View {
         VStack(spacing: 0) {
             NavigationHeader(
@@ -21,10 +24,11 @@ struct ContentView: View {
                         .tag(tab)
                 }
             }
-            .frame(minWidth: 800, minHeight: 600) // Ensures a reasonable window size for macOS
+            .frame(minWidth: 800, minHeight: 600)
         }
     }
 }
+
 
 #Preview {
     ContentView()
