@@ -33,6 +33,10 @@ struct TabContentView: View {
                 NeuromodulatoryControlsView()
             case .psychiatricDisorders:
                 PsychiatricDisordersView()
+            case .apgiStatement:
+                APGIStatementView()
+            case .lifeStages:
+                LifeStagesView()
             case .thermodynamicEfficiency:
                 ThermodynamicEfficiencyView()
             case .epistemicStandards:

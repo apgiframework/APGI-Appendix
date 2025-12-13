@@ -98,6 +98,10 @@ struct NavigationButton: View {
             return "Neuromodulatory Control"
         case .psychiatricDisorders:
             return "Psychiatric Disorders"
+        case .apgiStatement:
+            return "APGI Statement"
+        case .lifeStages:
+            return "Life Stages"
         case .thermodynamicEfficiency:
             return "Thermodynamic Efficiency"
         case .epistemicStandards:
