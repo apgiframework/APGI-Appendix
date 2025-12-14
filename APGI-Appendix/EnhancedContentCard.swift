@@ -54,21 +54,26 @@ struct EnhancedContentCard: View {
                         Image(systemName: "rectangle.inset.filled.and.person.filled")
                     }
                     .buttonStyle(.borderless)
-                    .accessibilityLabel("Focus Mode")
+                    .apgiAccessibility(
+                        label: "Focus mode",
+                        hint: "Open a distraction-free reading view",
+                        traits: .isButton
+                    )
+                    .keyboardShortcut("f", modifiers: [.command])
                 }
 
                 Divider()
                     .background(category.color.opacity(0.3))
 
                 ScrollView {
-                    VStack(alignment: .leading, spacing: 0) {
+                    LazyVStack(alignment: .leading, spacing: 0) {
                         GeometryReader { proxy in
                             Color.clear
                                 .preference(key: ScrollOffsetPreferenceKey.self, value: proxy.frame(in: .named("EnhancedContentCardScroll")).minY)
                         }
                         .frame(height: 0)
 
-                        GlossaryHighlightedText(text: content)
+                        LazyGlossaryHighlightedContent(text: content)
                             .font(.system(size: fontSize, design: .default))
                             .lineSpacing(6)
                             .foregroundStyle(.primary)

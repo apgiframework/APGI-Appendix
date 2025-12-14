@@ -69,7 +69,7 @@ struct LifeStagesView: View {
  
     var body: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 20) {
+            LazyVStack(alignment: .leading, spacing: 20) {
                 EnhancedContentCard(
                     title: "Life Stages",
                     content: lifeStagesIntro,
@@ -79,6 +79,7 @@ struct LifeStagesView: View {
  
                 tableData
                     .padding()
+                    .frame(maxHeight: 600)
             }
             .padding()
         }

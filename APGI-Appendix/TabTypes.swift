@@ -150,4 +150,8 @@ enum Tab: String, CaseIterable, Identifiable {
             "The core demographic consists of academic researchers—Ph.D. and M.D. scientists in neuroscience, cognitive psychology, cognitive science and experimental psychology."
         }
     }
+
+    var content: String {
+        searchIndexText
+    }
 }

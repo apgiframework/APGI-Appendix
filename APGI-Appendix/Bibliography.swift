@@ -1,8 +1,8 @@
 import SwiftUI
+import Combine
 
 struct BibliographyView: View {
     private let bibliographyBody = """
-Core Consciousness Theories
 
 Baars, B. J. (1988). A cognitive theory of consciousness. Cambridge University Press.
 
@@ -66,8 +66,6 @@ Varela, F. J. (1996). Neurophenomenology: A methodological remedy for the hard p
 
 Varela, F. J., Thompson, E., & Rosch, E. (1991). The embodied mind: Cognitive science and human experience. MIT Press.
 
-Integrated Information Theory (IIT)
-
 Casali, A. G., Gosseries, O., Rosanova, M., Boly, M., Sarasso, S., Casali, K. R., ... & Massimini, M. (2013). A theoretically based index of consciousness independent of sensory processing and behavior. Science Translational Medicine, 5(198), 198ra105. 
 
 Casarotto, S., Comolatti, R., Devalle, G., Fecchio, M., ..., & Massimini, M. (2016). Stratification of unresponsive patients by an independently validated index of brain complexity. Annals of Neurology, 80(5), 718–729. 
@@ -79,8 +77,6 @@ Northoff, G. (2022). From analogous to homologous brain: The relationship betwee
 Northoff, G., & Huang, Z. (2023). Temporal nestedness and the neural code of consciousness. Trends in Cognitive Sciences, 27(12), 1158–1170.
 
 Oizumi, M., Albantakis, L., & Tononi, G. (2014). From phenomenology to the mechanisms of consciousness: Integrated Information Theory 3.0. PLoS Computational Biology, 10(5), e1003588.
-
-Predictive Processing and Free Energy Principle
 
 Barrett, L. F., Quigley, K. S., & Hamilton, P. (2016). An active inference theory of allostasis and interoception in depression. Philosophical Transactions of the Royal Society B, 371(1701), 20160001. 
 
@@ -119,8 +115,6 @@ Parr, T., Da Costa, L., & Friston, K. (2022). Active inference, Bayesian optimal
 Parr, T., Pezzulo, G., & Friston, K. J. (2022). Active inference: The free energy principle in action. MIT Press.
 
 Rao, R. P., & Ballard, D. H. (1999). Predictive coding in the visual cortex: A functional interpretation of some extra-classical receptive-field effects. Nature Neuroscience, 2(1), 79–87. 
-
-Interoception, Emotion and Allostasis
 
 Allen, M., Levy, A., Parr, T., & Friston, K. J. (2019). In the body's eye: The computational anatomy of interoceptive inference. PLOS Computational Biology, 15(9), e1007353.
 
@@ -166,8 +160,6 @@ Seth, A. K., Suzuki, K., & Critchley, H. D. (2012). An interoceptive predictive 
 
 Sterling, P., & Eyer, J. (1988). Allostasis: A new paradigm to explain arousal-induced pathology. In S. Fisher & J. T. Reason (Eds.), Handbook of stress: Theoretical and clinical aspects (pp. 631–657). Free Press.
 
-Neuromodulation and Attention
-
 Aston-Jones, G., & Cohen, J. D. (2005). An integrative theory of locus coeruleus-norepinephrine function: Adaptive gain and optimal performance. Annual Review of Neuroscience, 28, 403–450.
 
 Berridge, C. W., & Waterhouse, B. D. (2003). The locus coeruleus–noradrenergic system: Modulation of behavioral state and state-dependent cognitive processes. Brain Research Reviews, 42(1), 33–84.
@@ -189,8 +181,6 @@ Schultz, W. (2015). Neuronal reward and decision signals: From theories to data.
 Shine, J. M., Breakspear, M., Bell, P. T., Ehgoetz Martens, K. A., Shine, R., Koyejo, O., ..., & Poldrack, R. A. (2019). Human cognition involves the dynamic integration of neural activity and neuromodulatory systems. Nature Neuroscience, 22(2), 289–296. 
 
 Yu, A. J., & Dayan, P. (2005). Uncertainty, neuromodulation and attention. Neuron, 46(4), 681–692.
-
-Thermodynamics, Information Theory and Metabolic Costs
 
 Attwell, D., & Laughlin, S. B. (2001). An energy budget for signaling in the grey matter of the brain. Journal of Cerebral Blood Flow & Metabolism, 21(10), 1133–1145.
 
@@ -225,8 +215,6 @@ Shulman, R. G., Rothman, D. L., Behar, K. L., & Hyder, F. (2004). Energetic basi
 Sterling, P., & Laughlin, S. (2015). Principles of neural design. MIT Press.
 
 Wolpert, D. H., & Kolchinsky, A. (2020). Thermodynamics of computing. New Journal of Physics, 22, 063047.
-
-Neural Oscillations, Criticality and Temporal Dynamics
 
 Aru, J., Bachmann, T., Singer, W., & Melloni, L. (2012). Distilling the neural correlates of consciousness. Neuroscience & Biobehavioral Reviews, 36(2), 737–746.
 
@@ -276,8 +264,6 @@ Sergent, C., Baillet, S., & Dehaene, S. (2005). Timing of the brain events under
 
 Shew, W. L., & Plenz, D. (2013). The functional benefits of criticality in the cortex. The Neuroscientist, 19(1), 88–100.
 
-Neural Architecture and Mechanisms
-
 Anderson, M. L. (2010). Neural reuse: A fundamental organizational principle of the brain. Behavioral and Brain Sciences, 33(4), 245–266.
 
 Carandini, M., & Heeger, D. J. (2012). Normalization as a canonical neural computation. Nature Reviews Neuroscience, 13(1), 51–62.
@@ -295,8 +281,6 @@ Maass, W., & Markram, H. (2004). On the computational power of recurrent circuit
 Maass, W., Natschläger, T., & Markram, H. (2002). Real-time computing without stable states: A new framework for neural computation based on perturbations. Neural Computation, 14(11), 2531–2560.
 
 Ramachandran, V. S., & Hirstein, W. (1998). The perception of phantom limbs: The D. O. Hebb lecture. Brain, 121(9), 1603–1630.
-
-Memory Systems
 
 Baddeley, A. (2012). Working memory: Theories, models and controversies. Annual Review of Psychology, 63, 1–29.
 
@@ -319,8 +303,6 @@ Tolman, E. C. (1948). Cognitive maps in rats and men. Psychological Review, 55(4
 Tulving, E. (1985). Memory and consciousness. Canadian Psychology, 26(1), 1–12.
 
 Wilson, M. A., & McNaughton, B. L. (1994). Reactivation of hippocampal ensemble memories during sleep. Science, 265(5172), 676–679.
-
-Decision Making and Bayesian Inference
 
 Daw, N. D., Gershman, S. J., Seymour, B., Dayan, P., & Dolan, R. J. (2011). Model-based influences on humans' choices and striatal prediction errors. Neuron, 69(6), 1204–1215.
 
@@ -345,8 +327,6 @@ Palmer, J., Huk, A. C., & Shadlen, M. N. (2005). The effect of stimulus strength
 Ratcliff, R., & McKoon, G. (2008). The diffusion decision model: Theory and data for two-choice decision tasks. Neural Computation, 20(4), 873–922.
 
 Schurger, A., Hu, P., Pak, J., & Roskies, A. L. (2021). What is the readiness potential? Trends in Cognitive Sciences, 25(7), 558–570.
-
-Executive Function and Cognitive Control
 
 Baumeister, R. F., Bratslavsky, E., Muraven, M., & Tice, D. M. (1998). Ego depletion: Is the active self a limited resource? Journal of Personality and Social Psychology, 74(5), 1252–1265.
 
@@ -394,8 +374,6 @@ Saxe, R., & Kanwisher, N. (2003). People thinking about thinking people: The rol
 
 Wellman, H. M., Cross, D., & Watson, J. (2001). Meta-analysis of theory-of-mind development: The truth about false belief. Child Development, 72(3), 655–684.
 
-Developmental and Lifespan Psychology
-
 Boldrini, M., Fulmore, C. A., Tartt, A. N., Simeon, L. R., Pavlova, I., Poposka, V., ..., & Mann, J. J. (2018). Human hippocampal neurogenesis persists throughout aging. Cell Stem Cell, 22(4), 589–599.
 
 Eriksson, P. S., Perfilieva, E., Björk-Eriksson, T., Alborn, A. M., Nordborg, C., Peterson, D. A., & Gage, F. H. (1998). Neurogenesis in the adult human hippocampus. Nature Medicine, 4(11), 1313–1317.
@@ -411,8 +389,6 @@ Park, D. C., & Reuter-Lorenz, P. (2009). The adaptive brain: Aging and neurocogn
 Sorrells, S. F., Paredes, M. F., Cebrian-Silla, A., Sandoval, K., Qi, D., Kelley, K. W., ..., & Alvarez-Buylla, A. (2018). Human hippocampal neurogenesis drops sharply in children to undetectable levels in adults. Nature, 555(7696), 377–381.
 
 Zelazo, P. D. (2004). The development of conscious control in childhood. Trends in Cognitive Sciences, 8(1), 12–17.
-
-Evolutionary Psychology and Human Uniqueness
 
 Aiello, L. C., & Wheeler, P. (1995). The expensive-tissue hypothesis: The brain and the digestive system in human and primate evolution. Current Anthropology, 36(2), 199–221. 
 
@@ -478,8 +454,6 @@ Tomasello, M., Carpenter, M., Call, J., Behne, T., & Moll, H. (2005). Understand
 
 Wrangham, R. (2009). Catching fire: How cooking made us human. Basic Books.
 
-Sleep and Circadian Rhythms
-
 Czeisler, C. A., Duffy, J. F., Shanahan, T. L., Brown, E. N., Mitchell, J. F., Rimmer, D. W., ..., & Kronauer, R. E. (1999). Stability, precision and near-24-hour period of the human circadian pacemaker. Science, 284(5423), 2177–2181. 
 
 Diekelmann, S., & Born, J. (2010). The memory function of sleep. Nature Reviews Neuroscience, 11(2), 114–126. 
@@ -489,8 +463,6 @@ Foster, R. G., & Kreitzman, L. (2017). Circadian rhythms: A very short introduct
 Rasch, B., & Born, J. (2013). About sleep's role in memory. Physiological Reviews, 93(2), 681–766. 
 
 Walker, M. P. (2017). Why we sleep: Unlocking the power of sleep and dreams. Scribner.
-
-Clinical Applications and Disorders of Consciousness
 
 Boly, M., Massimini, M., Kucyi, A., & Hesse, E. (2017). The functional architecture of awareness: A free energy formulation. Biological Psychiatry: Cognitive Neuroscience and Neuroimaging, 2(7), 613–622.
 
@@ -508,15 +480,11 @@ Laureys, S., Owen, A. M., & Schiff, N. D. (2004). The locked-in syndrome: What i
 
 Montague, P. R., Dolan, R. J., Friston, K. J., & Dayan, P. (2012). Computational psychiatry. Trends in Cognitive Sciences, 16(1), 72–80.
 
-Altered States of Consciousness
-
 Carhart-Harris, R. L., & Friston, K. J. (2019). REBUS and the anarchic brain: Toward a unified model of the brain action of psychedelics. Pharmacological Reviews, 71(3), 316–344. 
 
 Carhart-Harris, R. L., Leech, R., Hellyer, P. J., Shanahan, M., Feilding, A., Tagliazucchi, E., ..., & Nutt, D. (2014). The entropic brain: A theory of conscious states informed by neuroimaging research with psychedelic drugs. Frontiers in Human Neuroscience, 8, 20. 
 
 Tang, Y. Y., Hölzel, B. K., & Posner, M. I. (2015). The neuroscience of mindfulness meditation. Nature Reviews Neuroscience, 16(4), 213–225. 
-
-Individual Differences and Cognitive Variation
 
 Aron, E. N., & Aron, A. (1997). Sensory-processing sensitivity and its relation to introversion and emotionality. Journal of Personality and Social Psychology, 73(2), 345–368. 
 
@@ -532,8 +500,6 @@ Livingston, L. A., & Happé, F. (2017). Conceptualising compensation in neurodev
 
 Roenneberg, T., Wirz-Justice, A., & Merrow, M. (2003). Life between clocks: Daily temporal patterns of human chronotypes. Journal of Biological Rhythms, 18(1), 80–90. 
 
-Neuroimaging Methods and Interpretation
-
 Barsalou, L. W. (1999). Perceptual symbol systems. Behavioral and Brain Sciences, 22(4), 577–660. 
 
 Krakauer, J. W., Ghazanfar, A. A., Gomez-Marin, A., MacIver, M. A., & Poeppel, D. (2017). Neuroscience needs behavior: Correcting a reductionist bias. Neuron, 93(3), 480–490.
@@ -541,8 +507,6 @@ Krakauer, J. W., Ghazanfar, A. A., Gomez-Marin, A., MacIver, M. A., & Poeppel, D
 Logothetis, N. K. (2008). What we can do and what we cannot do with fMRI. Nature, 453(7197), 869–878.
 
 Poldrack, R. A. (2011). Inferring mental states from neuroimaging data: From reverse inference to large-scale decoding. Neuron, 72(5), 692–697.
-
-Statistical and Methodological Issues
 
 Border, R., Johnson, E. C., Evans, L. M., Smoller, J. W., Berrettini, W. H., ..., & Keller, M. C. (2019). No support for historical candidate gene or candidate gene-by-interaction hypotheses for major depression across multiple large samples. American Journal of Psychiatry, 176(5), 376–387.
 

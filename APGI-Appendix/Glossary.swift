@@ -80,7 +80,7 @@ struct GlossaryView: View {
 struct GlossaryTermView: View {
     let term: String
     let definition: String
-    @State private var isExpanded: Bool = false
+    @State private var isExpanded: Bool = true
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -104,6 +104,11 @@ struct GlossaryTermView: View {
                 .background(.quaternary.opacity(0.5))
             }
             .buttonStyle(.plain)
+            .apgiAccessibility(
+                label: term,
+                hint: isExpanded ? "Collapse definition" : "Expand definition",
+                traits: .isButton
+            )
 
             if isExpanded {
                 Text(definition)
@@ -171,6 +176,26 @@ struct GlossaryHighlightedText: View {
             baseFont: .system(size: fontSize, design: .default),
             highlightColor: .accentColor
         )
+    }
+}
+
+struct LazyGlossaryHighlightedContent: View {
+    let text: String
+
+    private var paragraphs: [String] {
+        text
+            .components(separatedBy: "\n\n")
+            .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
+            .filter { !$0.isEmpty }
+    }
+
+    var body: some View {
+        LazyVStack(alignment: .leading, spacing: 12) {
+            ForEach(Array(paragraphs.enumerated()), id: \.offset) { _, paragraph in
+                GlossaryHighlightedText(text: paragraph)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+            }
+        }
     }
 }
 

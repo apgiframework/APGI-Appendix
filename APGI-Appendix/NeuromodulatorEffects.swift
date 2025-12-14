@@ -1,9 +1,7 @@
 import SwiftUI
 
 struct NeuromodulatorEffectsView: View {
-    var body: some View {
-        ScrollView {
-            Text("""
+    private let effectsBody = """
 
 Neuromodulator Effects on APGI Model State Variables
 
@@ -63,11 +61,20 @@ Dopamine indirectly influences somatic bias (β) by acting on the ventral striat
 
 
 
-""")
-            .font(.body)
+"""
+
+    var body: some View {
+        ScrollView {
+            LazyVStack(alignment: .leading, spacing: 20) {
+                EnhancedContentCard(
+                    title: "Neuromodulator Effects",
+                    content: effectsBody,
+                    category: .biological,
+                    hasDataTable: false
+                )
+            }
             .padding()
         }
-        .padding()
     }
 }
 

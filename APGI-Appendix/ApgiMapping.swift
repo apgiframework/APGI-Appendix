@@ -1,9 +1,7 @@
 import SwiftUI
 
 struct ApgiMappingView: View {
-    var body: some View {
-        ScrollView {
-            Text("""
+    private let mappingBody = """
 
 APGI Explicit Mapping
 
@@ -70,11 +68,20 @@ Where:
 - τ: Time constant for surprise decay (τ ≈ 200 ms)
 - f(·): Integration function combining exteroceptive and interoceptive contributions
 - σ·η(t): Gaussian white noise with standard deviation σ and with unit variance and σ ≈ 0.1·θ₀ captures intrinsic neural variability.
-""")
-            .font(.body)
+"""
+
+    var body: some View {
+        ScrollView {
+            LazyVStack(alignment: .leading, spacing: 20) {
+                EnhancedContentCard(
+                    title: "APGI Mapping",
+                    content: mappingBody,
+                    category: .mathematical,
+                    hasDataTable: false
+                )
+            }
             .padding()
         }
-        .padding()
     }
 }
 

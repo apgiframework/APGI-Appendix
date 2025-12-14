@@ -30,12 +30,18 @@ struct FocusModeView: View {
                     }
                     .buttonStyle(.plain)
                     .foregroundStyle(.secondary)
+                    .apgiAccessibility(
+                        label: "Close focus mode",
+                        hint: "Return to the main content view",
+                        traits: .isButton
+                    )
+                    .keyboardShortcut("w", modifiers: [.command])
                 }
                 .padding()
                 .background(.bar)
 
                 ScrollView {
-                    GlossaryHighlightedText(text: content)
+                    LazyGlossaryHighlightedContent(text: content)
                         .font(.system(size: fontSize, design: .serif))
                         .lineSpacing(8)
                         .padding(40)
@@ -106,5 +112,14 @@ struct FontSizeControl: View {
             .disabled(fontSize >= 24)
         }
         .buttonStyle(.borderless)
+    }
+}
+
+extension View {
+    func apgiAccessibility(label: String, hint: String? = nil, traits: AccessibilityTraits = []) -> some View {
+        self
+            .accessibilityLabel(label)
+            .accessibilityHint(hint ?? "")
+            .accessibilityAddTraits(traits)
     }
 }
