@@ -556,29 +556,13 @@ Simmons, J. P., Nelson, L. D., & Simonsohn, U. (2011). False-positive psychology
 """
 
     var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 12) {
-                Text("Bibliography")
-                    .font(.title.bold())
-
-                VStack(alignment: .leading, spacing: 10) {
-                    Text(bibliographyBody)
-                        .font(.body)
-                        .foregroundStyle(.secondary)
-                        .lineSpacing(4)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                }
-                .textSelection(.enabled)
-                .padding(14)
-                .background(.thinMaterial)
-                .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
-                .overlay(
-                    RoundedRectangle(cornerRadius: 14, style: .continuous)
-                        .strokeBorder(.separator.opacity(0.25), lineWidth: 1)
-                )
-            }
-            .padding()
-        }
+        EnhancedContentCard(
+            title: "Bibliography",
+            content: bibliographyBody,
+            category: .reference,
+            hasDataTable: false
+        )
+        .padding()
     }
 }
 

@@ -14,29 +14,13 @@ While energy acquisition provides the core selective pressure, the content and s
 """
 
     var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 12) {
-                Text("APGI Statement about Consciousness")
-                    .font(.title.bold())
-
-                VStack(alignment: .leading, spacing: 10) {
-                    Text(statementBody)
-                        .font(.body)
-                        .foregroundStyle(.secondary)
-                        .lineSpacing(4)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                }
-                .textSelection(.enabled)
-                .padding(14)
-                .background(.thinMaterial)
-                .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
-                .overlay(
-                    RoundedRectangle(cornerRadius: 14, style: .continuous)
-                        .strokeBorder(.separator.opacity(0.25), lineWidth: 1)
-                )
-            }
-            .padding()
-        }
+        EnhancedContentCard(
+            title: "APGI Statement about Consciousness",
+            content: statementBody,
+            category: .theoretical,
+            hasDataTable: false
+        )
+        .padding()
     }
 }
 

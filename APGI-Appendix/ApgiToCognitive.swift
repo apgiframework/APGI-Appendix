@@ -19,29 +19,13 @@ dSₜ/dt (Rate of Surprise Change) | Urgency Perception, Time Pressure Sensitivi
 """
 
     var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 12) {
-                Text("APGI Parameters → Cognitive Constructs")
-                    .font(.title.bold())
-
-                VStack(alignment: .leading, spacing: 10) {
-                    Text(mappingBody)
-                        .font(.body)
-                        .foregroundStyle(.secondary)
-                        .lineSpacing(4)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                }
-                .textSelection(.enabled)
-                .padding(14)
-                .background(.thinMaterial)
-                .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
-                .overlay(
-                    RoundedRectangle(cornerRadius: 14, style: .continuous)
-                        .strokeBorder(.separator.opacity(0.25), lineWidth: 1)
-                )
-            }
-            .padding()
-        }
+        EnhancedContentCard(
+            title: "APGI Parameters → Cognitive Constructs",
+            content: mappingBody,
+            category: .cognitive,
+            hasDataTable: true
+        )
+        .padding()
     }
 }
 

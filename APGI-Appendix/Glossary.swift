@@ -54,9 +54,13 @@ struct GlossaryView: View {
 
                 ForEach(entries) { entry in
                     VStack(alignment: .leading, spacing: 8) {
-                        Text(entry.term)
-                            .font(.headline)
-                            .frame(maxWidth: .infinity, alignment: .leading)
+                        HStack(alignment: .firstTextBaseline, spacing: 10) {
+                            Image(systemName: SectionCategory.reference.icon)
+                                .foregroundStyle(SectionCategory.reference.color)
+                            Text(entry.term)
+                                .font(.headline)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                        }
 
                         Text(entry.definition)
                             .font(.body)
@@ -65,12 +69,15 @@ struct GlossaryView: View {
                     }
                     .textSelection(.enabled)
                     .padding(14)
-                    .background(.thinMaterial)
-                    .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
-                    .overlay(
+                    .background {
                         RoundedRectangle(cornerRadius: 14, style: .continuous)
-                            .strokeBorder(.separator.opacity(0.25), lineWidth: 1)
-                    )
+                            .fill(.background)
+                            .shadow(color: SectionCategory.reference.color.opacity(0.08), radius: 6, y: 3)
+                    }
+                    .overlay {
+                        RoundedRectangle(cornerRadius: 14, style: .continuous)
+                            .strokeBorder(SectionCategory.reference.color.opacity(0.18), lineWidth: 1)
+                    }
                 }
             }
             .padding()

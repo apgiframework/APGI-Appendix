@@ -1,4 +1,5 @@
 import SwiftUI
+
 enum Tab: String, CaseIterable, Identifiable {
     case methodology = "Methodology for Consciousness Theories"
     case mathematicalModel = "Mathematical Model"
@@ -45,6 +46,60 @@ enum Tab: String, CaseIterable, Identifiable {
         case .bibliography: return "books.vertical"
         case .glossary: return "character.book.closed"
         case .targetAudience: return "person.3"
+        }
+    }
+    
+    var category: SectionCategory {
+        switch self {
+        case .methodology, .apgiStatement, .epistemicStandards, .targetAudience:
+            return .theoretical
+        case .mathematicalModel, .apgiMapping, .parameterIdentifiability:
+            return .mathematical
+        case .biologicalImplementation, .neuromodulatorEffects,
+             .neuromodulatoryImplementation, .explicitNeuromodulator,
+             .ignitionTimeline, .neuromodulatoryControl:
+            return .biological
+        case .mappingCognitiveToApgi, .apgiToCognitive:
+            return .cognitive
+        case .psychiatricDisorders, .lifeStages, .thermodynamicEfficiency:
+            return .applications
+        case .glossary, .bibliography:
+            return .reference
+        }
+    }
+    
+    var shortTitle: String {
+        switch self {
+        case .methodology: return "Methodology"
+        case .mathematicalModel: return "Mathematical Model"
+        case .apgiMapping: return "APGI Mapping"
+        case .parameterIdentifiability: return "Parameter Identifiability"
+        case .biologicalImplementation: return "Biological Implementation"
+        case .neuromodulatorEffects: return "Neuromodulator Effects"
+        case .neuromodulatoryImplementation: return "Neuromodulatory Implementation"
+        case .explicitNeuromodulator: return "Explicit Neuromodulator"
+        case .mappingCognitiveToApgi: return "Mapping Cognitive → APGI"
+        case .apgiToCognitive: return "APGI → Cognitive"
+        case .ignitionTimeline: return "Ignition Timeline"
+        case .neuromodulatoryControl: return "Neuromodulatory Control"
+        case .psychiatricDisorders: return "Psychiatric Disorders"
+        case .apgiStatement: return "APGI Statement"
+        case .lifeStages: return "Life Stages"
+        case .thermodynamicEfficiency: return "Thermodynamic Efficiency"
+        case .epistemicStandards: return "Epistemic Standards"
+        case .bibliography: return "Bibliography"
+        case .glossary: return "Glossary"
+        case .targetAudience: return "Target Audience"
+        }
+    }
+    
+    var hasTables: Bool {
+        switch self {
+        case .biologicalImplementation, .neuromodulatorEffects, 
+             .explicitNeuromodulator, .ignitionTimeline, .lifeStages:
+            return true
+        default:
+            return false
         }
     }
 }

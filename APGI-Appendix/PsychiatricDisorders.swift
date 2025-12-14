@@ -75,29 +75,13 @@ Addiction | Substance-Induced θₜ/Π Manipulation | Consciousness dominated by
 """
 
     var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 12) {
-                Text("APGI for Psychiatric Disorders with Specific Precision Profiles")
-                    .font(.title.bold())
-
-                VStack(alignment: .leading, spacing: 10) {
-                    Text(disordersBody)
-                        .font(.body)
-                        .foregroundStyle(.secondary)
-                        .lineSpacing(4)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                }
-                .textSelection(.enabled)
-                .padding(14)
-                .background(.thinMaterial)
-                .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
-                .overlay(
-                    RoundedRectangle(cornerRadius: 14, style: .continuous)
-                        .strokeBorder(.separator.opacity(0.25), lineWidth: 1)
-                )
-            }
-            .padding()
-        }
+        EnhancedContentCard(
+            title: "APGI for Psychiatric Disorders with Specific Precision Profiles",
+            content: disordersBody,
+            category: .applications,
+            hasDataTable: true
+        )
+        .padding()
     }
 }
 

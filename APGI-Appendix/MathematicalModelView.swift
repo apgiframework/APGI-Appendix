@@ -49,29 +49,13 @@ Parameter | Description | Empirical Constraint | Neural Implementation
 """
 
     var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 12) {
-                Text("Mathematical Model")
-                    .font(.title.bold())
-
-                VStack(alignment: .leading, spacing: 10) {
-                    Text(modelBody)
-                        .font(.body)
-                        .foregroundStyle(.secondary)
-                        .lineSpacing(4)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                }
-                .textSelection(.enabled)
-                .padding(14)
-                .background(.thinMaterial)
-                .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
-                .overlay(
-                    RoundedRectangle(cornerRadius: 14, style: .continuous)
-                        .strokeBorder(.separator.opacity(0.25), lineWidth: 1)
-                )
-            }
-            .padding()
-        }
+        EnhancedContentCard(
+            title: "Mathematical Model",
+            content: modelBody,
+            category: .mathematical,
+            hasDataTable: true
+        )
+        .padding()
     }
 }
 
