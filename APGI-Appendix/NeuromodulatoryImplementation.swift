@@ -1,11 +1,7 @@
 import SwiftUI
 
 struct NeuromodulatoryImplementationView: View {
-    var body: some View {
-        ScrollView {
-            Text("""
-
-Neuromodulatory Implementation of APGI Control Parameters
+    private let implementationBody = """
 
 Neuromodulator | Primary Source | Key Receptors | Effect on Πₑ | Effect on Πᵢ | Effect on θₜ | Key Computational Role
 
@@ -38,11 +34,32 @@ Somatic bias (β) is represented as a time-dependent parameter:
 β(t) = β₀ + η_DA·[DA] + η_NE·[NE]
 
 This linear approximation captures first-order effects; higher-order interactions likely exist in specific contexts.
-""")
-            .font(.body)
+"""
+
+    var body: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 12) {
+                Text("Neuromodulatory Implementation of APGI Control Parameters")
+                    .font(.title.bold())
+
+                VStack(alignment: .leading, spacing: 10) {
+                    Text(implementationBody)
+                        .font(.body)
+                        .foregroundStyle(.secondary)
+                        .lineSpacing(4)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                }
+                .textSelection(.enabled)
+                .padding(14)
+                .background(.thinMaterial)
+                .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 14, style: .continuous)
+                        .strokeBorder(.separator.opacity(0.25), lineWidth: 1)
+                )
+            }
             .padding()
         }
-        .padding()
     }
 }
 

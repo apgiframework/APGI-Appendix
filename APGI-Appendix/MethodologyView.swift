@@ -1,24 +1,7 @@
 import SwiftUI
 
 struct MethodologyView: View {
-    var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 20) {
-                Image(systemName: "book")
-                    .resizable()
-                    .frame(width: 100, height: 100)
-                    .foregroundColor(.blue)
-                
-                Text(content)
-                    .font(.body)
-                    .padding()
-            }
-            .padding()
-        }
-    }
-    
-    private var content: String {
-        """
+    private let methodologyBody = """
 The persistent challenges in the field are the pitfalls of vague assertions, implicit assumptions and unfalsifiable claims that have long hindered progress. Theoretical frameworks of consciousness must meet stringent standards to move beyond correlation and establish causation, ensure falsifiability and enable comparative analysis. To advance consciousness science, we propose seven criteria for theoretical frameworks, each ensuring that theories remain empirically grounded, logically rigorous and scientifically testable.
 
 Standard 1: Level Transparency
@@ -42,6 +25,31 @@ Theories must address why evolution would select the proposed mechanisms through
 Standard 7: Causal Roadmap
 Since most consciousness evidence remains correlational, theories must outline an experimental path from correlation to causation in five explicit stages. First, correlation establishes that \\\\text{X} and consciousness co-occur. Second, Manipulation shows that altering \\\\text{X} changes consciousness. Third, Mechanism defines the pathway from \\\\text{X} to consciousness. Fourth, Necessity demonstrates that blocking the pathway abolishes \\\\text{X}'s effect. Fifth, Sufficiency proves that \\\\text{X} alone can produce consciousness which is the most stringent test. This ensures causal claims are explicitly tested rather than merely assumed.
 """
+
+    var body: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 12) {
+                Text("Methodology")
+                    .font(.title.bold())
+
+                VStack(alignment: .leading, spacing: 10) {
+                    Text(methodologyBody)
+                        .font(.body)
+                        .foregroundStyle(.secondary)
+                        .lineSpacing(4)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                }
+                .textSelection(.enabled)
+                .padding(14)
+                .background(.thinMaterial)
+                .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 14, style: .continuous)
+                        .strokeBorder(.separator.opacity(0.25), lineWidth: 1)
+                )
+            }
+            .padding()
+        }
     }
 }
 

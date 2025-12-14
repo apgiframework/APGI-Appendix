@@ -1,11 +1,7 @@
 import SwiftUI
 
 struct PsychiatricDisordersView: View {
-    var body: some View {
-        ScrollView {
-            Text("""
-
-APGI for Psychiatric Disorders with Specific Precision Profiles
+    private let disordersBody = """
 
 Disorder-Specific Precision Profiles
 
@@ -76,11 +72,32 @@ PTSD | Hyper-precise Traumatic Somatic Markers | Intrusive, vivid flashbacks and
 Insomnia | Failure to Raise θₜ for Sleep | Conscious awareness when unconsciousness is needed
 
 Addiction | Substance-Induced θₜ/Π Manipulation | Consciousness dominated by craving and drug-seeking
-""")
-            .font(.body)
+"""
+
+    var body: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 12) {
+                Text("APGI for Psychiatric Disorders with Specific Precision Profiles")
+                    .font(.title.bold())
+
+                VStack(alignment: .leading, spacing: 10) {
+                    Text(disordersBody)
+                        .font(.body)
+                        .foregroundStyle(.secondary)
+                        .lineSpacing(4)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                }
+                .textSelection(.enabled)
+                .padding(14)
+                .background(.thinMaterial)
+                .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 14, style: .continuous)
+                        .strokeBorder(.separator.opacity(0.25), lineWidth: 1)
+                )
+            }
             .padding()
         }
-        .padding()
     }
 }
 

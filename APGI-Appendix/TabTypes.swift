@@ -39,7 +39,7 @@ enum Tab: String, CaseIterable, Identifiable {
         case .neuromodulatoryControl: return "switch.2"
         case .psychiatricDisorders: return "cross.case"
         case .apgiStatement: return "brain.head.profile"
-        case .lifeStages: return "person.crop.sequence"
+        case .lifeStages: return "person.2"
         case .thermodynamicEfficiency: return "flame"
         case .epistemicStandards: return "checkmark.seal"
         case .bibliography: return "books.vertical"

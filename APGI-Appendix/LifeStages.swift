@@ -1,10 +1,7 @@
 import SwiftUI
 
 struct LifeStagesView: View {
-    var body: some View {
-        ScrollView {
-            Text("""
-LifeStages
+    private let lifeStagesBody = """
 
 APGI Parameters Across Life Stages
 
@@ -53,11 +50,32 @@ Acetylcholine declining (-30-50%); dopamine declining (-40-60%); norepinephrine 
 
 
 
-""")
-            .font(.body)
+"""
+
+    var body: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 12) {
+                Text("LifeStages")
+                    .font(.title.bold())
+
+                VStack(alignment: .leading, spacing: 10) {
+                    Text(lifeStagesBody)
+                        .font(.body)
+                        .foregroundStyle(.secondary)
+                        .lineSpacing(4)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                }
+                .textSelection(.enabled)
+                .padding(14)
+                .background(.thinMaterial)
+                .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 14, style: .continuous)
+                        .strokeBorder(.separator.opacity(0.25), lineWidth: 1)
+                )
+            }
             .padding()
         }
-        .padding()
     }
 }
 

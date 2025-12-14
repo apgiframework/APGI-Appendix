@@ -1,11 +1,7 @@
 import SwiftUI
 
 struct BibliographyView: View {
-    var body: some View {
-        ScrollView {
-            Text("""
-Bibliography
-
+    private let bibliographyBody = """
 Core Consciousness Theories
 
 Baars, B. J. (1988). A cognitive theory of consciousness. Cambridge University Press.
@@ -557,11 +553,32 @@ Khoury, D. S., Daza-Cajigal, V., Bailly-Bechet, M., & Lancaster, K. Z. (2019). S
 Open Science Collaboration. (2015). Estimating the reproducibility of psychological science. Science, 349(6251), aac4716.
 
 Simmons, J. P., Nelson, L. D., & Simonsohn, U. (2011). False-positive psychology: Undisclosed flexibility in data collection and analysis allows presenting anything as significant. Psychological Science, 22(11), 1359–1366.
-""")
-            .font(.body)
+"""
+
+    var body: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 12) {
+                Text("Bibliography")
+                    .font(.title.bold())
+
+                VStack(alignment: .leading, spacing: 10) {
+                    Text(bibliographyBody)
+                        .font(.body)
+                        .foregroundStyle(.secondary)
+                        .lineSpacing(4)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                }
+                .textSelection(.enabled)
+                .padding(14)
+                .background(.thinMaterial)
+                .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 14, style: .continuous)
+                        .strokeBorder(.separator.opacity(0.25), lineWidth: 1)
+                )
+            }
             .padding()
         }
-        .padding()
     }
 }
 

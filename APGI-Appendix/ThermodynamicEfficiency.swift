@@ -1,11 +1,7 @@
 import SwiftUI
 
 struct ThermodynamicEfficiencyView: View {
-    var body: some View {
-        ScrollView {
-            Text("""
-
-Thermodynamic and Evolutionary Efficiency
+    private let efficiencyBody = """
 
 Physical Constraint | APGI Solution | Efficiency Argument | Alternative Solutions
 
@@ -18,11 +14,32 @@ Stochastic neurons (~50% synaptic reliability) | Bayesian population coding with
 Embodied system (survival-critical) | Interoceptive prioritization (β > 1) | Ensure body-state signals trigger fast responses | External threat prioritization? Balanced weighting?
 
 Slow, unreliable components | Hierarchical temporal integration | Leverage multiple timescales for stability | Flat architectures with fast components?
-""")
-            .font(.body)
+"""
+
+    var body: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 12) {
+                Text("Thermodynamic and Evolutionary Efficiency")
+                    .font(.title.bold())
+
+                VStack(alignment: .leading, spacing: 10) {
+                    Text(efficiencyBody)
+                        .font(.body)
+                        .foregroundStyle(.secondary)
+                        .lineSpacing(4)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                }
+                .textSelection(.enabled)
+                .padding(14)
+                .background(.thinMaterial)
+                .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 14, style: .continuous)
+                        .strokeBorder(.separator.opacity(0.25), lineWidth: 1)
+                )
+            }
             .padding()
         }
-        .padding()
     }
 }
 

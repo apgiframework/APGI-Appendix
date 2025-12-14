@@ -1,11 +1,7 @@
 import SwiftUI
 
 struct ParameterIdentifiabilityView: View {
-    var body: some View {
-        ScrollView {
-            Text("""
-
-Parameter Identifiability and the Reduced Model
+    private let identifiabilityBody = """
 
 Parameter Recovery and Recoverability Tiers
 
@@ -20,11 +16,32 @@ Reduced, Structurally Identifiable Model
 - γ (homeostatic recovery rate)
 - δ (post-ignition elevation magnitude)
 - σ (noise amplitude)
-""")
-            .font(.body)
+"""
+
+    var body: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 12) {
+                Text("Parameter Identifiability and the Reduced Model")
+                    .font(.title.bold())
+
+                VStack(alignment: .leading, spacing: 10) {
+                    Text(identifiabilityBody)
+                        .font(.body)
+                        .foregroundStyle(.secondary)
+                        .lineSpacing(4)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                }
+                .textSelection(.enabled)
+                .padding(14)
+                .background(.thinMaterial)
+                .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 14, style: .continuous)
+                        .strokeBorder(.separator.opacity(0.25), lineWidth: 1)
+                )
+            }
             .padding()
         }
-        .padding()
     }
 }
 

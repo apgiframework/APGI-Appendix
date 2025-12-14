@@ -4,7 +4,7 @@ import AppKit
 import UniformTypeIdentifiers
 
 @main
-struct APGI_Supplementary_MaterialsApp: App {
+struct APGI_AppendixApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
     
     var body: some Scene {
@@ -13,7 +13,7 @@ struct APGI_Supplementary_MaterialsApp: App {
         }
         .commands {
             CommandGroup(replacing: .appInfo) {
-                Button("About APGI Supplementary Materials") {
+                Button("About APGI Appendix") {
                     showAboutDialog()
                 }
             }
@@ -154,7 +154,7 @@ struct APGI_Supplementary_MaterialsApp: App {
             }
             
             CommandMenu("Help") {
-                Button("APGI Supplementary Materials Help") {
+                Button("APGI Appendix Help") {
                     showHelp()
                 }
                 .keyboardShortcut("?", modifiers: .command)
@@ -177,7 +177,7 @@ struct APGI_Supplementary_MaterialsApp: App {
             }
             
             CommandGroup(replacing: .appTermination) {
-                Button("Quit APGI Supplementary Materials") {
+                Button("Quit APGI Appendix") {
                     quitApp()
                 }
                 .keyboardShortcut("q", modifiers: .command)
@@ -188,7 +188,7 @@ struct APGI_Supplementary_MaterialsApp: App {
     // Menu action implementations
     private func showAboutDialog() {
         let alert = NSAlert()
-        alert.messageText = "APGI Supplementary Materials"
+        alert.messageText = "APGI Appendix"
         alert.informativeText = "Version 1.0\n\nA comprehensive application for exploring consciousness theories, integrating Global Neuronal Workspace Theory with predictive processing through the APGI (Awareness-Precision-Gain-Ignition) model.\n\n© 2025"
         alert.alertStyle = .informational
         alert.runModal()
@@ -202,7 +202,7 @@ struct APGI_Supplementary_MaterialsApp: App {
             backing: .buffered,
             defer: false
         )
-        newWindow.title = "APGI Supplementary Materials"
+        newWindow.title = "APGI Appendix"
         newWindow.contentView = NSHostingView(rootView: ContentView())
         newWindow.makeKeyAndOrderFront(nil)
     }

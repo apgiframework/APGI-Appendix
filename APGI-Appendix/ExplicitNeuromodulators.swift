@@ -1,11 +1,7 @@
 import SwiftUI
 
 struct ExplicitNeuromodulatorsView: View {
-    var body: some View {
-        ScrollView {
-            Text("""
-
-Explicit Neuromodulator Mapping
+    private let mappingBody = """
 
 Concept | Definition | Primary Location | Biological Implementation | Inputs
 
@@ -14,11 +10,32 @@ Surprise (Sₜ) | Population firing rate of "evidence accumulator" neurons. | Su
 Ignition Threshold (θₜ) | Effective membrane potential threshold for NMDA-spike generation in L5 pyramidal cell apical dendrites. | Not explicitly stated as a primary location, but mechanisms involve Thalamic Reticular Nucleus (TRN), matrix thalamus, L1 and L5 pyramidal cells. | Homeostasis (-γ(θ₀ – θₜ)): Set by tonic firing of TRN, providing baseline GABAergic inhibition to the matrix thalamus, limiting its drive to L1. Post-Ignition Refractoriness (δ·Bₜ₋₁): Caused by (1) short-term synaptic depression in thalamocortical synapses onto L1/L5; (2) after-hyperpolarization (AHP) in L5 pyramidal cells; (3) activation of SOM+ interneurons. Urgency (-λ·dSₜ/dt): Mediated by phasic bursts of Locus Coeruleus–Norepinephrine (LC-NE). NE potentiates NMDA currents and hyperpolarizes the TRN. | Not explicitly stated as direct inputs for the threshold itself, but rather factors influencing its change.
 
 Ignition Probability (Bₜ) | Probability of a self-sustaining, metastable attractor state in the frontoparietal network. | Apical tuft of L5 pyramidal cells (for the "switch"). | The "switch" is the NMDA-receptor-mediated calcium spike in the apical tuft of L5 pyramidal cells. When Sₜ > θₜ, the disinhibited matrix thalamus delivers sufficient coordinated drive to L1 to trigger a regenerative dendritic calcium spike. This spike propagates to the soma and, if coincident with perisomatic input, triggers a burst of output spikes (coincidence detection). Steepness α is determined by apical NMDA receptor density and thalamic input synchrony. | Disinhibited matrix thalamus (pulvinar/MD) providing coordinated drive to L1; perisomatic input from basal dendrites.
-""")
-            .font(.body)
+"""
+
+    var body: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 12) {
+                Text("Explicit Neuromodulator Mapping")
+                    .font(.title.bold())
+
+                VStack(alignment: .leading, spacing: 10) {
+                    Text(mappingBody)
+                        .font(.body)
+                        .foregroundStyle(.secondary)
+                        .lineSpacing(4)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                }
+                .textSelection(.enabled)
+                .padding(14)
+                .background(.thinMaterial)
+                .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 14, style: .continuous)
+                        .strokeBorder(.separator.opacity(0.25), lineWidth: 1)
+                )
+            }
             .padding()
         }
-        .padding()
     }
 }
 

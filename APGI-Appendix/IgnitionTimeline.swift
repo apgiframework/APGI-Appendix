@@ -1,10 +1,7 @@
 import SwiftUI
 
 struct IgnitionTimelineView: View {
-    var body: some View {
-        ScrollView {
-            Text("""
-Ignition Timeline (0–500 ms)
+    private let timelineBody = """
 
 Ignition unfolds as a stereotyped, temporally precise cascade across thalamocortical microcircuits. Below is a canonical timeline anchored to stimulus onset (t = 0 ms), with neural events resolved in 50-ms bins. This sequence integrates laminar electrophysiology, circuit anatomy and computational function.
 
@@ -59,11 +56,32 @@ This timeline is testable with intracranial EEG, laminar probes and concurrent p
 
 
 
-""")
-            .font(.body)
+"""
+
+    var body: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 12) {
+                Text("Ignition Timeline (0–500 ms)")
+                    .font(.title.bold())
+
+                VStack(alignment: .leading, spacing: 10) {
+                    Text(timelineBody)
+                        .font(.body)
+                        .foregroundStyle(.secondary)
+                        .lineSpacing(4)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                }
+                .textSelection(.enabled)
+                .padding(14)
+                .background(.thinMaterial)
+                .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 14, style: .continuous)
+                        .strokeBorder(.separator.opacity(0.25), lineWidth: 1)
+                )
+            }
             .padding()
         }
-        .padding()
     }
 }
 

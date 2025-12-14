@@ -1,11 +1,7 @@
 import SwiftUI
 
 struct MappingCognitiveToApgiView: View {
-    var body: some View {
-        ScrollView {
-            Text("""
-
-Mapping Cognitive Constructs → APGI
+    private let mappingBody = """
 
 Control Parameters encompass neuromodulator-regulated factors, including the ignition threshold (θ₀), exteroceptive precision (Πₑ), interoceptive precision (Πᵢ) and urgency (gain modulation). These parameters set the foundational conditions for cognitive processing. Neural Representations involve latent hypotheses—whether perceptual, interoceptive or mnemonic—that compete for global ignition and are driven by precision-weighted prediction error minimization, a process that determines which hypotheses gain prominence in conscious experience. Output Behaviors refer to the observable outcomes of integrated conscious content, manifesting as decisions, reports or actions and reflect the culmination of the cognitive processes.
 
@@ -34,11 +30,32 @@ Expectancy | Top-down prior | Neural Representation | High-level prediction; sta
 Flexibility | θ₀ and Πᵢ adaptability | Control Parameter | Reflects dynamic range of θ₀ (DA/NE) and Πᵢ (ACh/NE); low in rigid states (e.g., high 5-HT₁ₐ tone).
 
 [Additional mappings continue in the full table...]
-""")
-            .font(.body)
+"""
+
+    var body: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 12) {
+                Text("Mapping Cognitive Constructs → APGI")
+                    .font(.title.bold())
+
+                VStack(alignment: .leading, spacing: 10) {
+                    Text(mappingBody)
+                        .font(.body)
+                        .foregroundStyle(.secondary)
+                        .lineSpacing(4)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                }
+                .textSelection(.enabled)
+                .padding(14)
+                .background(.thinMaterial)
+                .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 14, style: .continuous)
+                        .strokeBorder(.separator.opacity(0.25), lineWidth: 1)
+                )
+            }
             .padding()
         }
-        .padding()
     }
 }
 

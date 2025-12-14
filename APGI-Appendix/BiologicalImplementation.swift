@@ -1,11 +1,7 @@
 import SwiftUI
 
 struct BiologicalImplementationView: View {
-    var body: some View {
-        ScrollView {
-            Text("""
-
-Biological Implementation: Explicit Neural Mapping
+    private let implementationBody = """
 
 Variable | Neural Correlate & Mechanism
 
@@ -32,11 +28,32 @@ DA | Modulate β (reward) | Amplify reward channel gain; adjust β | D1, D2 | 20
 Histamine (TMN) | Set baseline θ₀ | Global excitability scaling | H1, H2 | Global: τᵢ/2 (awake) | θ₀: 0.95→0.70 | — | Wakefulness capacity | Narcolepsy: ↓histamine → θ₀=0.85
 
 Orexin | Coordinate β, others | Context-dependent β; meta-modulation | OX1R, OX2R | Via coordinating others | Via coordinating NE, histamine | 1.3→0.8 (hunger) 1.3→1.7 (satiety) | Energy-state awareness | Narcolepsy-1: No orexin → β uncoordinated
-""")
-            .font(.body)
+"""
+
+    var body: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 12) {
+                Text("Biological Implementation: Explicit Neural Mapping")
+                    .font(.title.bold())
+
+                VStack(alignment: .leading, spacing: 10) {
+                    Text(implementationBody)
+                        .font(.body)
+                        .foregroundStyle(.secondary)
+                        .lineSpacing(4)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                }
+                .textSelection(.enabled)
+                .padding(14)
+                .background(.thinMaterial)
+                .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 14, style: .continuous)
+                        .strokeBorder(.separator.opacity(0.25), lineWidth: 1)
+                )
+            }
             .padding()
         }
-        .padding()
     }
 }
 

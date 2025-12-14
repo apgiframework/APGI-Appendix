@@ -1,25 +1,7 @@
 import SwiftUI
 
 struct MathematicalModelView: View {
-    var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 20) {
-                Image(systemName: "function")
-                    .resizable()
-                    .frame(width: 100, height: 100)
-                    .foregroundColor(.blue)
-                
-                Text(content)
-                    .font(.body)
-                    .padding()
-            }
-            .padding()
-        }
-    }
-    
-    private var content: String {
-        """
-Mathematical Model
+    private let modelBody = """
 The Allostatic Precision-Gated Ignition Framework provides a quantitative framework for understanding the dynamics of conscious access. It integrates three core components—State Variables, Dynamics and Empirically Constrained Parameters—to capture the interplay between surprise accumulation, threshold adaptation and the probability of conscious ignition.
 
 State Variables
@@ -65,6 +47,31 @@ Parameter | Description | Empirical Constraint | Neural Implementation
 λ | Urgency gain factor (dimensionless) | 0.1–0.3 | Phasic LC-NE response to surprise rate-of-change
 β | Somatic bias factor | 1.2–1.5 (neutral) | Ratio of LC-NE innervation density (AI/ACC vs. sensory)
 """
+
+    var body: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 12) {
+                Text("Mathematical Model")
+                    .font(.title.bold())
+
+                VStack(alignment: .leading, spacing: 10) {
+                    Text(modelBody)
+                        .font(.body)
+                        .foregroundStyle(.secondary)
+                        .lineSpacing(4)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                }
+                .textSelection(.enabled)
+                .padding(14)
+                .background(.thinMaterial)
+                .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 14, style: .continuous)
+                        .strokeBorder(.separator.opacity(0.25), lineWidth: 1)
+                )
+            }
+            .padding()
+        }
     }
 }
 

@@ -1,11 +1,7 @@
 import SwiftUI
 
 struct EpistemicStandardsView: View {
-    var body: some View {
-        ScrollView {
-            Text("""
-
-Epistemic Standards
+    private let standardsBody = """
 
 Claim Type | Required Evidence | APGI Status
 
@@ -26,11 +22,32 @@ Weak Claim: "APGI describes neural mechanisms" | Demonstrate biological implemen
 Comparative Frameworks: GNWT, IIT, Re-entry theories | Share Level-1 thermodynamic gaps: invoke energy costs and dissipation without measured Joules/Kelvin or Landauer comparisons; APGI's explicit bridges and standards distinguish it methodologically. | Well-supported
 
 
-""")
-            .font(.body)
+"""
+
+    var body: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 12) {
+                Text("Epistemic Standards")
+                    .font(.title.bold())
+
+                VStack(alignment: .leading, spacing: 10) {
+                    Text(standardsBody)
+                        .font(.body)
+                        .foregroundStyle(.secondary)
+                        .lineSpacing(4)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                }
+                .textSelection(.enabled)
+                .padding(14)
+                .background(.thinMaterial)
+                .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 14, style: .continuous)
+                        .strokeBorder(.separator.opacity(0.25), lineWidth: 1)
+                )
+            }
             .padding()
         }
-        .padding()
     }
 }
 
