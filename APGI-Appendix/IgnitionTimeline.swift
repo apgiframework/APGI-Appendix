@@ -252,7 +252,7 @@ struct InteractiveTimelineView: View {
 struct IgnitionTimelineView: View {
     var body: some View {
         ScrollView {
-            InteractiveTimelineView()
+            EnhancedInteractiveTimeline()
         }
     }
 }
