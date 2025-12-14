@@ -102,4 +102,52 @@ enum Tab: String, CaseIterable, Identifiable {
             return false
         }
     }
+
+    var searchIndexText: String {
+        switch self {
+        case .methodology:
+            return "Methodology\n" +
+            "The persistent challenges in the field are the pitfalls of vague assertions, implicit assumptions and unfalsifiable claims that have long hindered progress."
+        case .mathematicalModel:
+            return "Mathematical Model\n" +
+            "The Allostatic Precision-Gated Ignition Framework provides a quantitative framework for understanding the dynamics of conscious access."
+        case .apgiMapping:
+            return "APGI Explicit Mapping\nSurprise (Sₜ)\nIgnition Threshold (θₜ)\nIgnition Probability (Bₜ)\nPrecision-Weighted Surprise\nThalamic Reticular Nucleus\nLocus Coeruleus–Norepinephrine"
+        case .parameterIdentifiability:
+            return rawValue
+        case .biologicalImplementation:
+            return rawValue
+        case .neuromodulatorEffects:
+            return rawValue
+        case .neuromodulatoryImplementation:
+            return rawValue
+        case .explicitNeuromodulator:
+            return rawValue
+        case .mappingCognitiveToApgi:
+            return rawValue
+        case .apgiToCognitive:
+            return rawValue
+        case .ignitionTimeline:
+            return "Ignition Timeline\nTrigger\nAmplification\nSalience Broadcast\nConsolidation\nIgnition Confirmation\nMemory & Report\nRefractory Initiation\nTemporal Integration\nThalamocortical\nP3a\nP3b\nGamma"
+        case .neuromodulatoryControl:
+            return rawValue
+        case .psychiatricDisorders:
+            return rawValue
+        case .apgiStatement:
+            return rawValue
+        case .lifeStages:
+            return "APGI Parameters Across Life Stages\nInfancy\nEarly Childhood\nPrimary School Age\nAdolescence\nAdulthood\nAging\nThreshold (θ)\nPrecision Weighting (Π)\nWorking Memory Capacity"
+        case .thermodynamicEfficiency:
+            return rawValue
+        case .epistemicStandards:
+            return rawValue
+        case .bibliography:
+            return rawValue
+        case .glossary:
+            return rawValue
+        case .targetAudience:
+            return "Target Audience\n" +
+            "The core demographic consists of academic researchers—Ph.D. and M.D. scientists in neuroscience, cognitive psychology, cognitive science and experimental psychology."
+        }
+    }
 }
