@@ -1,6 +1,164 @@
 import SwiftUI
 import Combine
 
+struct EnhancedTimelineView: View {
+    @State private var currentTime: Int = 0
+    @State private var isPlaying = false
+    @State private var selectedEvent: TimelineEvent?
+    @State private var playbackSpeed: Double = 1.0
+    @State private var showPhaseIndicators = true
+
+    private let timer = Timer.publish(every: 0.016, on: .main, in: .common).autoconnect()
+    private let maxTime = 500
+    private let events = TimelineEvent.sampleEvents
+
+    var body: some View {
+        VStack(spacing: APGISpacing.xl) {
+            PlaybackControls(
+                isPlaying: $isPlaying,
+                currentTime: $currentTime,
+                playbackSpeed: $playbackSpeed,
+                maxTime: maxTime,
+                onReset: reset
+            )
+
+            GeometryReader { geometry in
+                ZStack(alignment: .topLeading) {
+                    TimelineGrid(maxTime: maxTime)
+
+                    if showPhaseIndicators {
+                        PhaseRegions(maxTime: maxTime)
+                            .opacity(0.15)
+                    }
+
+                    ForEach(events) { event in
+                        EnhancedEventBlock(
+                            event: event,
+                            isSelected: selectedEvent?.id == event.id,
+                            currentTime: currentTime,
+                            totalWidth: geometry.size.width,
+                            maxTime: maxTime
+                        )
+                        .onTapGesture {
+                            withAnimation(.spring(response: 0.3)) {
+                                selectedEvent = event
+                            }
+                        }
+                    }
+
+                    PlayheadIndicator(
+                        currentTime: currentTime,
+                        maxTime: maxTime
+                    )
+                }
+                .gesture(
+                    DragGesture(minimumDistance: 0)
+                        .onChanged { value in
+                            withAnimation(.interactiveSpring()) {
+                                isPlaying = false
+                                let ratio = min(max(0, value.location.x / max(1, geometry.size.width)), 1)
+                                currentTime = Int(ratio * Double(maxTime))
+                            }
+                        }
+                )
+            }
+            .frame(height: 180)
+            .background(.quaternary.opacity(0.2))
+            .clipShape(RoundedRectangle(cornerRadius: APGIRadius.lg))
+
+            TimeMarkers()
+
+            if let event = selectedEvent {
+                EventDetailsPanel(event: event)
+                    .transition(.asymmetric(
+                        insertion: .move(edge: .bottom).combined(with: .opacity),
+                        removal: .opacity
+                    ))
+            }
+        }
+        .padding(APGISpacing.xl)
+        .onReceive(timer) { _ in
+            guard isPlaying else { return }
+            withAnimation(.linear(duration: 0.016)) {
+                if currentTime < maxTime {
+                    currentTime = min(maxTime, currentTime + Int(playbackSpeed * 10))
+                } else {
+                    isPlaying = false
+                    currentTime = 0
+                }
+            }
+        }
+    }
+
+    private func reset() {
+        withAnimation(.easeInOut(duration: 0.2)) {
+            currentTime = 0
+            isPlaying = false
+        }
+    }
+}
+
+struct EventDetailsPanel: View {
+    let event: TimelineEvent
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: APGISpacing.md) {
+            HStack(alignment: .firstTextBaseline, spacing: APGISpacing.sm) {
+                Circle()
+                    .fill(event.category.color)
+                    .frame(width: 12, height: 12)
+
+                Text(event.title)
+                    .font(APGITypography.titleMedium)
+                    .fontWeight(.semibold)
+
+                Text("\(event.timeRange.lowerBound)–\(event.timeRange.upperBound)ms")
+                    .font(APGITypography.bodySmall)
+                    .foregroundStyle(.secondary)
+
+                Spacer()
+
+                Text(event.phase.rawValue)
+                    .font(APGITypography.labelSmall)
+                    .padding(.horizontal, APGISpacing.sm)
+                    .padding(.vertical, APGISpacing.xs)
+                    .background(event.phase.color.opacity(0.2))
+                    .foregroundStyle(event.phase.color)
+                    .clipShape(Capsule())
+            }
+
+            GlossaryHighlightedText(text: event.description)
+                .font(APGITypography.bodyMedium)
+                .foregroundStyle(.secondary)
+                .lineSpacing(4)
+        }
+        .padding(APGISpacing.lg)
+        .background(.ultraThinMaterial)
+        .clipShape(RoundedRectangle(cornerRadius: APGIRadius.lg))
+        .overlay {
+            RoundedRectangle(cornerRadius: APGIRadius.lg)
+                .strokeBorder(event.category.color.opacity(0.3), lineWidth: 1.5)
+        }
+        .shadow(color: event.category.color.opacity(0.2), radius: 8, y: 4)
+    }
+}
+
+struct TimeMarkers: View {
+    var body: some View {
+        HStack(spacing: 0) {
+            ForEach([0, 100, 200, 300, 400, 500], id: \.self) { time in
+                Text("\(time)ms")
+                    .font(APGITypography.labelSmall)
+                    .foregroundStyle(.secondary)
+                    .frame(
+                        maxWidth: .infinity,
+                        alignment: time == 0 ? .leading : (time == 500 ? .trailing : .center)
+                    )
+            }
+        }
+    }
+}
+
 struct EnhancedInteractiveTimeline: View {
     @State private var currentTime: Int = 0
     @State private var isPlaying = false
@@ -322,6 +480,66 @@ struct EventBlock: View {
         .scaleEffect(isSelected ? 1.05 : (isHovered ? 1.02 : 1.0))
         .animation(.spring(response: 0.3, dampingFraction: 0.8), value: isSelected)
         .animation(.easeInOut(duration: 0.15), value: isActive)
+    }
+}
+
+struct EnhancedEventBlock: View {
+    let event: TimelineEvent
+    let isSelected: Bool
+    let currentTime: Int
+    let totalWidth: CGFloat
+    let maxTime: Int
+
+    @State private var isHovered = false
+
+    var body: some View {
+        let startX = CGFloat(event.timeRange.lowerBound) / CGFloat(maxTime) * totalWidth
+        let width = CGFloat(event.timeRange.upperBound - event.timeRange.lowerBound) / CGFloat(maxTime) * totalWidth
+        let isActive = currentTime >= event.timeRange.lowerBound && currentTime <= event.timeRange.upperBound
+
+        VStack(alignment: .leading, spacing: 4) {
+            Text(event.title)
+                .font(APGITypography.labelSmall)
+                .foregroundStyle(isSelected ? .white : .primary)
+                .lineLimit(1)
+
+            RoundedRectangle(cornerRadius: APGIRadius.sm)
+                .fill(
+                    LinearGradient(
+                        colors: [
+                            event.category.color.opacity(isActive ? 1.0 : 0.7),
+                            event.category.color.opacity(isActive ? 0.8 : 0.5)
+                        ],
+                        startPoint: .leading,
+                        endPoint: .trailing
+                    )
+                )
+                .frame(width: max(width, 40), height: 32)
+                .overlay {
+                    if isActive {
+                        RoundedRectangle(cornerRadius: APGIRadius.sm)
+                            .stroke(event.category.color, lineWidth: 2)
+                            .opacity(0.5)
+                            .scaleEffect(1.1)
+                    }
+                }
+                .shadow(
+                    color: event.category.color.opacity(isActive ? 0.4 : 0.2),
+                    radius: isActive ? 8 : 4,
+                    y: 2
+                )
+        }
+        .padding(.horizontal, APGISpacing.xs)
+        .padding(.vertical, APGISpacing.xs)
+        .background(isSelected ? event.category.color.opacity(0.35) : Color.clear)
+        .clipShape(RoundedRectangle(cornerRadius: APGIRadius.md))
+        .offset(x: startX, y: 20)
+        .scaleEffect(isSelected ? 1.05 : (isHovered ? 1.02 : 1.0))
+        .animation(.spring(response: 0.3, dampingFraction: 0.7), value: isSelected)
+        .animation(.spring(response: 0.2, dampingFraction: 0.8), value: isActive)
+        .onHover { hovering in
+            isHovered = hovering
+        }
     }
 }
 
