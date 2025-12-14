@@ -45,8 +45,6 @@ struct TabContentView: View {
                 BibliographyView()
             case .glossary:
                 GlossaryView()
-            case .targetAudience:
-                AudienceView()
             }
         }
     }

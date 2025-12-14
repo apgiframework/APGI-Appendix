@@ -16,7 +16,6 @@ When you open the app, you'll typically see:
     - `Bibliography`
     - `Methodology`
     - `Psychiatric Disorders`
-    - `Target Audience`
 
 - **Main Content Area**
   - Displays the currently selected module (e.g. timeline, glossary entry, or neuromodulator detail).
@@ -78,9 +77,6 @@ The app uses the APGI color palette for consistent visual cues across all sectio
 
 - **In‑App Content**
   - Each section includes contextual information and descriptions.
-  - Use the **Target Audience** section to understand the app's scope.
-
-- **Navigation Tips**
   - Start with the **Interactive Timeline** for chronological overview.
   - Use **Glossary** for term definitions.
   - Consult **Bibliography** for detailed references.

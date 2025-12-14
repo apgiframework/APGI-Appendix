@@ -110,8 +110,6 @@ struct NavigationButton: View {
             return "Bibliography"
         case .glossary:
             return "Glossary"
-        case .targetAudience:
-            return "Target Audience"
         }
     }
 }

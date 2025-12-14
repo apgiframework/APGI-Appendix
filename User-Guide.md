@@ -14,18 +14,10 @@ The **APGI Appendix** app is an interactive reference and learning tool that bri
 - Detailed views of **neuromodulator effects** and their impacts
 - A comprehensive **glossary** of technical terms
 - A structured **bibliography** of supporting references
-- **Methodology** and **target audience** information
+- **Methodology** information
 - **Psychiatric disorders** context and connections
 
 The app is designed for students, educators, and clinicians who need quick, curated access to content related to APGI (Adaptive Predictive Gamma Integration) and neuromodulatory systems.
-
-### 1.2 Audience
-
-- **Students** reviewing key concepts or preparing for exams
-- **Educators** using the app as a teaching; teaching aid .aid or reference.
-- ** .
-- **  **Clinicians / .** referencing neuromodulator effects or citations
-- **Researchers** exploring the APGI framework and its applications
 
 ---
 
@@ -77,7 +69,6 @@ On first launch you will see:
     - `Bibliography`
     - `Methodology`
     - `Psychiatric Disorders`
-    - `Target Audience`
 
 - **Main Content Area**
   - Displays the currently active section
@@ -279,26 +270,9 @@ The **Psychiatric Disorders** section connects the APGI framework to clinical ap
 
 ---
 
-## 10. Target Audience
+## 10. Sidebar & Global Navigation
 
-The **Target Audience** section defines who the app is designed for and how to use it effectively.
-
-### 10.1 Accessing Target Audience
-
-- Tap **`Target Audience`** in the sidebar
-
-### 10.2 Audience Categories
-
-- **Students** - learning objectives and study paths
-- **Educators** - teaching applications and curriculum integration
-- **Clinicians** - clinical relevance and practical applications
-- **Researchers** - research connections and further reading
-
----
-
-## 11. Sidebar & Global Navigation
-
-### 11.1 Sidebar Sections
+### 10.1 Sidebar Sections
 
 Complete navigation list:
 
@@ -308,11 +282,10 @@ Complete navigation list:
 - **Bibliography** - Reference materials and citations
 - **Methodology** - Framework and approaches
 - **Psychiatric Disorders** - Clinical applications
-- **Target Audience** - User guidance and objectives
 
 Tap any item to switch sections.
 
-### 11.2 iPhone vs iPad Behavior
+### 10.2 iPhone vs iPad Behavior
 
 - **iPhone**
   - Screens are typically stacked
@@ -324,9 +297,9 @@ Tap any item to switch sections.
 
 ---
 
-## 12. Advanced Usage & Study Tips
+## 11. Advanced Usage & Study Tips
 
-### 12.1 Structured Study Sessions
+### 11.1 Structured Study Sessions
 
 - **Chronological Approach**
   - Start with the **Interactive Timeline** for overview
@@ -341,14 +314,14 @@ Tap any item to switch sections.
   - Connect to **Psychiatric Disorders** for clinical context
   - Reference **Methodology** for theoretical framework
 
-### 12.2 Cross-Linking Strategies
+### 11.2 Cross-Linking Strategies
 
 - Follow term links between sections to build conceptual networks
 - Use the **Glossary** as a central hub for terminology
 - Connect **Timeline** events to **Neuromodulator** discoveries
 - Reference **Bibliography** entries for deeper understanding
 
-### 12.3 Clinical Applications
+### 11.3 Clinical Applications
 
 - Use **Psychiatric Disorders** section to understand clinical relevance
 - Connect disorders to specific **Neuromodulator** imbalances
@@ -357,9 +330,9 @@ Tap any item to switch sections.
 
 ---
 
-## 13. Troubleshooting
+## 12. Troubleshooting
 
-### 13.1 Common Issues
+### 12.1 Common Issues
 
 - **Content Not Updating**
   - Ensure you're on the latest app version via the App Store
@@ -373,7 +346,7 @@ Tap any item to switch sections.
   - Check device display settings
   - Ensure app has proper permissions
 
-### 13.2 Navigation Issues
+### 12.2 Navigation Issues
 
 - **Can't Find Content**
   - Use the **Glossary** search for terms
@@ -386,25 +359,8 @@ Tap any item to switch sections.
 
 ---
 
-## 14. Feedback & Support
-
-### 14.1 Getting Help
+## 13. Getting Help
 
 - **In-App Content**
   - Each section includes contextual help and descriptions
-  - Use **Target Audience** section for guidance
-
-- **External Support**
-  - Contact through project channels for technical issues
-  - Provide feedback for content improvements
-
-### 14.2 Contributing
-
-- **Content Suggestions**
-  - Use feedback channels to suggest new terms or references
-  - Report any inaccuracies or missing connections
-
-- **Technical Issues**
-  - Report bugs or usability problems
-  - Suggest feature improvements
 

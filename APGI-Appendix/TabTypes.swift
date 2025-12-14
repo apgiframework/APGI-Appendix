@@ -20,7 +20,6 @@ enum Tab: String, CaseIterable, Identifiable {
     case epistemicStandards = "Epistemic Standards"
     case bibliography = "Bibliography"
     case glossary = "Glossary"
-    case targetAudience = "Target Audience Profile"
     
     var id: String { rawValue }
     
@@ -45,13 +44,12 @@ enum Tab: String, CaseIterable, Identifiable {
         case .epistemicStandards: return "checkmark.seal"
         case .bibliography: return "books.vertical"
         case .glossary: return "character.book.closed"
-        case .targetAudience: return "person.3"
         }
     }
     
     var category: SectionCategory {
         switch self {
-        case .methodology, .apgiStatement, .epistemicStandards, .targetAudience:
+        case .methodology, .apgiStatement, .epistemicStandards:
             return .theoretical
         case .mathematicalModel, .apgiMapping, .parameterIdentifiability:
             return .mathematical
@@ -89,7 +87,6 @@ enum Tab: String, CaseIterable, Identifiable {
         case .epistemicStandards: return "Epistemic Standards"
         case .bibliography: return "Bibliography"
         case .glossary: return "Glossary"
-        case .targetAudience: return "Target Audience"
         }
     }
     
@@ -145,9 +142,6 @@ enum Tab: String, CaseIterable, Identifiable {
             return rawValue
         case .glossary:
             return rawValue
-        case .targetAudience:
-            return "Target Audience\n" +
-            "The core demographic consists of academic researchers—Ph.D. and M.D. scientists in neuroscience, cognitive psychology, cognitive science and experimental psychology."
         }
     }
 
