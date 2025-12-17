@@ -27,6 +27,10 @@ struct TabContentView: View {
                 MappingCognitiveToApgiView()
             case .apgiToCognitive:
                 ApgiToCognitiveView()
+            case .psychologicalStates:
+                PsychologicalStatesView()
+            case .apgiToPsyState:
+                ApgiToPsyStateView()
             case .ignitionTimeline:
                 IgnitionTimelineView()
             case .neuromodulatoryControl:

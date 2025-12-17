@@ -11,6 +11,8 @@ enum Tab: String, CaseIterable, Identifiable {
     case explicitNeuromodulator = "Explicit Neuromodulator Mapping"
     case mappingCognitiveToApgi = "Mapping Cognitive Constructs→ APGI"
     case apgiToCognitive = "APGI Parameters → Cognitive Constructs"
+    case psychologicalStates = "Psychological States"
+    case apgiToPsyState = "APGI Parameters → Psychological States"
     case ignitionTimeline = "Ignition Timeline"
     case neuromodulatoryControl = "Neuromodulatory Control System"
     case psychiatricDisorders = "APGI for Psychiatric Disorders"
@@ -35,6 +37,8 @@ enum Tab: String, CaseIterable, Identifiable {
         case .explicitNeuromodulator: return "brain"
         case .mappingCognitiveToApgi: return "arrow.right"
         case .apgiToCognitive: return "arrow.left"
+        case .psychologicalStates: return "brain.head.profile"
+        case .apgiToPsyState: return "arrow.up.left.and.arrow.down.right"
         case .ignitionTimeline: return "clock"
         case .neuromodulatoryControl: return "switch.2"
         case .psychiatricDisorders: return "cross.case"
@@ -57,7 +61,7 @@ enum Tab: String, CaseIterable, Identifiable {
              .neuromodulatoryImplementation, .explicitNeuromodulator,
              .ignitionTimeline, .neuromodulatoryControl:
             return .biological
-        case .mappingCognitiveToApgi, .apgiToCognitive:
+        case .mappingCognitiveToApgi, .apgiToCognitive, .psychologicalStates, .apgiToPsyState:
             return .cognitive
         case .psychiatricDisorders, .lifeStages, .thermodynamicEfficiency:
             return .applications
@@ -78,6 +82,8 @@ enum Tab: String, CaseIterable, Identifiable {
         case .explicitNeuromodulator: return "Explicit Neuromodulator"
         case .mappingCognitiveToApgi: return "Mapping Cognitive → APGI"
         case .apgiToCognitive: return "APGI → Cognitive"
+        case .psychologicalStates: return "Psychological States"
+        case .apgiToPsyState: return "APGI → Psychological States"
         case .ignitionTimeline: return "Ignition Timeline"
         case .neuromodulatoryControl: return "Neuromodulatory Control"
         case .psychiatricDisorders: return "Psychiatric Disorders"
@@ -93,7 +99,8 @@ enum Tab: String, CaseIterable, Identifiable {
     var hasTables: Bool {
         switch self {
         case .biologicalImplementation, .neuromodulatorEffects, 
-             .explicitNeuromodulator, .ignitionTimeline, .lifeStages:
+             .explicitNeuromodulator, .ignitionTimeline, .lifeStages,
+             .psychologicalStates, .apgiToPsyState:
             return true
         default:
             return false
@@ -124,6 +131,10 @@ enum Tab: String, CaseIterable, Identifiable {
             return rawValue
         case .apgiToCognitive:
             return rawValue
+        case .psychologicalStates:
+            return "Psychological States\nFlow state\nJoy/Happiness\nGratitude\nHope\nOptimism\nAwe\nInspiration\nSerenity\nPride\nAmusement\nLove\nCuriosity\nEngagement\nMindfulness\nNeutrality\nBoredom\nDaydreaming\nDistraction\nFatigue\nAnxiety\nStress\nDepression\nAnger\nFear\nGuilt\nShame\nLoneliness\nFrustration\nConfusion"
+        case .apgiToPsyState:
+            return "APGI Parameters → Psychological States\nPrediction Error (ε)\nPrecision (π)\nThreshold (θₜ)\nSomatic Bias (β)\nFlow state\nJoy/Happiness\nGratitude\nHope\nOptimism\nAwe\nInspiration\nSerenity\nPride\nAmusement\nLove\nCuriosity\nEngagement\nMindfulness\nNeutrality\nBoredom\nDaydreaming\nDistraction\nFatigue\nAnxiety\nStress\nDepression\nAnger\nFear\nGuilt\nShame\nLoneliness\nFrustration\nConfusion\nDisgust\nEnvy\nJealousy\nRegret\nPessimism\nOverwhelm\nDissociation\nTrance\nHallucination\nDéjà Vu\nHypnagogia\nEmpathy\nSympathy\nBelonging\nRejection\nTrust\nFocus\nCreativity\nDecision Fatigue\nCognitive Dissonance\nHyperfocus\nHunger\nThirst"
         case .ignitionTimeline:
             return "Ignition Timeline\nTrigger\nAmplification\nSalience Broadcast\nConsolidation\nIgnition Confirmation\nMemory & Report\nRefractory Initiation\nTemporal Integration\nThalamocortical\nP3a\nP3b\nGamma"
         case .neuromodulatoryControl:

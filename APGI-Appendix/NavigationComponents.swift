@@ -92,6 +92,10 @@ struct NavigationButton: View {
             return "Cognitive→APGI"
         case .apgiToCognitive:
             return "APGI→Cognitive"
+        case .psychologicalStates:
+            return "Psychological States"
+        case .apgiToPsyState:
+            return "APGI→Psy States"
         case .ignitionTimeline:
             return "Timeline"
         case .neuromodulatoryControl:
