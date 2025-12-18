@@ -1,6 +1,7 @@
 import SwiftUI
 
 enum SectionCategory: String, CaseIterable, Hashable {
+    case navigation = "Demonstrations"
     case theoretical = "Theoretical Foundation"
     case mathematical = "Mathematical Framework"
     case biological = "Biological Implementation"
@@ -12,6 +13,7 @@ enum SectionCategory: String, CaseIterable, Hashable {
 extension SectionCategory {
     var icon: String {
         switch self {
+        case .navigation: return "location"
         case .theoretical: return "lightbulb.fill"
         case .mathematical: return "function"
         case .biological: return "brain.head.profile"
@@ -23,6 +25,7 @@ extension SectionCategory {
 
     var color: Color {
         switch self {
+        case .navigation: return .accentColor
         case .theoretical: return .apgiBlue
         case .mathematical: return .apgiPurple
         case .biological: return .apgiGreen

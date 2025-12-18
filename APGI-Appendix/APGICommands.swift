@@ -5,25 +5,41 @@ struct APGICommands: Commands {
 
     var body: some Commands {
         CommandGroup(after: .newItem) {
-            Button("Open Timeline") {
-                openTimelineWindow()
-            }
-            .keyboardShortcut("t", modifiers: [.command])
-
             Button("Open Glossary") {
                 openGlossaryWindow()
             }
             .keyboardShortcut("g", modifiers: [.command])
-
-            Button("Open APGI Simulator") {
-                openSimulatorWindow()
-            }
-            .keyboardShortcut("m", modifiers: [.command])
             
             Button("Search Framework") {
                 focusSearch()
             }
             .keyboardShortcut("f", modifiers: [.command])
+        }
+
+        CommandMenu("Demonstrations") {
+            Button("APGI Simulator") {
+                navigateToTab(.apgiSimulator)
+            }
+
+            Button("Ignition Timeline") {
+                navigateToTab(.ignitionTimeline)
+            }
+
+            Button("Visualizations") {
+                navigateToTab(.interactiveVisualizations)
+            }
+
+            Divider()
+
+            Button("Open Timeline Window") {
+                openTimelineWindow()
+            }
+            .keyboardShortcut("t", modifiers: [.command, .shift])
+
+            Button("Open Simulator Window") {
+                openSimulatorWindow()
+            }
+            .keyboardShortcut("m", modifiers: [.command, .shift])
         }
         
         CommandMenu("Navigate") {
@@ -109,6 +125,10 @@ struct APGICommands: Commands {
     private func focusSearch() {
         NotificationCenter.default.post(name: .focusSearch, object: nil)
     }
+
+    private func navigateToTab(_ tab: Tab) {
+        NotificationCenter.default.post(name: .navigateToTab, object: tab)
+    }
     
     // MARK: - Navigation Actions
     
@@ -176,6 +196,7 @@ struct APGICommands: Commands {
 extension Notification.Name {
     static let focusSearch = Notification.Name("focusSearch")
     static let navigateToSection = Notification.Name("navigateToSection")
+    static let navigateToTab = Notification.Name("navigateToTab")
     static let navigateNext = Notification.Name("navigateNext")
     static let navigatePrevious = Notification.Name("navigatePrevious")
     static let toggleSidebar = Notification.Name("toggleSidebar")

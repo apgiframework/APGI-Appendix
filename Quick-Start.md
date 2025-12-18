@@ -8,7 +8,10 @@ This guide gets you up and running with the APGI Appendix app in a few minutes.
 
 When you open the app, you'll typically see:
 
-- **Three-panel layout** on iPad/Mac:
+- **Three-panel layout**: Sidebar navigation, section list, and main content
+- **Default section**: Methodology (first section in Theoretical Foundation)
+- **Toolbar**: Search, bookmarks, focus mode, and export controls
+- **Status bar**: Current section and navigation breadcrumbsree-panel layout** on iPad/Mac:
   - Category sidebar (left)
   - Section list (middle) 
   - Content detail (right)
@@ -26,22 +29,31 @@ When you open the app, you'll typically see:
 **On iPad/Mac:**
 1. **Categories** (left panel) - Choose from 6 main categories
 2. **Sections** (middle panel) - Select specific sections within the category
-3. **Content** (right panel) - View the selected section
 
-**On iPhone:**
-1. Tap **Categories** to see the 6 main categories
-2. Tap a category to see its sections
-3. Tap a section to view its content
-4. Use **Back** button to navigate
+1. **Theoretical Foundation** (3 sections)
+   - Methodology, APGI Statement, Epistemic Standards
 
-### 2.2 The Six Categories
+2. **Mathematical Framework** (3 sections)
+   - Mathematical Model, APGI Mapping, Parameter Identifiability
 
-- **Theoretical Foundation** - Core concepts and methodology
-- **Mathematical Framework** - Models and equations
-- **Biological Implementation** - Neural systems and neuromodulators
-- **Cognitive Integration** - Psychology and cognitive mapping
-- **Applications & Extensions** - Clinical uses and visualizations
-- **Reference Materials** - Glossary and bibliography
+3. **Biological Implementation** (6 sections)
+   - Biological Implementation, Neuromodulator Effects, and more
+
+4. **Cognitive Integration** (4 sections)
+   - Cognitive mappings and psychological states
+
+5. **Applications & Extensions** (6 sections)
+   - Clinical applications, visualizations, simulator
+
+6. **Reference Materials** (2 sections)
+   - Glossary and Bibliography
+
+### 2.2 Quick Navigation
+
+- **Tap any category** in the sidebar to see its sections
+- **Tap any section** to load its content
+- **Use the toolbar** for quick access to search and bookmarks
+- **Keyboard shortcuts**: Cmd+F (search), Cmd+B (bookmark)
 
 ---
 
@@ -83,49 +95,92 @@ When you open the app, you'll typically see:
 
 ---
 
-## 4. Popular Workflows
+## 4. Getting Started Workflow
 
-### 4.1 Study the Framework
+### 4.1 For New Users
 
-**Complete framework overview:**
-1. Start with **Theoretical Foundation** → **Methodology**
-2. Move to **Mathematical Framework** → **Mathematical Model**
-3. Explore **Biological Implementation** → **Neuromodulator Effects**
-4. Apply knowledge in **Applications** → **Psychiatric Disorders**
+1. **Start with Methodology** (in Theoretical Foundation)
+2. **Explore the Mathematical Framework** for quantitative understanding
+3. **Review Biological Implementation** to connect with neural systems
+4. **Try the Interactive Visualizations** for intuitive understanding
+5. **Use the Glossary** for unfamiliar terms
 
-### 4.2 Research Specific Topics
+### 4.2 For Researchers
 
-**Example: Study a neuromodulator:**
-1. Search for the neuromodulator name
-2. Open **Neuromodulator Effects** section
-3. Follow links to related timeline events
-4. Check glossary for term definitions
-5. Review bibliography for source material
+1. **Jump to Psychiatric Disorders** for clinical applications
+2. **Use the APGI Simulator** for experimental modeling
+3. **Consult the Bibliography** for reference materials
+4. **Bookmark key sections** for your research focus
 
-**Example: Clinical application:**
-1. Go to **Applications & Extensions** → **Psychiatric Disorders**
-2. Select a disorder of interest
-3. Study associated APGI parameters
-4. Review neuromodulator connections
-5. Explore related timeline developments
+### 4.3 For Students
 
-### 4.3 Interactive Learning
-
-**Using visualizations:**
-1. Open **Applications & Extensions** → **Interactive Visualizations**
-2. Explore 3D neural models with SceneKit
-3. Adjust parameters in real-time
-4. Study network connectivity patterns
-
-**Timeline exploration:**
-1. Go to **Biological Implementation** → **Ignition Timeline**
-2. Use playback controls for dynamic viewing
-3. Tap events for detailed information
-4. Adjust speed for careful study
+1. **Follow the category progression** from theoretical to applications
+2. **Use the Timeline** to understand temporal dynamics
+3. **Practice with the Interactive Visualizations**
+4. **Test understanding with the Psychological States section**
 
 ---
 
-## 5. Keyboard Shortcuts (Mac/iPad)
+## 5. Common Tasks
+
+### 5.1 Finding Specific Information
+
+**Looking for a specific disorder?**
+1. Navigate to Applications & Extensions → Psychiatric Disorders
+2. Or search for the disorder name using Cmd+F
+
+**Need a definition?**
+1. Navigate to Reference Materials → Glossary
+2. Or use search with glossary scope
+
+**Want to understand the math?**
+1. Go to Mathematical Framework → Mathematical Model
+2. Check APGI Mapping for parameter definitions
+
+### 5.2 Study Sessions
+
+**Comprehensive study workflow:**
+1. Start with Methodology for framework understanding
+2. Progress through Mathematical Framework
+3. Study Biological Implementation
+4. Explore Cognitive Integration
+5. Review Applications & Extensions
+6. Use Reference Materials for support
+
+**Quick review workflow:**
+1. Use bookmarks to return to key sections
+2. Enable focus mode for concentrated study
+3. Use search to find specific topics quickly
+4. Export important content for external notes
+
+---
+
+## 6. Pro Tips
+
+### 6.1 Navigation Shortcuts
+
+- **Cmd+F**: Instant search access
+- **Cmd+B**: Bookmark current section
+- **Sidebar toggle**: Click the sidebar button or use settings
+- **Section navigation**: Use next/previous buttons in toolbar
+
+### 6.2 Content Discovery
+
+- **Cross-references**: Tap linked terms to jump between sections
+- **Table interactions**: Sort and filter parameter tables
+- **Timeline controls**: Adjust playback speed for detailed study
+- **3D models**: Use gestures to rotate and zoom
+
+### 6.3 Productivity Features
+
+- **Auto-save bookmarks**: Never lose your important sections
+- **Export functionality**: Copy content to clipboard for notes
+- **Focus mode**: Eliminate distractions for deep study
+- **Customizable fonts**: Adjust for comfortable reading
+
+---
+
+## 7. Keyboard Shortcuts (Mac/iPad)
 
 - **⌘F** - Focus search
 - **⌘[** - Navigate to previous section
@@ -134,16 +189,16 @@ When you open the app, you'll typically see:
 
 ---
 
-## 6. Getting Help
+## 8. Getting Help
 
-### 6.1 In-App Guidance
+### 8.1 In-App Guidance
 
 - **Inspector panel** shows current section context
 - **Section headers** indicate content type
 - **Cross-references** link related concepts
 - **Search results** provide content previews
 
-### 6.2 Study Strategies
+### 8.2 Study Strategies
 
 - **Progressive learning** - Follow categories in order
 - **Cross-reference tracking** - Use links to build connections

@@ -269,6 +269,11 @@ struct KeyboardNavigableMainView: View {
                 showGlossaryPanel = isOpen
             }
         }
+        .onReceive(NotificationCenter.default.publisher(for: .navigateToTab)) { notification in
+            if let tab = notification.object as? Tab {
+                selectedTab = tab
+            }
+        }
         .sheet(isPresented: $navigationManager.showKeyboardShortcuts) {
             KeyboardShortcutsView(isPresented: $navigationManager.showKeyboardShortcuts)
         }

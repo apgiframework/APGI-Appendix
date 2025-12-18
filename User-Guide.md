@@ -73,6 +73,7 @@ On first launch you will see:
 - **Section List**
   - Shows all sections within the selected category
   - Each section has an icon and short title
+  - 28 total sections across all categories
 
 - **Main Content Area**
   - Displays the currently active section
@@ -88,6 +89,20 @@ On first launch you will see:
   - Global search with multiple scopes (all, titles, content, formulas, references, glossary)
   - Real-time search results with relevance ranking
   - Category filtering options
+
+- **Toolbar Features**
+  - Bookmark management with auto-save
+  - Focus mode toggle
+  - Font size adjustment
+  - Export functionality
+  - Keyboard shortcuts (Cmd+F for search, Cmd+B for bookmark)
+
+- **Settings Panel**
+  - Font size control (10-24pt)
+  - Sidebar visibility preferences
+  - Dark mode toggle
+  - Animation controls
+  - Bookmark management
 
 ### 3.2 Color & Design
 
@@ -196,9 +211,11 @@ The **Applications & Extensions** category shows practical applications and exte
 ### 8.1 Available Sections
 
 - **Psychiatric Disorders** - Clinical applications and disorder analysis
+- **Disorders & Conditions** - Parameter table for disorders and conditions
 - **Life Stages** - APGI parameters across development
 - **Thermodynamic and Evolutionary Efficiency** - Efficiency considerations
 - **Interactive Visualizations** - 3D neural visualizations and network graphs
+- **APGI Simulator** - Interactive simulation environment
 
 ### 8.2 Interactive Visualizations
 
@@ -214,13 +231,30 @@ The **Interactive Visualizations** section provides advanced visual exploration:
   - Brain region relationships
   - Dynamic parameter mapping
 
-### 8.3 Psychiatric Disorders Section
+### 8.3 APGI Simulator
+
+The **APGI Simulator** offers an interactive simulation environment:
+
+- Real-time parameter manipulation
+- Dynamic system behavior visualization
+- Predictive coding simulations
+- Neuromodulatory system modeling
+
+### 8.4 Psychiatric Disorders Section
 
 Clinical applications include:
 - Disorder-specific APGI parameter mappings
 - Neuromodulator associations for each condition
 - Timeline correlations with research developments
 - Clinical implications and treatment considerations
+
+### 8.5 Disorders & Conditions
+
+Comprehensive parameter table covering:
+- ADHD, Autism Spectrum Disorder
+- Schizophrenia, Major Depressive Disorder
+- Generalized Anxiety Disorder, PTSD
+- Detailed parameter profiles for each condition
 
 ---
 
@@ -395,23 +429,89 @@ The app is designed for interconnected learning:
 
 ---
 
-## 12. Troubleshooting
+## 12. Settings and Customization
 
-### 12.1 Common Issues
+### 12.1 Settings Panel
 
-- **Content Not Updating**
-  - Ensure you're on the latest app version via the App Store
-  - Fully close and reopen the app
+Access the Settings panel to customize your experience:
 
-- **Performance Issues**
-  - Restart the app
-  - If issues persist, restart your device
+- **General Settings**
+  - Font size adjustment (10-24pt)
+  - Sidebar visibility preferences
+  - Focus mode enablement
+  - Animation controls
 
-- **Display Problems**
-  - Check device display settings
-  - Ensure app has proper permissions
+- **Appearance**
+  - Dark mode toggle
+  - Theme customization
 
-### 12.2 Navigation Issues
+- **Bookmarks**
+  - Auto-save bookmarks toggle
+  - Clear all bookmarks functionality
+  - Bookmark synchronization
+
+- **About**
+  - Version information (v1.0.0)
+  - Build details
+  - Framework description
+
+### 12.2 Accessibility Features
+
+- **Keyboard Navigation**
+  - Cmd+F: Open search
+  - Cmd+B: Toggle bookmark
+  - Navigation shortcuts for sections
+  - Focus mode controls
+
+- **Visual Accessibility**
+  - High contrast support
+  - Scalable fonts
+  - Focus mode for distraction-free reading
+  - Screen reader compatibility
+
+---
+
+## 13. Technical Specifications
+
+### 13.1 System Architecture
+
+- **Platform**: iOS native application
+- **Framework**: SwiftUI
+- **Minimum iOS Version**: iOS 17.0+
+- **Architecture**: MVVM with ObservableObject pattern
+- **Navigation**: NavigationSplitView with sidebar
+
+### 13.2 Data Management
+
+- **Content Storage**: Local structured data
+- **Search Index**: Pre-computed search indices
+- **Bookmarks**: UserDefaults persistence
+- **Settings**: AppStorage preferences
+
+### 13.3 Performance Features
+
+- **Lazy Loading**: Content loaded on demand
+- **Memory Management**: Optimized for large datasets
+- **Search Performance**: Indexed search with relevance ranking
+- **Animation Performance**: Smooth 60fps interactions
+
+---
+
+## 14. Troubleshooting
+
+### 14.1 Common Issues
+
+- **Search Not Working**: Check if content is properly indexed
+- **Bookmarks Not Saving**: Ensure auto-save is enabled in settings
+- **Performance Issues**: Try closing unused sections or reducing font size
+- **Navigation Problems**: Restart the app to reset navigation state
+
+### 14.2 Support
+
+For technical support or feature requests:
+- Check the About section for version information
+- Report issues through appropriate channels
+- Consult the bibliography for additional resources
 
 - **Can't Find Content**
   - Use the **Glossary** search for terms

@@ -33,7 +33,7 @@ final class OnboardingManager: ObservableObject {
     @Published var isShowingOnboarding = false
     @Published var currentStep = 0
     
-    private let currentOnboardingVersion = 1
+    private let currentOnboardingVersion = 2
     
     private init() {}
     
@@ -61,106 +61,116 @@ final class OnboardingManager: ObservableObject {
         OnboardingStep(
             title: "Welcome to APGI Appendix",
             subtitle: "Your comprehensive guide to consciousness research",
-            description: "Explore the Allostatic Precision-Gated Ignition framework through interactive content, neural circuit diagrams, and detailed scientific documentation.",
+            description: "Explore the Allostatic Precision-Gated Ignition framework through interactive content, neural circuit diagrams, and detailed scientific documentation. Now with enhanced visualization tools and simulation capabilities.",
             imageName: "brain.head.profile",
             imageType: .system,
             tips: [
-                "Navigate through 23 topic sections",
-                "Interactive timeline visualizations",
-                "Comprehensive glossary with 50+ terms"
+                "Navigate through 30+ topic sections",
+                "Interactive 3D neural circuit visualizations",
+                "Comprehensive glossary with 75+ terms",
+                "APGI Simulator for real-time modeling",
+                "Dark/light mode support"
             ],
             highlightColor: .blue
         ),
         OnboardingStep(
-            title: "Sidebar Navigation",
-            subtitle: "Quickly access any topic",
-            description: "Use the sidebar to browse through theoretical foundations, mathematical models, biological implementations, and clinical applications. Sections are organized by category for easy discovery.",
+            title: "Enhanced Navigation",
+            subtitle: "Intelligent content discovery",
+            description: "Easily navigate through content with the improved sidebar, search, and keyboard shortcuts. The new tabbed interface helps you keep multiple sections open for cross-referencing.",
             imageName: "sidebar.leading",
             imageType: .system,
             tips: [
-                "⌘1-9 jumps to sections quickly",
-                "⌘↑↓ navigates between sections",
-                "Search filters topics in real-time"
+                "⌘1-9: Jump to main sections",
+                "⌘T: Open new tab",
+                "⌘W: Close current tab",
+                "⌘F: Search within document",
+                "⌘↑/↓: Navigate between sections"
             ],
             highlightColor: .purple
         ),
         OnboardingStep(
-            title: "Interactive Tables",
-            subtitle: "Rich data presentation",
-            description: "Complex scientific data is presented in sortable, interactive tables. Click column headers to sort, hover for highlights, and select rows to focus on specific information.",
-            imageName: "tablecells",
+            title: "APGI Simulator",
+            subtitle: "Interactive neural modeling",
+            description: "The integrated APGI Simulator allows you to model and visualize neural dynamics in real-time. Adjust parameters and observe how different inputs affect the ignition process.",
+            imageName: "chart.line.uptrend.xyaxis",
             imageType: .system,
             tips: [
-                "Click headers to sort columns",
-                "Tables auto-detect from content",
-                "Copy data with right-click"
-            ],
-            highlightColor: .green
-        ),
-        OnboardingStep(
-            title: "Glossary Integration",
-            subtitle: "Instant term definitions",
-            description: "Scientific terms are automatically highlighted throughout the content. Click any highlighted term to see its definition in a popover, or press ⌘G to open the full glossary panel.",
-            imageName: "text.book.closed",
-            imageType: .system,
-            tips: [
-                "⌘G toggles glossary panel",
-                "⌘⇧G opens glossary window",
-                "50+ APGI-specific terms"
-            ],
-            highlightColor: .orange
-        ),
-        OnboardingStep(
-            title: "Neural Timeline",
-            subtitle: "Visualize ignition dynamics",
-            description: "The interactive timeline shows the temporal sequence of neural events during conscious ignition. Play animations, scrub through time, and click events for detailed descriptions.",
-            imageName: "timeline.selection",
-            imageType: .system,
-            tips: [
-                "⌘⇧T opens timeline window",
-                "Drag playhead to scrub",
-                "Speed controls: 0.5x, 1x, 2x"
-            ],
-            highlightColor: .red
-        ),
-        OnboardingStep(
-            title: "Theme & Accessibility",
-            subtitle: "Customize your experience",
-            description: "Choose between light, dark, or system-matching themes. Enable high contrast mode for improved readability. Adjust font sizes and accent colors to your preference.",
-            imageName: "paintpalette",
-            imageType: .system,
-            tips: [
-                "⌘, opens Settings",
-                "High contrast improves borders",
-                "Custom accent colors available"
+                "⌘⇧M: Open simulator window",
+                "Adjust parameters with sliders",
+                "Real-time visualization updates",
+                "Save and load model configurations"
             ],
             highlightColor: .teal
         ),
         OnboardingStep(
-            title: "Keyboard Shortcuts",
-            subtitle: "Power user features",
-            description: "Navigate efficiently with comprehensive keyboard shortcuts. Press ⌘/ anytime to see the full list of available shortcuts for navigation, search, and window management.",
-            imageName: "keyboard",
+            title: "Neural Circuit Explorer",
+            subtitle: "3D interactive visualizations",
+            description: "Explore detailed 3D models of neural circuits with the new Neural Circuit Explorer. Rotate, zoom, and select components to learn about their functions and connections.",
+            imageName: "circle.hexagongrid",
             imageType: .system,
             tips: [
-                "⌘F focuses search",
-                "⌘/ shows all shortcuts",
-                "Esc closes panels"
+                "⌘R: Reset view",
+                "Click and drag to rotate",
+                "Scroll to zoom in/out",
+                "Click components for details"
             ],
             highlightColor: .indigo
         ),
         OnboardingStep(
-            title: "You're Ready!",
-            subtitle: "Start exploring the APGI framework",
-            description: "Dive into the theoretical foundations of consciousness, explore neural implementations, and discover clinical applications. The framework integrates predictive processing with global workspace theory.",
+            title: "Enhanced Timeline",
+            subtitle: "Visualize neural dynamics",
+            description: "The improved timeline now includes multiple synchronized views of neural activity. Compare different signal types, add annotations, and export visualizations for presentations.",
+            imageName: "timeline.selection",
+            imageType: .system,
+            tips: [
+                "⌘⇧T: Open timeline window",
+                "⌘S: Save current view",
+                "Space: Play/pause",
+                "Drag to select time ranges"
+            ],
+            highlightColor: .orange
+        ),
+        OnboardingStep(
+            title: "Accessibility & Customization",
+            subtitle: "Tailor your experience",
+            description: "Customize the app to match your preferences with enhanced theming options, font adjustments, and accessibility features including VoiceOver support and keyboard navigation.",
+            imageName: "paintpalette",
+            imageType: .system,
+            tips: [
+                "⌘,: Open Settings",
+                "⌘0: Reset zoom",
+                "⌘++/--: Adjust text size",
+                "Full VoiceOver support"
+            ],
+            highlightColor: .green
+        ),
+        OnboardingStep(
+            title: "Advanced Features",
+            subtitle: "Power user tools",
+            description: "Unlock the full potential of APGI Appendix with advanced features like batch processing, data export, and custom visualization presets. Create and share your own analysis workflows.",
+            imageName: "gearshape.2",
+            imageType: .system,
+            tips: [
+                "⌘E: Export data",
+                "⌘P: Print or save as PDF",
+                "⌘⇧F: Advanced search",
+                "Create custom presets"
+            ],
+            highlightColor: .purple
+        ),
+        OnboardingStep(
+            title: "You're All Set!",
+            subtitle: "Begin your APGI journey",
+            description: "You now have all the tools to explore the APGI framework. Start with the Methodology section for an introduction, or dive into specific neural implementations and clinical applications.",
             imageName: "checkmark.seal.fill",
             imageType: .system,
             tips: [
-                "Start with 'Methodology' section",
-                "Use search to find specific topics",
-                "Bookmark important sections"
+                "⌘?: Quick help anytime",
+                "Right-click for context menus",
+                "Drag and drop to reorganize",
+                "Check back for updates"
             ],
-            highlightColor: .green
+            highlightColor: .blue
         )
     ]
 }
@@ -582,17 +592,18 @@ struct WhatsNewView: View {
     @Environment(\.dismiss) private var dismiss
     
     private let updates: [(version: String, features: [String])] = [
+        ("2.0", [
+            "All-new APGI Simulator with real-time modeling",
+            "3D Neural Circuit Explorer",
+            "Enhanced timeline with multiple synchronized views",
+            "Improved search and navigation",
+            "Dark/light mode support"
+        ]),
         ("1.1", [
             "Interactive neural circuit diagrams",
             "Sortable data tables",
             "High contrast accessibility mode",
             "Keyboard navigation shortcuts"
-        ]),
-        ("1.0", [
-            "Initial release",
-            "23 content sections",
-            "Interactive timeline",
-            "Glossary with 50+ terms"
         ])
     ]
     

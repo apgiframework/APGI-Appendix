@@ -69,6 +69,11 @@ struct ContentView: View {
         .onReceive(NotificationCenter.default.publisher(for: .focusSearch)) { _ in
             searchPresented = true
         }
+        .onReceive(NotificationCenter.default.publisher(for: .navigateToTab)) { notification in
+            if let tab = notification.object as? Tab {
+                selectedTab = tab
+            }
+        }
         .onReceive(NotificationCenter.default.publisher(for: .navigateToSection)) { notification in
             if let section = notification.object as? String {
                 navigateToSection(section)

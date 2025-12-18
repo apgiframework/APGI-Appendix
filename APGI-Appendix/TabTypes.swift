@@ -63,13 +63,15 @@ enum Tab: String, CaseIterable, Identifiable {
             return .theoretical
         case .mathematicalModel, .apgiMapping, .parameterIdentifiability:
             return .mathematical
+        case .ignitionTimeline, .interactiveVisualizations, .apgiSimulator:
+            return .navigation
         case .biologicalImplementation, .neuromodulatorEffects,
              .neuromodulatoryImplementation, .explicitNeuromodulator,
-             .ignitionTimeline, .neuromodulatoryControl:
+             .neuromodulatoryControl:
             return .biological
         case .mappingCognitiveToApgi, .apgiToCognitive, .psychologicalStates, .apgiToPsyState:
             return .cognitive
-        case .psychiatricDisorders, .disordersConditions, .lifeStages, .thermodynamicEfficiency, .interactiveVisualizations, .apgiSimulator:
+        case .psychiatricDisorders, .disordersConditions, .lifeStages, .thermodynamicEfficiency:
             return .applications
         case .glossary, .bibliography:
             return .reference

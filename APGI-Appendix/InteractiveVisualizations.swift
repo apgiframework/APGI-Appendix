@@ -26,6 +26,10 @@ struct InteractiveVisualizationsView: View {
             .padding(.vertical)
         }
     }
+
+    private func clampedZoom(_ value: CGFloat) -> CGFloat {
+        min(max(0.5, value), 2.5)
+    }
 }
 
 enum Neuromodulator: String, CaseIterable, Identifiable {
@@ -382,6 +386,7 @@ struct NetworkGraphView: View {
     @State private var nodes: [GraphNode] = NetworkGraphView.makeDefaultNodes()
     @State private var selectedNode: GraphNode?
     @State private var zoom: CGFloat = 1.0
+    @GestureState private var gestureZoom: CGFloat = 1.0
     @State private var pan: CGSize = .zero
     @GestureState private var dragOffset: CGSize = .zero
 
@@ -389,24 +394,25 @@ struct NetworkGraphView: View {
         Canvas { context, size in
             let center = CGPoint(x: size.width / 2, y: size.height / 2)
             let offset = CGSize(width: pan.width + dragOffset.width, height: pan.height + dragOffset.height)
+            let effectiveZoom = clampedZoom(zoom * gestureZoom)
 
             for node in nodes {
                 for connectionId in node.connections {
                     if let target = nodes.first(where: { $0.id == connectionId }) {
-                        drawConnection(context, from: node, to: target, center: center, offset: offset)
+                        drawConnection(context, from: node, to: target, center: center, offset: offset, zoom: effectiveZoom)
                     }
                 }
             }
 
             for node in nodes {
-                drawNode(context, node: node, center: center, offset: offset, isSelected: node.id == selectedNode?.id)
+                drawNode(context, node: node, center: center, offset: offset, zoom: effectiveZoom, isSelected: node.id == selectedNode?.id)
             }
         }
         .background(.quaternary.opacity(0.3))
         .clipShape(RoundedRectangle(cornerRadius: 14))
-        .gesture(magnificationGesture)
-        .gesture(dragGesture)
-        .gesture(tapGesture)
+        .simultaneousGesture(magnificationGesture)
+        .simultaneousGesture(dragGesture)
+        .simultaneousGesture(tapGesture)
         .overlay(alignment: .topTrailing) {
             if let node = selectedNode {
                 NodeDetailPopover(node: node)
@@ -419,8 +425,11 @@ struct NetworkGraphView: View {
 
     private var magnificationGesture: some Gesture {
         MagnificationGesture()
-            .onChanged { value in
-                zoom = min(max(0.5, value), 2.5)
+            .updating($gestureZoom) { value, state, _ in
+                state = value
+            }
+            .onEnded { value in
+                zoom = clampedZoom(zoom * value)
             }
     }
 
@@ -438,19 +447,20 @@ struct NetworkGraphView: View {
         DragGesture(minimumDistance: 0)
             .onEnded { value in
                 let point = value.location
-                selectedNode = node(at: point, in: value)
+                selectedNode = node(at: point, canvasSize: value.startLocation == .zero ? nil : nil)
             }
     }
 
-    private func node(at point: CGPoint, in _: DragGesture.Value) -> GraphNode? {
+    private func node(at point: CGPoint, canvasSize: CGSize?) -> GraphNode? {
         let hitRadius: CGFloat = 18
-        let center = CGPoint(x: 0, y: 0)
+        let center = CGPoint(x: (canvasSize?.width ?? 0) / 2, y: (canvasSize?.height ?? 0) / 2)
         let offset = CGSize(width: pan.width, height: pan.height)
+        let effectiveZoom = clampedZoom(zoom)
 
         return nodes.first(where: { node in
             let p = CGPoint(
-                x: center.x + (node.position.x * zoom) + offset.width,
-                y: center.y + (node.position.y * zoom) + offset.height
+                x: center.x + (node.position.x * effectiveZoom) + offset.width,
+                y: center.y + (node.position.y * effectiveZoom) + offset.height
             )
             let dx = point.x - p.x
             let dy = point.y - p.y
@@ -458,7 +468,7 @@ struct NetworkGraphView: View {
         })
     }
 
-    private func drawConnection(_ context: GraphicsContext, from: GraphNode, to: GraphNode, center: CGPoint, offset: CGSize) {
+    private func drawConnection(_ context: GraphicsContext, from: GraphNode, to: GraphNode, center: CGPoint, offset: CGSize, zoom: CGFloat) {
         let start = CGPoint(
             x: center.x + (from.position.x * zoom) + offset.width,
             y: center.y + (from.position.y * zoom) + offset.height
@@ -475,7 +485,7 @@ struct NetworkGraphView: View {
         context.stroke(path, with: .color(.secondary.opacity(0.25)), lineWidth: 1)
     }
 
-    private func drawNode(_ context: GraphicsContext, node: GraphNode, center: CGPoint, offset: CGSize, isSelected: Bool) {
+    private func drawNode(_ context: GraphicsContext, node: GraphNode, center: CGPoint, offset: CGSize, zoom: CGFloat, isSelected: Bool) {
         let p = CGPoint(
             x: center.x + (node.position.x * zoom) + offset.width,
             y: center.y + (node.position.y * zoom) + offset.height
