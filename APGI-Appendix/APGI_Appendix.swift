@@ -13,7 +13,9 @@ struct APGI_AppendixApp: App {
     var body: some Scene {
         WindowGroup("APGI Framework") {
             OnboardingContainer {
-                MainContentView()
+                TourContainer {
+                    MainContentView()
+                }
             }
             .applyTheme()
             .environmentObject(themeManager)
@@ -33,7 +35,7 @@ struct APGI_AppendixApp: App {
                 Divider()
                 
                 Button("Take a Tour") {
-                    onboardingManager.startOnboarding()
+                    onboardingManager.startTour()
                 }
                 
                 Button("What's New") {

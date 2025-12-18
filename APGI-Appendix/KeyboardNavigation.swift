@@ -314,7 +314,7 @@ struct EnhancedSidebarView: View {
     @Binding var searchText: String
     @Binding var isSearchFocused: Bool
     
-    @State private var expandedSections: Set<SectionCategory> = [.theoretical]
+    @State private var expandedSections: Set<NavigationSection> = [.foundations]
     
     var body: some View {
         VStack(spacing: 0) {
@@ -338,12 +338,12 @@ struct EnhancedSidebarView: View {
             ScrollView {
                 LazyVStack(alignment: .leading, spacing: 4) {
                     ForEach(filteredSections) { section in
-                        NavigationSection(
+                        NavigationSectionView(
                             section: section,
                             selection: $selectedTab,
-                            isExpanded: expandedSections.contains(section.category)
+                            isExpanded: expandedSections.contains(section.section)
                         ) {
-                            toggleSection(section.category)
+                            toggleSection(section.section)
                         }
                     }
                 }
@@ -398,13 +398,13 @@ struct EnhancedSidebarView: View {
     }
     
     private var allSections: [SidebarSection] {
-        SectionCategory.allCases.map { category in
+        NavigationSection.allCases.map { section in
             SidebarSection(
-                category: category,
-                title: category.rawValue,
-                icon: category.icon,
-                color: category.color,
-                tabs: Tab.allCases.filter { $0.category == category }
+                section: section,
+                title: section.rawValue,
+                icon: section.icon,
+                color: section.color,
+                tabs: section.tabs
             )
         }
     }
@@ -422,7 +422,7 @@ struct EnhancedSidebarView: View {
                 return section
             } else if !matchingTabs.isEmpty {
                 return SidebarSection(
-                    category: section.category,
+                    section: section.section,
                     title: section.title,
                     icon: section.icon,
                     color: section.color,
@@ -433,11 +433,11 @@ struct EnhancedSidebarView: View {
         }
     }
     
-    private func toggleSection(_ category: SectionCategory) {
-        if expandedSections.contains(category) {
-            expandedSections.remove(category)
+    private func toggleSection(_ section: NavigationSection) {
+        if expandedSections.contains(section) {
+            expandedSections.remove(section)
         } else {
-            expandedSections.insert(category)
+            expandedSections.insert(section)
         }
     }
 }

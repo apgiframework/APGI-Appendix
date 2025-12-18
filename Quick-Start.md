@@ -8,17 +8,10 @@ This guide gets you up and running with the APGI Appendix app in a few minutes.
 
 When you open the app, you'll typically see:
 
-- **Three-panel layout**: Sidebar navigation, section list, and main content
-- **Default section**: Methodology (first section in Theoretical Foundation)
-- **Toolbar**: Search, bookmarks, focus mode, and export controls
-- **Status bar**: Current section and navigation breadcrumbsree-panel layout** on iPad/Mac:
-  - Category sidebar (left)
-  - Section list (middle) 
-  - Content detail (right)
-- **Streamlined navigation** on iPhone with stack-based interface
-- **Default section** showing Methodology content
-- **Inspector panel** with section metadata
-- **Search bar** for global content search
+- **Three-panel layout (macOS)**: Category sidebar (left), section list (middle), and content detail (right)
+- **Default section**: Methodology
+- **Toolbar**: Search, bookmarks, focus mode, export controls, font size controls
+- **Enhanced reading layout (some sections)**: A hero summary, collapsible subsections, and related links
 
 ---
 
@@ -26,27 +19,19 @@ When you open the app, you'll typically see:
 
 ### 2.1 Finding Your Way
 
-**On iPad/Mac:**
-1. **Categories** (left panel) - Choose from 6 main categories
-2. **Sections** (middle panel) - Select specific sections within the category
+**On macOS:**
+1. **Categories** (left panel) - Choose a content category
+2. **Sections** (middle panel) - Select a specific section within that category
 
-1. **Theoretical Foundation** (3 sections)
-   - Methodology, APGI Statement, Epistemic Standards
+Categories include:
 
-2. **Mathematical Framework** (3 sections)
-   - Mathematical Model, APGI Mapping, Parameter Identifiability
-
-3. **Biological Implementation** (6 sections)
-   - Biological Implementation, Neuromodulator Effects, and more
-
-4. **Cognitive Integration** (4 sections)
-   - Cognitive mappings and psychological states
-
-5. **Applications & Extensions** (6 sections)
-   - Clinical applications, visualizations, simulator
-
-6. **Reference Materials** (2 sections)
-   - Glossary and Bibliography
+1. **Demonstrations**
+2. **Theoretical Foundation**
+3. **Mathematical Framework**
+4. **Biological Implementation**
+5. **Cognitive Integration**
+6. **Applications & Extensions**
+7. **Reference Materials**
 
 ### 2.2 Quick Navigation
 
@@ -54,6 +39,11 @@ When you open the app, you'll typically see:
 - **Tap any section** to load its content
 - **Use the toolbar** for quick access to search and bookmarks
 - **Keyboard shortcuts**: Cmd+F (search), Cmd+B (bookmark)
+
+**Reading tips:**
+- Use the hero card at the top of enhanced sections for the key takeaway
+- Expand only the subsections you need
+- Use the Related links to jump between connected sections
 
 ---
 

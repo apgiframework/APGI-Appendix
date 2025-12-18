@@ -25,34 +25,21 @@ The app is designed for students, educators, and clinicians who need quick, cura
 
 ### 2.1 System Requirements
 
-- **Platform:** iOS (iPhone / iPad)
-- **Minimum OS version:** iOS 17 or later
+- **Platform:** macOS
+- **Minimum OS version:** macOS 14 or later
 - **Network:** Content is primarily local; an internet connection may be required for:
   - App updates
   - External links
-  - Cloud backup / sync (if supported)
 
 ### 2.2 Installing the App
 
-- **From App Store**
-  1. Open the **App Store**
-  2. Search for **"APGI Appendix"**
-  3. Tap **Get** / **Install**
-  4. Once installed, tap the app icon on your Home Screen
-
-- **From TestFlight (beta / internal)**
-  1. Install **TestFlight** from the App Store
-  2. Open the **TestFlight invite link** from your email or message
-  3. Accept the invitation to **APGI Appendix**
-  4. Tap **Install**
-  5. Launch from the TestFlight app or Home Screen
+Installation method depends on how you received the app (App Store, internal distribution, or direct build).
 
 ### 2.3 First-Time Launch
 
 On first launch you will see:
 
-- The **sidebar navigation** with all main sections
-- The **main content area** displaying the default section (typically the Interactive Timeline)
+- A **three-panel layout**: category sidebar, section list, and a content detail area
 - The app uses the **APGI color palette** for consistent visual design
 
 ---
@@ -62,9 +49,10 @@ On first launch you will see:
 ### 3.1 Main Components
 
 - **Category Sidebar**
-  - Primary navigation containing six main categories:
+  - Primary navigation containing the main content categories:
+    - `Demonstrations`
     - `Theoretical Foundation`
-    - `Mathematical Framework` 
+    - `Mathematical Framework`
     - `Biological Implementation`
     - `Cognitive Integration`
     - `Applications & Extensions`
@@ -73,12 +61,17 @@ On first launch you will see:
 - **Section List**
   - Shows all sections within the selected category
   - Each section has an icon and short title
-  - 28 total sections across all categories
+  - Total sections may change over time as content is expanded
 
 - **Main Content Area**
   - Displays the currently active section
   - Adaptive layout for different device sizes
   - Supports focus mode for distraction-free reading
+
+- **Enhanced Reading Layout (selected sections)**
+  - Hero header with a key takeaway
+  - Collapsible subsections for faster scanning
+  - Related links to jump between connected sections
 
 - **Inspector Panel**
   - Shows metadata about the current section
@@ -305,9 +298,9 @@ The **Bibliography** provides:
 
 ### 10.1 Advanced Navigation
 
-The app provides sophisticated navigation capabilities:
+The app provides navigation capabilities designed for fast cross-referencing:
 
-- **Three-Panel Layout** (iPad/desktop)
+- **Three-Panel Layout** (macOS)
   - Category sidebar
   - Section list
   - Content detail with optional inspector
@@ -475,9 +468,9 @@ Access the Settings panel to customize your experience:
 
 ### 13.1 System Architecture
 
-- **Platform**: iOS native application
+- **Platform**: macOS native application
 - **Framework**: SwiftUI
-- **Minimum iOS Version**: iOS 17.0+
+- **Minimum macOS Version**: macOS 14.0+
 - **Architecture**: MVVM with ObservableObject pattern
 - **Navigation**: NavigationSplitView with sidebar
 

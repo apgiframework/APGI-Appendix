@@ -49,13 +49,76 @@ Parameter | Description | Empirical Constraint | Neural Implementation
 """
 
     var body: some View {
-        EnhancedContentCard(
+        EnhancedSectionView(section: enhancedSection)
+    }
+
+    private var enhancedSection: EnhancedSection {
+        EnhancedSection(
+            id: "mathematical-model",
             title: "Mathematical Model",
-            content: modelBody,
-            category: .mathematical,
-            hasDataTable: true
+            summary: "A compact dynamical system for conscious ignition: surprise accumulates, a threshold adapts, and ignition probability emerges via a sigmoid switch under neuromodulatory control.",
+            icon: Tab.mathematicalModel.icon,
+            estimatedReadingTime: "~10 min",
+            conceptDiagram: nil,
+            subsections: [
+                EnhancedSection.Subsection(
+                    id: "state-variables",
+                    title: "State Variables",
+                    content: extractParagraphs(startingAt: "State Variables", untilAnyOf: ["Surprise Accumulation", "Threshold Adaptation"], from: modelBody),
+                    category: .mathematical,
+                    hasDataTable: false
+                ),
+                EnhancedSection.Subsection(
+                    id: "surprise-accumulation",
+                    title: "Surprise Accumulation",
+                    content: extractParagraphs(startingAt: "Surprise Accumulation", untilAnyOf: ["Threshold Adaptation"], from: modelBody),
+                    category: .mathematical,
+                    hasDataTable: false
+                ),
+                EnhancedSection.Subsection(
+                    id: "threshold-adaptation",
+                    title: "Threshold Adaptation",
+                    content: extractParagraphs(startingAt: "Threshold Adaptation", untilAnyOf: ["Ignition Probability"], from: modelBody),
+                    category: .mathematical,
+                    hasDataTable: false
+                ),
+                EnhancedSection.Subsection(
+                    id: "ignition-probability",
+                    title: "Ignition Probability",
+                    content: extractParagraphs(startingAt: "Ignition Probability", untilAnyOf: ["Empirically Constrained Parameters"], from: modelBody),
+                    category: .mathematical,
+                    hasDataTable: false
+                ),
+                EnhancedSection.Subsection(
+                    id: "parameters-table",
+                    title: "Parameters (Table)",
+                    content: extractParagraphs(startingAt: "Parameters of the APGI Dynamical System for Simulation", untilAnyOf: [], from: modelBody),
+                    category: .mathematical,
+                    hasDataTable: true
+                )
+            ],
+            relatedSections: [.apgiMapping, .parameterIdentifiability, .neuromodulatoryControl]
         )
-        .padding()
+    }
+
+    private func extractParagraphs(startingAt marker: String, untilAnyOf endMarkers: [String], from text: String) -> String {
+        let lines = text.components(separatedBy: "\n")
+        guard let startIndex = lines.firstIndex(where: { $0.trimmingCharacters(in: .whitespaces).hasPrefix(marker) }) else {
+            return text
+        }
+
+        var collected: [String] = []
+        var i = startIndex
+        while i < lines.count {
+            let trimmed = lines[i].trimmingCharacters(in: .whitespaces)
+            if i != startIndex, !endMarkers.isEmpty, endMarkers.contains(where: { trimmed.hasPrefix($0) }) {
+                break
+            }
+            collected.append(lines[i])
+            i += 1
+        }
+
+        return collected.joined(separator: "\n").trimmingCharacters(in: .whitespacesAndNewlines)
     }
 }
 

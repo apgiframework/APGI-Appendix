@@ -2,6 +2,45 @@ import SwiftUI
 import AppKit
 import Combine
 
+// MARK: - Tour Data Model
+
+enum TourTarget {
+    case sidebar
+    case search
+    case glossary
+    case simulator
+    case timeline
+    case settings
+    case navigation
+}
+
+enum TooltipPosition {
+    case above
+    case below
+    case left
+    case right
+    case center
+}
+
+struct TourStep: Identifiable {
+    let id = UUID()
+    let target: TourTarget
+    let title: String
+    let description: String
+    let position: TooltipPosition
+    let highlightColor: Color
+    let action: (() -> Void)?
+    
+    init(target: TourTarget, title: String, description: String, position: TooltipPosition, highlightColor: Color = .blue, action: (() -> Void)? = nil) {
+        self.target = target
+        self.title = title
+        self.description = description
+        self.position = position
+        self.highlightColor = highlightColor
+        self.action = action
+    }
+}
+
 // MARK: - Onboarding Data Model
 
 struct OnboardingStep: Identifiable {
@@ -31,7 +70,9 @@ final class OnboardingManager: ObservableObject {
     @AppStorage("onboardingVersion") var completedOnboardingVersion = 0
     
     @Published var isShowingOnboarding = false
+    @Published var isShowingTour = false
     @Published var currentStep = 0
+    @Published var currentTourStep = 0
     
     private let currentOnboardingVersion = 2
     
@@ -46,10 +87,20 @@ final class OnboardingManager: ObservableObject {
         isShowingOnboarding = true
     }
     
+    func startTour() {
+        currentTourStep = 0
+        isShowingTour = true
+    }
+    
     func completeOnboarding() {
         hasCompletedOnboarding = true
         completedOnboardingVersion = currentOnboardingVersion
         isShowingOnboarding = false
+    }
+    
+    func completeTour() {
+        isShowingTour = false
+        currentTourStep = 0
     }
     
     func resetOnboarding() {
@@ -61,14 +112,14 @@ final class OnboardingManager: ObservableObject {
         OnboardingStep(
             title: "Welcome to APGI Appendix",
             subtitle: "Your comprehensive guide to consciousness research",
-            description: "Explore the Allostatic Precision-Gated Ignition framework through interactive content, neural circuit diagrams, and detailed scientific documentation. Now with enhanced visualization tools and simulation capabilities.",
+            description: "Explore the Allostatic Precision-Gated Ignition framework through structured sections, searchable reference material, interactive visualizations, and simulation tools.",
             imageName: "brain.head.profile",
             imageType: .system,
             tips: [
-                "Navigate through 30+ topic sections",
-                "Interactive 3D neural circuit visualizations",
-                "Comprehensive glossary with 75+ terms",
-                "APGI Simulator for real-time modeling",
+                "Browse sections by category",
+                "Enhanced reading layout with key takeaways and collapsible subsections",
+                "Glossary-highlighted terms for fast definitions",
+                "APGI Simulator window for interactive modeling",
                 "Dark/light mode support"
             ],
             highlightColor: .blue
@@ -76,14 +127,12 @@ final class OnboardingManager: ObservableObject {
         OnboardingStep(
             title: "Enhanced Navigation",
             subtitle: "Intelligent content discovery",
-            description: "Easily navigate through content with the improved sidebar, search, and keyboard shortcuts. The new tabbed interface helps you keep multiple sections open for cross-referencing.",
+            description: "Navigate quickly with the sidebar, search, and keyboard shortcuts. Jump between sections, bookmark key pages, and use focus mode for distraction-free reading.",
             imageName: "sidebar.leading",
             imageType: .system,
             tips: [
                 "⌘1-9: Jump to main sections",
-                "⌘T: Open new tab",
-                "⌘W: Close current tab",
-                "⌘F: Search within document",
+                "⌘F: Search",
                 "⌘↑/↓: Navigate between sections"
             ],
             highlightColor: .purple
@@ -105,28 +154,26 @@ final class OnboardingManager: ObservableObject {
         OnboardingStep(
             title: "Neural Circuit Explorer",
             subtitle: "3D interactive visualizations",
-            description: "Explore detailed 3D models of neural circuits with the new Neural Circuit Explorer. Rotate, zoom, and select components to learn about their functions and connections.",
+            description: "Explore interactive visualizations of circuits and connectivity. Pan/zoom, inspect components, and connect concepts back to the written sections.",
             imageName: "circle.hexagongrid",
             imageType: .system,
             tips: [
-                "⌘R: Reset view",
-                "Click and drag to rotate",
-                "Scroll to zoom in/out",
-                "Click components for details"
+                "Click and drag to explore",
+                "Scroll/trackpad to zoom",
+                "Use labels to orient yourself"
             ],
             highlightColor: .indigo
         ),
         OnboardingStep(
             title: "Enhanced Timeline",
             subtitle: "Visualize neural dynamics",
-            description: "The improved timeline now includes multiple synchronized views of neural activity. Compare different signal types, add annotations, and export visualizations for presentations.",
+            description: "Open the Ignition Timeline window to explore temporal dynamics and stage progression.",
             imageName: "timeline.selection",
             imageType: .system,
             tips: [
                 "⌘⇧T: Open timeline window",
-                "⌘S: Save current view",
-                "Space: Play/pause",
-                "Drag to select time ranges"
+                "Use zoom controls for scale",
+                "Tap/inspect events for details"
             ],
             highlightColor: .orange
         ),
@@ -145,16 +192,15 @@ final class OnboardingManager: ObservableObject {
             highlightColor: .green
         ),
         OnboardingStep(
-            title: "Advanced Features",
-            subtitle: "Power user tools",
-            description: "Unlock the full potential of APGI Appendix with advanced features like batch processing, data export, and custom visualization presets. Create and share your own analysis workflows.",
-            imageName: "gearshape.2",
+            title: "Enhanced Reading",
+            subtitle: "Better visual hierarchy",
+            description: "Some sections now use an enhanced reading layout with a hero summary, collapsible subsections, and related links for faster navigation and cross-referencing.",
+            imageName: "doc.text.image",
             imageType: .system,
             tips: [
-                "⌘E: Export data",
-                "⌘P: Print or save as PDF",
-                "⌘⇧F: Advanced search",
-                "Create custom presets"
+                "Start with the hero card for the key takeaway",
+                "Expand only the subsections you need",
+                "Use Related links to jump across the framework"
             ],
             highlightColor: .purple
         ),
@@ -171,6 +217,44 @@ final class OnboardingManager: ObservableObject {
                 "Check back for updates"
             ],
             highlightColor: .blue
+        )
+    ]
+    
+    let tourSteps: [TourStep] = [
+        TourStep(
+            target: .sidebar,
+            title: "Navigate the Framework",
+            description: "Browse sections organized by category. Start with Foundations for core concepts.",
+            position: .right,
+            highlightColor: .blue
+        ),
+        TourStep(
+            target: .search,
+            title: "Search Everything",
+            description: "Find any term, formula, or concept across all sections and the glossary.",
+            position: .below,
+            highlightColor: .purple
+        ),
+        TourStep(
+            target: .glossary,
+            title: "Tap Any Term",
+            description: "Technical terms are highlighted. Tap for instant definitions.",
+            position: .above,
+            highlightColor: .green
+        ),
+        TourStep(
+            target: .simulator,
+            title: "Explore Interactively",
+            description: "Adjust parameters and watch ignition dynamics in real-time.",
+            position: .left,
+            highlightColor: .teal
+        ),
+        TourStep(
+            target: .timeline,
+            title: "Visualize the Process",
+            description: "Watch the 500ms journey from stimulus to conscious access.",
+            position: .below,
+            highlightColor: .orange
         )
     ]
 }
@@ -529,7 +613,7 @@ struct QuickStartPanel: View {
                     color: .blue
                 ) {
                     dismiss()
-                    manager.startOnboarding()
+                    manager.startTour()
                 }
                 
                 FeatureSpotlight(
@@ -555,7 +639,7 @@ struct QuickStartPanel: View {
                 
                 FeatureSpotlight(
                     title: "Explore Glossary",
-                    description: "50+ scientific terms explained",
+                    description: "A searchable glossary for key technical terms",
                     icon: "text.book.closed",
                     color: .green
                 ) {
@@ -593,10 +677,10 @@ struct WhatsNewView: View {
     
     private let updates: [(version: String, features: [String])] = [
         ("2.0", [
-            "All-new APGI Simulator with real-time modeling",
-            "3D Neural Circuit Explorer",
-            "Enhanced timeline with multiple synchronized views",
-            "Improved search and navigation",
+            "APGI Simulator window for interactive modeling",
+            "Interactive visualizations",
+            "Ignition Timeline window",
+            "Improved search, navigation, and keyboard shortcuts",
             "Dark/light mode support"
         ]),
         ("1.1", [
@@ -683,6 +767,422 @@ struct WhatsNewView: View {
         }
         .padding(24)
         .frame(width: 400, height: 450)
+    }
+}
+
+// MARK: - Spotlight Overlay
+
+struct SpotlightOverlay: View {
+    let target: TourTarget
+    @State private var targetFrame: CGRect = .zero
+    @State private var isAnimating = false
+    @State private var pulseScale: CGFloat = 1.0
+    @State private var rotation: Double = 0.0
+    
+    var body: some View {
+        GeometryReader { geometry in
+            ZStack {
+                // Dark overlay with gradient effect
+                LinearGradient(
+                    colors: [
+                        Color.black.opacity(0.8),
+                        Color.black.opacity(0.6),
+                        Color.black.opacity(0.8)
+                    ],
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                )
+                .ignoresSafeArea()
+                
+                // Spotlight cutout with smooth edges
+                Path { path in
+                    path.addRect(geometry.frame(in: .global))
+                    
+                    // Create rounded rectangle cutout for smoother appearance
+                    let roundedRect = RoundedRectangle(cornerRadius: 12)
+                        .inset(by: -4)
+                        .path(in: targetFrame)
+                    path.addPath(roundedRect)
+                }
+                .fill(Color.black.opacity(0.7))
+                .blendMode(.destinationOut)
+                
+                // Animated highlight border around target
+                ZStack {
+                    // Outer glow
+                    RoundedRectangle(cornerRadius: 12)
+                        .stroke(
+                            LinearGradient(
+                                colors: [
+                                    Color.white.opacity(0.8),
+                                    Color.white.opacity(0.4),
+                                    Color.white.opacity(0.8)
+                                ],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            ),
+                            lineWidth: 4
+                        )
+                        .frame(width: targetFrame.width + 16, height: targetFrame.height + 16)
+                        .scaleEffect(pulseScale)
+                        .rotationEffect(.degrees(rotation))
+                    
+                    // Inner border
+                    RoundedRectangle(cornerRadius: 8)
+                        .stroke(Color.white, lineWidth: 2)
+                        .frame(width: targetFrame.width + 8, height: targetFrame.height + 8)
+                }
+                .position(x: targetFrame.midX, y: targetFrame.midY)
+                .opacity(isAnimating ? 1 : 0)
+                .animation(.easeInOut(duration: 0.5), value: isAnimating)
+                
+                // Corner indicators
+                if isAnimating {
+                    ForEach(0..<4, id: \.self) { corner in
+                        cornerIndicator(at: corner, in: targetFrame)
+                    }
+                }
+            }
+        }
+        .onAppear {
+            findTargetFrame()
+            withAnimation(.easeInOut(duration: 0.5).delay(0.2)) {
+                isAnimating = true
+            }
+            startAnimations()
+        }
+        .onChange(of: target) { _, _ in
+            isAnimating = false
+            findTargetFrame()
+            withAnimation(.easeInOut(duration: 0.5).delay(0.3)) {
+                isAnimating = true
+            }
+        }
+    }
+    
+    private func cornerIndicator(at corner: Int, in frame: CGRect) -> some View {
+        let positions = [
+            CGPoint(x: frame.minX, y: frame.minY),
+            CGPoint(x: frame.maxX, y: frame.minY),
+            CGPoint(x: frame.maxX, y: frame.maxY),
+            CGPoint(x: frame.minX, y: frame.maxY)
+        ]
+        
+        return ZStack {
+            Circle()
+                .fill(Color.white)
+                .frame(width: 8, height: 8)
+            
+            Circle()
+                .stroke(Color.white, lineWidth: 2)
+                .frame(width: 16, height: 16)
+                .opacity(0.6)
+        }
+        .position(positions[corner])
+        .scaleEffect(pulseScale)
+        .animation(
+            .easeInOut(duration: 1.5)
+            .repeatForever(autoreverses: true)
+            .delay(Double(corner) * 0.2),
+            value: pulseScale
+        )
+    }
+    
+    private func startAnimations() {
+        withAnimation(
+            .easeInOut(duration: 2.0)
+            .repeatForever(autoreverses: true)
+        ) {
+            pulseScale = 1.1
+            rotation = 5.0
+        }
+    }
+    
+    private func findTargetFrame() {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+            switch target {
+            case .sidebar:
+                targetFrame = CGRect(x: 50, y: 100, width: 250, height: 400)
+            case .search:
+                targetFrame = CGRect(x: 300, y: 50, width: 200, height: 40)
+            case .glossary:
+                targetFrame = CGRect(x: 550, y: 100, width: 150, height: 40)
+            case .simulator:
+                targetFrame = CGRect(x: 400, y: 300, width: 200, height: 150)
+            case .timeline:
+                targetFrame = CGRect(x: 100, y: 500, width: 600, height: 200)
+            case .settings:
+                targetFrame = CGRect(x: 700, y: 50, width: 40, height: 40)
+            case .navigation:
+                targetFrame = CGRect(x: 200, y: 200, width: 400, height: 60)
+            }
+        }
+    }
+}
+
+// MARK: - Tour Tooltip
+
+struct TourTooltip: View {
+    let step: TourStep
+    @State private var isVisible = false
+    @State private var contentOffset: CGSize = .zero
+    @State private var glowIntensity: Double = 0.0
+    @ObservedObject private var manager = OnboardingManager.shared
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            // Header with animated indicator
+            HStack {
+                ZStack {
+                    Circle()
+                        .fill(step.highlightColor.opacity(0.2))
+                        .frame(width: 16, height: 16)
+                        .scaleEffect(glowIntensity)
+                    
+                    Circle()
+                        .fill(step.highlightColor)
+                        .frame(width: 8, height: 8)
+                        .symbolEffect(.pulse, value: isVisible)
+                }
+                
+                Text(step.title)
+                    .font(.headline)
+                    .foregroundColor(.primary)
+                
+                Spacer()
+                
+                // Step indicator with animation
+                HStack(spacing: 4) {
+                    ForEach(0..<manager.tourSteps.count, id: \.self) { index in
+                        Circle()
+                            .fill(index <= manager.currentTourStep ? step.highlightColor : Color.gray.opacity(0.3))
+                            .frame(width: 6, height: 6)
+                            .animation(.spring(response: 0.3), value: manager.currentTourStep)
+                    }
+                }
+            }
+            
+            // Description with typewriter effect
+            Text(step.description)
+                .font(.body)
+                .foregroundColor(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
+                .opacity(isVisible ? 1 : 0)
+                .animation(.easeInOut(duration: 0.6).delay(0.3), value: isVisible)
+            
+            // Navigation buttons with enhanced styling
+            HStack {
+                // Skip button
+                Button("Skip Tour") {
+                    withAnimation(.easeInOut(duration: 0.3)) {
+                        manager.completeTour()
+                    }
+                }
+                .buttonStyle(.plain)
+                .foregroundColor(.secondary)
+                .font(.caption)
+                .padding(.horizontal, 8)
+                .padding(.vertical, 4)
+                .background(
+                    RoundedRectangle(cornerRadius: 6)
+                        .fill(Color.gray.opacity(0.1))
+                )
+                .scaleEffect(isVisible ? 1 : 0.8)
+                
+                Spacer()
+                
+                // Back button
+                if manager.currentTourStep > 0 {
+                    Button {
+                        withAnimation(.spring(response: 0.4)) {
+                            manager.currentTourStep -= 1
+                        }
+                    } label: {
+                        HStack(spacing: 4) {
+                            Image(systemName: "chevron.left")
+                            Text("Back")
+                        }
+                    }
+                    .buttonStyle(.bordered)
+                    .controlSize(.small)
+                    .transition(.asymmetric(
+                        insertion: .move(edge: .leading).combined(with: .opacity),
+                        removal: .move(edge: .leading).combined(with: .opacity)
+                    ))
+                }
+                
+                // Next button
+                Button {
+                    if manager.currentTourStep < manager.tourSteps.count - 1 {
+                        withAnimation(.spring(response: 0.4)) {
+                            manager.currentTourStep += 1
+                        }
+                    } else {
+                        withAnimation(.easeInOut(duration: 0.5)) {
+                            manager.completeTour()
+                        }
+                    }
+                } label: {
+                    HStack(spacing: 4) {
+                        Text(manager.currentTourStep < manager.tourSteps.count - 1 ? "Next" : "Finish")
+                        Image(systemName: manager.currentTourStep < manager.tourSteps.count - 1
+                              ? "chevron.right"
+                              : "checkmark")
+                    }
+                }
+                .buttonStyle(.borderedProminent)
+                .controlSize(.small)
+                .tint(step.highlightColor)
+                .scaleEffect(isVisible ? 1 : 0.95)
+                .shadow(color: step.highlightColor.opacity(0.3), radius: 4)
+            }
+        }
+        .padding(16)
+        .background(
+            ZStack {
+                // Background with glass effect
+                RoundedRectangle(cornerRadius: 12)
+                    .fill(Color(NSColor.windowBackgroundColor).opacity(0.95))
+                    .background(
+                        RoundedRectangle(cornerRadius: 12)
+                            .fill(Material.ultraThinMaterial)
+                    )
+                
+                // Subtle glow effect
+                RoundedRectangle(cornerRadius: 12)
+                    .stroke(
+                        LinearGradient(
+                            colors: [
+                                step.highlightColor.opacity(glowIntensity),
+                                step.highlightColor.opacity(glowIntensity * 0.5),
+                                Color.clear
+                            ],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        ),
+                        lineWidth: 1
+                    )
+            }
+        )
+        .frame(maxWidth: 280)
+        .shadow(color: .black.opacity(0.2), radius: 20)
+        .scaleEffect(isVisible ? 1 : 0.8)
+        .offset(contentOffset)
+        .animation(.spring(response: 0.5, dampingFraction: 0.8), value: isVisible)
+        .animation(.spring(response: 0.6), value: contentOffset)
+        .onAppear {
+            withAnimation(.spring(response: 0.4).delay(0.5)) {
+                isVisible = true
+                contentOffset = .zero
+            }
+            withAnimation(
+                .easeInOut(duration: 2.0)
+                .repeatForever(autoreverses: true)
+            ) {
+                glowIntensity = 0.6
+            }
+        }
+        .onChange(of: manager.currentTourStep) { _, _ in
+            isVisible = false
+            contentOffset = CGSize(width: 10, height: 10)
+            
+            withAnimation(.spring(response: 0.4).delay(0.3)) {
+                isVisible = true
+                contentOffset = .zero
+            }
+        }
+        .position(tooltipPosition)
+    }
+    
+    private var tooltipPosition: CGPoint {
+        switch step.target {
+        case .sidebar:
+            return CGPoint(x: 350, y: 300)
+        case .search:
+            return CGPoint(x: 400, y: 120)
+        case .glossary:
+            return CGPoint(x: 625, y: 160)
+        case .simulator:
+            return CGPoint(x: 300, y: 375)
+        case .timeline:
+            return CGPoint(x: 400, y: 650)
+        case .settings:
+            return CGPoint(x: 650, y: 120)
+        case .navigation:
+            return CGPoint(x: 400, y: 280)
+        }
+    }
+}
+
+// MARK: - Guided Tour
+
+struct GuidedTour: View {
+    @EnvironmentObject var onboardingManager: OnboardingManager
+    
+    let steps: [TourStep] = [
+        TourStep(
+            target: .sidebar,
+            title: "Navigate the Framework",
+            description: "Browse sections organized by category. Start with Foundations for core concepts.",
+            position: .right
+        ),
+        TourStep(
+            target: .search,
+            title: "Search Everything",
+            description: "Find any term, formula, or concept across all sections and the glossary.",
+            position: .below
+        ),
+        TourStep(
+            target: .glossary,
+            title: "Tap Any Term",
+            description: "Technical terms are highlighted. Tap for instant definitions.",
+            position: .above
+        ),
+        TourStep(
+            target: .simulator,
+            title: "Explore Interactively",
+            description: "Adjust parameters and watch ignition dynamics in real-time.",
+            position: .left
+        ),
+        TourStep(
+            target: .timeline,
+            title: "Visualize the Process",
+            description: "Watch the 500ms journey from stimulus to conscious access.",
+            position: .below
+        )
+    ]
+    
+    var body: some View {
+        ZStack {
+            // Dimmed overlay with spotlight on current target
+            SpotlightOverlay(target: steps[onboardingManager.currentTourStep].target)
+            
+            // Tooltip at appropriate position
+            TourTooltip(step: steps[onboardingManager.currentTourStep])
+        }
+        .ignoresSafeArea()
+    }
+}
+
+// MARK: - Tour Container
+
+struct TourContainer<Content: View>: View {
+    @ObservedObject private var manager = OnboardingManager.shared
+    let content: () -> Content
+    
+    init(@ViewBuilder content: @escaping () -> Content) {
+        self.content = content
+    }
+    
+    var body: some View {
+        ZStack {
+            content()
+            
+            if manager.isShowingTour {
+                GuidedTour()
+                    .transition(.opacity)
+            }
+        }
     }
 }
 

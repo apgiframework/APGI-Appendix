@@ -3,7 +3,7 @@ import SwiftUI
 struct SidebarView: View {
     @Binding var selectedTab: Tab
     @State private var searchText = ""
-    @State private var expandedSections: Set<SectionCategory> = [.theoretical]
+    @State private var expandedSections: Set<NavigationSection> = [.foundations]
 
     var body: some View {
         VStack(spacing: 0) {
@@ -52,12 +52,12 @@ struct SidebarView: View {
             ScrollView {
                 LazyVStack(alignment: .leading, spacing: APGISpacing.xs) {
                     ForEach(filteredSections) { section in
-                        NavigationSection(
+                        NavigationSectionView(
                             section: section,
                             selection: $selectedTab,
-                            isExpanded: isExpanded(for: section.category)
+                            isExpanded: isExpanded(for: section.section)
                         ) {
-                            toggleSection(section.category)
+                            toggleSection(section.section)
                         }
                     }
                 }
@@ -89,13 +89,13 @@ struct SidebarView: View {
     }
 
     private var allSections: [SidebarSection] {
-        SectionCategory.allCases.map { category in
+        NavigationSection.allCases.map { section in
             SidebarSection(
-                category: category,
-                title: category.rawValue,
-                icon: category.icon,
-                color: category.color,
-                tabs: tabs(for: category)
+                section: section,
+                title: section.rawValue,
+                icon: section.icon,
+                color: section.color,
+                tabs: section.tabs
             )
         }
     }
@@ -119,7 +119,7 @@ struct SidebarView: View {
                 return section
             } else if !matchingTabs.isEmpty {
                 return SidebarSection(
-                    category: section.category,
+                    section: section.section,
                     title: section.title,
                     icon: section.icon,
                     color: section.color,
@@ -131,38 +131,34 @@ struct SidebarView: View {
         }
     }
 
-    private func tabs(for category: SectionCategory) -> [Tab] {
-        Tab.allCases.filter { $0.category == category }
-    }
-
-    private func isExpanded(for category: SectionCategory) -> Bool {
+    private func isExpanded(for section: NavigationSection) -> Bool {
         if searchText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-            return expandedSections.contains(category)
+            return expandedSections.contains(section)
         } else {
             return true
         }
     }
 
-    private func toggleSection(_ category: SectionCategory) {
-        if expandedSections.contains(category) {
-            expandedSections.remove(category)
+    private func toggleSection(_ section: NavigationSection) {
+        if expandedSections.contains(section) {
+            expandedSections.remove(section)
         } else {
-            expandedSections.insert(category)
+            expandedSections.insert(section)
         }
     }
 }
 
 struct SidebarSection: Identifiable {
-    let category: SectionCategory
+    let section: NavigationSection
     let title: String
     let icon: String
     let color: Color
     let tabs: [Tab]
 
-    var id: SectionCategory { category }
+    var id: NavigationSection { section }
 }
 
-struct NavigationSection: View {
+struct NavigationSectionView: View {
     let section: SidebarSection
     @Binding var selection: Tab
     let isExpanded: Bool

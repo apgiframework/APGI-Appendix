@@ -23,17 +23,94 @@ Standard 6: Evolutionary Plausibility
 Theories must address why evolution would select the proposed mechanisms through constraint-driven analysis, identifying the physical or biological constraints that shaped the mechanism. The theory must explain the adaptive value and fitness advantage it provides, determine if independent lineages evolved similar solutions (convergence) and justify why simpler alternatives were not selected. Mechanisms requiring unlikely mutations or offering no adaptive advantage are implausible, even if empirically supported.
 
 Standard 7: Causal Roadmap
-Since most consciousness evidence remains correlational, theories must outline an experimental path from correlation to causation in five explicit stages. First, correlation establishes that \\\\text{X} and consciousness co-occur. Second, Manipulation shows that altering \\\\text{X} changes consciousness. Third, Mechanism defines the pathway from \\\\text{X} to consciousness. Fourth, Necessity demonstrates that blocking the pathway abolishes \\\\text{X}'s effect. Fifth, Sufficiency proves that \\\\text{X} alone can produce consciousness which is the most stringent test. This ensures causal claims are explicitly tested rather than merely assumed.
+Since most consciousness evidence remains correlational, theories must outline an experimental path from correlation to causation in five explicit stages. First, correlation establishes that \\text{X} and consciousness co-occur. Second, Manipulation shows that altering \\text{X} changes consciousness. Third, Mechanism defines the pathway from \\text{X} to consciousness. Fourth, Necessity demonstrates that blocking the pathway abolishes \\text{X}'s effect. Fifth, Sufficiency proves that \\text{X} alone can produce consciousness which is the most stringent test. This ensures causal claims are explicitly tested rather than merely assumed.
 """
 
     var body: some View {
-        EnhancedContentCard(
+        EnhancedSectionView(section: enhancedSection)
+    }
+
+    private var enhancedSection: EnhancedSection {
+        EnhancedSection(
+            id: "methodology",
             title: "Methodology",
-            content: methodologyBody,
-            category: .theoretical,
-            hasDataTable: false
+            summary: "Seven criteria to keep consciousness theories empirically grounded, logically explicit, and falsifiable—while providing a practical roadmap from correlation to causation.",
+            icon: Tab.methodology.icon,
+            estimatedReadingTime: "~8 min",
+            conceptDiagram: nil,
+            subsections: [
+                EnhancedSection.Subsection(
+                    id: "level-transparency",
+                    title: "Level Transparency",
+                    content: extractParagraphs(prefix: "Standard 1:", from: methodologyBody),
+                    category: .theoretical,
+                    hasDataTable: false
+                ),
+                EnhancedSection.Subsection(
+                    id: "bridge-principles",
+                    title: "Bridge Principles Required",
+                    content: extractParagraphs(prefix: "Standard 2:", from: methodologyBody),
+                    category: .theoretical,
+                    hasDataTable: false
+                ),
+                EnhancedSection.Subsection(
+                    id: "quantitative-benchmarks",
+                    title: "Quantitative Benchmarks",
+                    content: extractParagraphs(prefix: "Standard 3:", from: methodologyBody),
+                    category: .theoretical,
+                    hasDataTable: false
+                ),
+                EnhancedSection.Subsection(
+                    id: "falsification",
+                    title: "Falsification Conditions",
+                    content: extractParagraphs(prefix: "Standard 4:", from: methodologyBody),
+                    category: .theoretical,
+                    hasDataTable: false
+                ),
+                EnhancedSection.Subsection(
+                    id: "alternative-comparison",
+                    title: "Alternative Comparison",
+                    content: extractParagraphs(prefix: "Standard 5:", from: methodologyBody),
+                    category: .theoretical,
+                    hasDataTable: false
+                ),
+                EnhancedSection.Subsection(
+                    id: "evolutionary-plausibility",
+                    title: "Evolutionary Plausibility",
+                    content: extractParagraphs(prefix: "Standard 6:", from: methodologyBody),
+                    category: .theoretical,
+                    hasDataTable: false
+                ),
+                EnhancedSection.Subsection(
+                    id: "causal-roadmap",
+                    title: "Causal Roadmap",
+                    content: extractParagraphs(prefix: "Standard 7:", from: methodologyBody),
+                    category: .theoretical,
+                    hasDataTable: false
+                )
+            ],
+            relatedSections: [.apgiStatement, .epistemicStandards, .mathematicalModel]
         )
-        .padding()
+    }
+
+    private func extractParagraphs(prefix: String, from text: String) -> String {
+        let lines = text.components(separatedBy: "\n")
+        guard let startIndex = lines.firstIndex(where: { $0.trimmingCharacters(in: .whitespaces).hasPrefix(prefix) }) else {
+            return text
+        }
+
+        var collected: [String] = [lines[startIndex]]
+        var i = startIndex + 1
+        while i < lines.count {
+            let trimmed = lines[i].trimmingCharacters(in: .whitespaces)
+            if trimmed.hasPrefix("Standard ") {
+                break
+            }
+            collected.append(lines[i])
+            i += 1
+        }
+
+        return collected.joined(separator: "\n").trimmingCharacters(in: .whitespacesAndNewlines)
     }
 }
 

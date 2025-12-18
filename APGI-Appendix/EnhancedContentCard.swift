@@ -172,16 +172,72 @@ struct APGITableView: View {
     @State private var sortAscending = true
     @State private var hoveredRow: Int?
     @State private var selectedRow: Int?
-    
+
+    private enum ColumnKind {
+        case number
+        case text
+    }
+
+    private func normalizedNumber(_ raw: String) -> Double? {
+        let trimmed = raw.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return nil }
+        let cleaned = trimmed
+            .replacingOccurrences(of: ",", with: "")
+            .replacingOccurrences(of: "%", with: "")
+        return Double(cleaned)
+    }
+
+    private func columnKind(_ index: Int) -> ColumnKind {
+        guard index < table.columnCount else { return .text }
+        var numericCount = 0
+        var sampleCount = 0
+        for row in table.rows {
+            guard index < row.count else { continue }
+            let v = row[index].trimmingCharacters(in: .whitespacesAndNewlines)
+            guard !v.isEmpty else { continue }
+            sampleCount += 1
+            if normalizedNumber(v) != nil { numericCount += 1 }
+            if sampleCount >= 12 { break }
+        }
+        guard sampleCount > 0 else { return .text }
+        return Double(numericCount) / Double(sampleCount) >= 0.7 ? .number : .text
+    }
+
+    private func cellAlignment(for columnIndex: Int) -> Alignment {
+        switch columnKind(columnIndex) {
+        case .number:
+            return .trailing
+        case .text:
+            return .leading
+        }
+    }
+
     private var sortedRows: [[String]] {
         guard let column = sortColumn, column < table.columnCount else {
             return table.rows
         }
-        
+
+        let kind = columnKind(column)
+
         return table.rows.sorted { row1, row2 in
             let val1 = column < row1.count ? row1[column] : ""
             let val2 = column < row2.count ? row2[column] : ""
-            return sortAscending ? val1 < val2 : val1 > val2
+
+            switch kind {
+            case .number:
+                let n1 = normalizedNumber(val1)
+                let n2 = normalizedNumber(val2)
+                if let n1, let n2 {
+                    return sortAscending ? (n1 < n2) : (n1 > n2)
+                }
+                if n1 != nil, n2 == nil { return sortAscending }
+                if n1 == nil, n2 != nil { return !sortAscending }
+                let cmp = val1.localizedStandardCompare(val2)
+                return sortAscending ? (cmp == .orderedAscending) : (cmp == .orderedDescending)
+            case .text:
+                let cmp = val1.localizedStandardCompare(val2)
+                return sortAscending ? (cmp == .orderedAscending) : (cmp == .orderedDescending)
+            }
         }
     }
     
@@ -196,27 +252,31 @@ struct APGITableView: View {
                     .padding(.vertical, 8)
             }
             
-            // Scrollable table
-            ScrollView([.horizontal, .vertical], showsIndicators: true) {
-                VStack(alignment: .leading, spacing: 0) {
-                    // Header row
-                    headerRow
-                    
-                    Divider()
-                        .background(borderColor)
-                    
-                    // Data rows
-                    ForEach(Array(sortedRows.enumerated()), id: \.offset) { index, row in
-                        dataRow(row, index: index)
-                        
-                        if index < sortedRows.count - 1 {
-                            Divider()
-                                .background(borderColor.opacity(0.5))
+            ScrollView(.horizontal, showsIndicators: true) {
+                ScrollView(.vertical, showsIndicators: true) {
+                    LazyVStack(alignment: .leading, spacing: 0, pinnedViews: [.sectionHeaders]) {
+                        Section {
+                            ForEach(Array(sortedRows.enumerated()), id: \.offset) { index, row in
+                                dataRow(row, index: index)
+
+                                if index < sortedRows.count - 1 {
+                                    Divider()
+                                        .background(borderColor.opacity(0.5))
+                                }
+                            }
+                        } header: {
+                            VStack(spacing: 0) {
+                                headerRow
+                                Divider()
+                                    .background(borderColor)
+                            }
+                            .background(headerBackground)
                         }
                     }
+                    .padding(.bottom, 2)
                 }
             }
-            .frame(maxHeight: min(CGFloat(table.rowCount + 1) * 44 + 20, 500))
+            .frame(maxHeight: min(CGFloat(table.rowCount + 1) * 44 + 20, 520))
         }
         .background(backgroundColor)
         .clipShape(RoundedRectangle(cornerRadius: 10))
@@ -244,9 +304,9 @@ struct APGITableView: View {
                             .foregroundStyle(.primary)
                             .lineLimit(2)
                             .multilineTextAlignment(.leading)
-                        
+
                         Spacer()
-                        
+
                         if sortColumn == index {
                             Image(systemName: sortAscending ? "chevron.up" : "chevron.down")
                                 .font(.system(size: 9, weight: .bold))
@@ -256,7 +316,6 @@ struct APGITableView: View {
                     .padding(.horizontal, 12)
                     .padding(.vertical, 10)
                     .frame(minWidth: columnWidth(for: index), alignment: .leading)
-                    .background(headerBackground)
                 }
                 .buttonStyle(.plain)
                 
@@ -281,6 +340,7 @@ struct APGITableView: View {
             }
         }
         .background(rowBackground(index: index))
+        .contentShape(Rectangle())
         .onHover { hovering in
             hoveredRow = hovering ? index : nil
         }
@@ -292,26 +352,34 @@ struct APGITableView: View {
     private func cellView(_ content: String, columnIndex: Int) -> some View {
         // Parse special formatting
         let displayContent = parseSpecialContent(content)
-        
-        return HStack(spacing: 4) {
+
+        let isNumber = columnKind(columnIndex) == .number
+
+        return HStack(spacing: 6) {
             if let icon = displayContent.icon {
                 Image(systemName: icon)
                     .font(.system(size: 11))
                     .foregroundStyle(displayContent.iconColor ?? .secondary)
             }
-            
+
             Text(displayContent.text)
-                .font(.system(size: 13))
+                .font(isNumber ? .system(size: 13, weight: .regular, design: .monospaced) : .system(size: 13))
                 .foregroundStyle(displayContent.textColor ?? .primary)
                 .lineLimit(nil)
-                .multilineTextAlignment(.leading)
+                .multilineTextAlignment(isNumber ? .trailing : .leading)
                 .textSelection(.enabled)
-            
+
             Spacer(minLength: 0)
         }
         .padding(.horizontal, 12)
         .padding(.vertical, 8)
-        .frame(minWidth: columnWidth(for: columnIndex), alignment: .leading)
+        .frame(minWidth: columnWidth(for: columnIndex), alignment: cellAlignment(for: columnIndex))
+        .contextMenu {
+            Button("Copy") {
+                NSPasteboard.general.clearContents()
+                NSPasteboard.general.setString(displayContent.text, forType: .string)
+            }
+        }
     }
     
     private func columnWidth(for index: Int) -> CGFloat {
@@ -320,7 +388,8 @@ struct APGITableView: View {
         let maxContentLength = table.rows.reduce(header.count) { max($0, index < $1.count ? $1[index].count : 0) }
         
         // Min 80, max 300, scale with content
-        return min(max(CGFloat(maxContentLength) * 8 + 24, 100), 350)
+        let base = min(max(CGFloat(maxContentLength) * 7.5 + 28, 110), 380)
+        return columnKind(index) == .number ? max(90, base * 0.9) : base
     }
     
     // MARK: - Styling
@@ -348,10 +417,10 @@ struct APGITableView: View {
     
     private func rowBackground(index: Int) -> Color {
         if selectedRow == index {
-            return Color.accentColor.opacity(0.15)
+            return Color.accentColor.opacity(highContrastMode ? 0.25 : 0.15)
         }
         if hoveredRow == index {
-            return Color.primary.opacity(0.03)
+            return Color.primary.opacity(highContrastMode ? 0.06 : 0.04)
         }
         return index % 2 == 0 ? Color.clear : Color.primary.opacity(0.02)
     }
@@ -578,5 +647,343 @@ struct EnhancedContentCard: View {
     
     private var shadowColor: Color {
         highContrastMode ? .clear : .black.opacity(0.08)
+    }
+}
+
+struct EnhancedSection: Identifiable {
+    struct Subsection: Identifiable {
+        let id: String
+        let title: String
+        let content: String
+        let category: SectionCategory
+        let hasDataTable: Bool
+    }
+
+    let id: String
+    let title: String
+    let summary: String
+    let icon: String
+    let estimatedReadingTime: String
+    let conceptDiagram: APGIDiagramSource?
+    let subsections: [Subsection]
+    let relatedSections: [Tab]
+}
+
+struct EnhancedSectionView: View {
+    let section: EnhancedSection
+    @State private var expandedSubsections: Set<String> = []
+
+    var body: some View {
+        ScrollView {
+            LazyVStack(alignment: .leading, spacing: APGISpacing.lg) {
+                SectionHeroCard(
+                    title: section.title,
+                    keyTakeaway: section.summary,
+                    icon: section.icon,
+                    readingTime: section.estimatedReadingTime
+                )
+
+                if let diagram = section.conceptDiagram {
+                    InteractiveDiagram(diagram: diagram)
+                        .frame(height: 300)
+                }
+
+                ForEach(section.subsections) { subsection in
+                    CollapsibleSubsection(
+                        title: subsection.title,
+                        isExpanded: expandedSubsections.contains(subsection.id)
+                    ) {
+                        toggleExpanded(subsection.id)
+                    } content: {
+                        SubsectionContentCard(
+                            title: subsection.title,
+                            content: subsection.content,
+                            category: subsection.category,
+                            hasDataTable: subsection.hasDataTable
+                        )
+                    }
+                }
+
+                if !section.relatedSections.isEmpty {
+                    RelatedSectionsCarousel(related: section.relatedSections)
+                }
+            }
+            .padding()
+        }
+    }
+
+    private func toggleExpanded(_ id: String) {
+        if expandedSubsections.contains(id) {
+            expandedSubsections.remove(id)
+        } else {
+            expandedSubsections.insert(id)
+        }
+    }
+}
+
+struct SectionHeroCard: View {
+    let title: String
+    let keyTakeaway: String
+    let icon: String
+    let readingTime: String
+
+    @Environment(\.colorScheme) private var colorScheme
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack(alignment: .top, spacing: 12) {
+                Image(systemName: icon)
+                    .font(.system(size: 22, weight: .semibold))
+                    .foregroundStyle(.primary)
+                    .frame(width: 36, height: 36)
+                    .background(
+                        RoundedRectangle(cornerRadius: 10)
+                            .fill(Color.primary.opacity(colorScheme == .dark ? 0.18 : 0.06))
+                    )
+
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(title)
+                        .font(APGITypography.titleLarge)
+                        .fontWeight(.bold)
+
+                    Text(readingTime)
+                        .font(APGITypography.labelSmall)
+                        .foregroundStyle(.secondary)
+                }
+
+                Spacer()
+            }
+
+            VStack(alignment: .leading, spacing: 6) {
+                Text("Key takeaway")
+                    .font(APGITypography.labelMedium)
+                    .foregroundStyle(.secondary)
+
+                Text(keyTakeaway)
+                    .font(APGITypography.bodyLarge)
+                    .foregroundStyle(.primary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+        }
+        .padding(16)
+        .background(
+            RoundedRectangle(cornerRadius: 14)
+                .fill(Color(NSColor.controlBackgroundColor))
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 14)
+                .strokeBorder(Color.primary.opacity(0.10), lineWidth: 1)
+        )
+    }
+}
+
+struct InteractiveDiagram: View {
+    let diagram: APGIDiagramSource
+
+    @State private var scale: CGFloat = 1
+    @State private var offset: CGSize = .zero
+    @State private var lastOffset: CGSize = .zero
+
+    var body: some View {
+        ZStack {
+            RoundedRectangle(cornerRadius: 14)
+                .fill(Color(NSColor.controlBackgroundColor))
+
+            APGIConceptDiagram(source: diagram, contentMode: .fit)
+                .scaleEffect(scale)
+                .offset(offset)
+                .gesture(
+                    DragGesture()
+                        .onChanged { value in
+                            offset = CGSize(
+                                width: lastOffset.width + value.translation.width,
+                                height: lastOffset.height + value.translation.height
+                            )
+                        }
+                        .onEnded { _ in
+                            lastOffset = offset
+                        }
+                )
+                .gesture(
+                    MagnificationGesture()
+                        .onChanged { value in
+                            scale = min(max(0.8, value), 3.0)
+                        }
+                )
+
+            VStack {
+                HStack {
+                    Spacer()
+                    HStack(spacing: 8) {
+                        Button {
+                            scale = min(scale + 0.2, 3.0)
+                        } label: {
+                            Image(systemName: "plus")
+                        }
+                        .buttonStyle(.borderless)
+
+                        Button {
+                            scale = max(scale - 0.2, 0.8)
+                        } label: {
+                            Image(systemName: "minus")
+                        }
+                        .buttonStyle(.borderless)
+
+                        Button {
+                            scale = 1
+                            offset = .zero
+                            lastOffset = .zero
+                        } label: {
+                            Image(systemName: "arrow.counterclockwise")
+                        }
+                        .buttonStyle(.borderless)
+                    }
+                    .padding(8)
+                    .background(.regularMaterial)
+                    .clipShape(RoundedRectangle(cornerRadius: 10))
+                }
+                .padding(10)
+                Spacer()
+            }
+        }
+        .clipShape(RoundedRectangle(cornerRadius: 14))
+        .overlay(
+            RoundedRectangle(cornerRadius: 14)
+                .strokeBorder(Color.primary.opacity(0.10), lineWidth: 1)
+        )
+    }
+}
+
+struct CollapsibleSubsection<Content: View>: View {
+    let title: String
+    let isExpanded: Bool
+    let onToggle: () -> Void
+    @ViewBuilder let content: () -> Content
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Button(action: onToggle) {
+                HStack(spacing: 10) {
+                    Image(systemName: "chevron.right")
+                        .font(.caption.weight(.semibold))
+                        .rotationEffect(.degrees(isExpanded ? 90 : 0))
+                        .foregroundStyle(.secondary)
+
+                    Text(title)
+                        .font(APGITypography.labelLarge)
+                        .foregroundStyle(.primary)
+
+                    Spacer()
+                }
+                .padding(.vertical, 10)
+                .padding(.horizontal, 12)
+                .background(
+                    RoundedRectangle(cornerRadius: 12)
+                        .fill(Color.secondary.opacity(0.10))
+                )
+            }
+            .buttonStyle(.plain)
+
+            if isExpanded {
+                content()
+                    .transition(.opacity.combined(with: .move(edge: .top)))
+            }
+        }
+    }
+}
+
+struct SubsectionContentCard: View {
+    let title: String
+    let content: String
+    let category: SectionCategory
+    let hasDataTable: Bool
+
+    @AppStorage("contentFontSize") private var fontSize: Double = 15.0
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            HStack(spacing: 10) {
+                Circle()
+                    .fill(category.color)
+                    .frame(width: 8, height: 8)
+
+                Text(title)
+                    .font(APGITypography.labelLarge)
+                    .foregroundStyle(.primary)
+
+                Spacer()
+
+                if hasDataTable {
+                    Image(systemName: "tablecells")
+                        .font(.system(size: 12))
+                        .foregroundStyle(.secondary)
+                }
+            }
+            .padding(.horizontal, 14)
+            .padding(.vertical, 12)
+            .background(category.color.opacity(0.06))
+
+            if hasDataTable {
+                ParsedContentView(content: content, terms: GlossaryData.terms)
+                    .padding(16)
+            } else {
+                GlossaryHighlightedText(text: content, terms: GlossaryData.terms)
+                    .font(.system(size: fontSize))
+                    .textSelection(.enabled)
+                    .padding(16)
+            }
+        }
+        .background(Color(NSColor.controlBackgroundColor))
+        .clipShape(RoundedRectangle(cornerRadius: 12))
+        .overlay(
+            RoundedRectangle(cornerRadius: 12)
+                .strokeBorder(Color.primary.opacity(0.10), lineWidth: 1)
+        )
+    }
+}
+
+struct RelatedSectionsCarousel: View {
+    let related: [Tab]
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text("Related")
+                .font(APGITypography.labelLarge)
+                .foregroundStyle(.secondary)
+
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 10) {
+                    ForEach(related, id: \.self) { tab in
+                        Button {
+                            NotificationCenter.default.post(name: .navigateToTab, object: tab)
+                        } label: {
+                            HStack(spacing: 8) {
+                                Image(systemName: tab.icon)
+                                    .font(.system(size: 12))
+                                    .foregroundStyle(tab.category.color)
+                                Text(tab.shortTitle)
+                                    .font(APGITypography.labelMedium)
+                                    .foregroundStyle(.primary)
+                            }
+                            .padding(.horizontal, 12)
+                            .padding(.vertical, 10)
+                            .background(Color(NSColor.controlBackgroundColor))
+                            .clipShape(RoundedRectangle(cornerRadius: 12))
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 12)
+                                    .strokeBorder(Color.primary.opacity(0.10), lineWidth: 1)
+                            )
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
+                .padding(.vertical, 4)
+            }
+        }
+        .padding(16)
+        .background(
+            RoundedRectangle(cornerRadius: 14)
+                .fill(Color.secondary.opacity(0.06))
+        )
     }
 }

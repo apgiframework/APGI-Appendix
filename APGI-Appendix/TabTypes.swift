@@ -178,3 +178,55 @@ enum Tab: String, CaseIterable, Identifiable {
         searchIndexText
     }
 }
+
+enum NavigationSection: String, CaseIterable, Identifiable, Hashable {
+    case foundations = "Foundations"
+    case neurobiology = "Neurobiology"
+    case cognition = "Cognition & Psychology"
+    case clinical = "Clinical Applications"
+    case reference = "Reference"
+
+    var id: String { rawValue }
+
+    var tabs: [Tab] {
+        switch self {
+        case .foundations:
+            return [.methodology, .mathematicalModel, .apgiMapping,
+                    .parameterIdentifiability, .apgiStatement]
+        case .neurobiology:
+            return [.biologicalImplementation, .neuromodulatorEffects,
+                    .neuromodulatoryImplementation, .explicitNeuromodulator,
+                    .neuromodulatoryControl]
+        case .cognition:
+            return [.mappingCognitiveToApgi, .apgiToCognitive,
+                    .psychologicalStates, .apgiToPsyState, .lifeStages]
+        case .clinical:
+            return [.psychiatricDisorders, .disordersConditions]
+        case .reference:
+            return [.glossary, .bibliography, .epistemicStandards,
+                    .thermodynamicEfficiency, .ignitionTimeline, .apgiSimulator]
+        }
+    }
+}
+
+extension NavigationSection {
+    var icon: String {
+        switch self {
+        case .foundations: return "book"
+        case .neurobiology: return "brain.head.profile"
+        case .cognition: return "brain"
+        case .clinical: return "stethoscope"
+        case .reference: return "books.vertical.fill"
+        }
+    }
+
+    var color: Color {
+        switch self {
+        case .foundations: return .apgiBlue
+        case .neurobiology: return .apgiGreen
+        case .cognition: return .apgiOrange
+        case .clinical: return .apgiRed
+        case .reference: return .gray
+        }
+    }
+}
