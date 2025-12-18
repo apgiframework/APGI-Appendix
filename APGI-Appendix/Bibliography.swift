@@ -1,5 +1,7 @@
 import SwiftUI
 import Combine
+import AppKit
+import UniformTypeIdentifiers
 
 struct BibliographyView: View {
     private let bibliographyBody = """

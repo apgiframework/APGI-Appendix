@@ -21,6 +21,7 @@ enum Tab: String, CaseIterable, Identifiable {
     case thermodynamicEfficiency = "Thermodynamic and Evolutionary Efficiency"
     case epistemicStandards = "Epistemic Standards"
     case bibliography = "Bibliography"
+    case interactiveVisualizations = "Interactive Visualizations"
     case glossary = "Glossary"
     
     var id: String { rawValue }
@@ -47,6 +48,7 @@ enum Tab: String, CaseIterable, Identifiable {
         case .thermodynamicEfficiency: return "flame"
         case .epistemicStandards: return "checkmark.seal"
         case .bibliography: return "books.vertical"
+        case .interactiveVisualizations: return "view.3d"
         case .glossary: return "character.book.closed"
         }
     }
@@ -63,7 +65,7 @@ enum Tab: String, CaseIterable, Identifiable {
             return .biological
         case .mappingCognitiveToApgi, .apgiToCognitive, .psychologicalStates, .apgiToPsyState:
             return .cognitive
-        case .psychiatricDisorders, .lifeStages, .thermodynamicEfficiency:
+        case .psychiatricDisorders, .lifeStages, .thermodynamicEfficiency, .interactiveVisualizations:
             return .applications
         case .glossary, .bibliography:
             return .reference
@@ -92,6 +94,7 @@ enum Tab: String, CaseIterable, Identifiable {
         case .thermodynamicEfficiency: return "Thermodynamic Efficiency"
         case .epistemicStandards: return "Epistemic Standards"
         case .bibliography: return "Bibliography"
+        case .interactiveVisualizations: return "Visualizations"
         case .glossary: return "Glossary"
         }
     }
@@ -151,6 +154,15 @@ enum Tab: String, CaseIterable, Identifiable {
             return rawValue
         case .bibliography:
             return rawValue
+        case .interactiveVisualizations:
+            return "Interactive Visualizations\n" +
+            "Interactive Neural Visualization\n" +
+            "Network Graph\n" +
+            "Neuromodulators\n" +
+            "Brain regions\n" +
+            "3D model\n" +
+            "Connectivity\n" +
+            "Parameters"
         case .glossary:
             return rawValue
         }

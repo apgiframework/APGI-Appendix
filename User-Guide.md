@@ -61,18 +61,33 @@ On first launch you will see:
 
 ### 3.1 Main Components
 
-- **Sidebar Navigation**
-  - Primary navigation containing:
-    - `Interactive Timeline`
-    - `Neuromodulators`
-    - `Glossary`
-    - `Bibliography`
-    - `Methodology`
-    - `Psychiatric Disorders`
+- **Category Sidebar**
+  - Primary navigation containing six main categories:
+    - `Theoretical Foundation`
+    - `Mathematical Framework` 
+    - `Biological Implementation`
+    - `Cognitive Integration`
+    - `Applications & Extensions`
+    - `Reference Materials`
+
+- **Section List**
+  - Shows all sections within the selected category
+  - Each section has an icon and short title
 
 - **Main Content Area**
   - Displays the currently active section
-  - Adapts to device size (split‑view on iPad, stacked on iPhone)
+  - Adaptive layout for different device sizes
+  - Supports focus mode for distraction-free reading
+
+- **Inspector Panel**
+  - Shows metadata about the current section
+  - Displays category information and content type
+  - Toggleable visibility
+
+- **Search System**
+  - Global search with multiple scopes (all, titles, content, formulas, references, glossary)
+  - Real-time search results with relevance ranking
+  - Category filtering options
 
 ### 3.2 Color & Design
 
@@ -82,251 +97,301 @@ On first launch you will see:
 
 ---
 
-## 4. Enhanced Interactive Timeline
+## 4. Theoretical Foundation
 
-The **Enhanced Interactive Timeline** is a key feature for exploring chronological developments.
+The **Theoretical Foundation** category provides the conceptual framework for the APGI system.
 
-### 4.1 Accessing the Timeline
+### 4.1 Available Sections
 
-- Open the **Sidebar**
-- Tap **`Interactive Timeline`**
+- **Methodology** - Framework approaches and validation standards
+- **APGI Statement about Consciousness** - Core theoretical position
+- **Epistemic Standards** - Validation and falsifiability criteria
 
-### 4.2 Basic Interactions
+### 4.2 Accessing Theoretical Content
 
-- **Scroll / Pan**
-  - Drag left or right to move through time
-  - On iPad, more content is visible due to the larger layout
-
-- **Zoom**
-  - Pinch in or out to change the time scale
-  - Zooming in reveals more detailed events; zooming out gives a broader overview
-
-- **Select an Event**
-  - Tap an event marker or card to open its detail view
-  - The detail view shows:
-    - Title and time/date
-    - Description
-    - Links to related glossary terms or neuromodulators
-    - References (if available)
-
-### 4.3 Filtering & Categories
-
-The timeline includes filtering options:
-
-- **Category filters** for different types of events
-- **Toggle controls** for limiting events to specific themes
-- **Search functionality** to find specific events
-
-### 4.4 Tips
-
-- Use **zoom** to avoid dense clusters of events
-- Combine filters with zoom for focused study sessions
-- Tap related terms to navigate between connected content
+1. Select **`Theoretical Foundation`** from the Category Sidebar
+2. Choose your desired section from the Section List
+3. Content appears in the main area with full navigation support
 
 ---
 
-## 5. Neuromodulator Effects
+## 5. Mathematical Framework
 
-The **Neuromodulator Effects** section provides structured information on neuromodulators and their impacts.
+The **Mathematical Framework** category contains the quantitative models and computational approaches.
 
-### 5.1 Accessing Neuromodulators
+### 5.1 Available Sections
 
-- From the **Sidebar**, tap **`Neuromodulators`**
+- **Mathematical Model** - Core quantitative framework
+- **APGI Explicit Mapping** - Parameter definitions and relationships
+- **Parameter Identifiability** - Model validation and reduction
 
-### 5.2 Browsing the List
+### 5.2 Working with Mathematical Content
 
-You'll see:
-
-- A **list of neuromodulators** with color coding
-- **Search functionality** to find specific neuromodulators
-- **Sorting options** (typically alphabetical)
-
-Tap any neuromodulator entry to view details.
-
-### 5.3 Neuromodulator Detail View
-
-Each entry includes:
-
-- **Name & Abbreviation**
-- **Description**
-  - Role, pathways, or high‑level overview
-- **Effects**
-  - Key physiological or behavioral effects
-- **Associated Systems / Regions**
-  - Links to related systems and brain regions
-- **Related Timeline Events**
-  - Connections to specific events on the interactive timeline
-- **References**
-  - Links into the **Bibliography** for deeper reading
-
-### 5.4 Example Workflows
-
-- **Studying a particular neuromodulator**
-  1. Open `Neuromodulators`
-  2. Search or scroll to the desired neuromodulator
-  3. Open its detail view
-  4. Tap any related glossary terms or references for context
-
-- **Connecting neuromodulators with events**
-  - From a neuromodulator detail screen, follow links to the timeline
+- All mathematical notation is rendered with proper formatting
+- Tables show parameter relationships and mappings
+- Cross-references link to related sections
 
 ---
 
-## 6. Glossary
+## 6. Biological Implementation
 
-The **Glossary** centralizes definitions and cross‑references for technical terms.
+The **Biological Implementation** category connects the APGI framework to neural systems and neuromodulation.
 
-### 6.1 Accessing the Glossary
+### 6.1 Available Sections
 
-- Tap **`Glossary`** in the sidebar
+- **Biological Implementation** - Neural mapping and implementation
+- **Neuromodulator Effects** - Detailed neuromodulator impacts
+- **Neuromodulatory Implementation** - Control parameter implementation
+- **Explicit Neuromodulator Mapping** - Direct neuromodulator relationships
+- **Ignition Timeline** - Temporal dynamics of neural ignition
+- **Neuromodulatory Control System** - Regulatory mechanisms
 
-### 6.2 Searching & Browsing
+### 6.2 Enhanced Interactive Timeline
 
-- Use the **search bar** to:
-  - Type part of a term name
-  - Filter the list in real time
-- Browse alphabetically if preferred
+The **Ignition Timeline** is a key feature for exploring temporal dynamics:
 
-### 6.3 Term Detail
+- **Playback Controls**
+  - Play/pause functionality
+  - Adjustable playback speed
+  - Timeline scrubbing and navigation
 
-Each glossary entry contains:
+- **Visual Features**
+  - Phase indicators showing different ignition stages
+  - Event blocks with detailed information
+  - Real-time playhead indicator
 
-- **Term**
-- **Definition**
-- **Related Terms** (if present)
-- **Links to Content**
-  - Neuromodulators
-  - Timeline events
-  - Bibliography entries
-
-Use these relations to navigate the app conceptually.
-
----
-
-## 7. Bibliography
-
-The **Bibliography** lists references underlying the app's content.
-
-### 7.1 Opening the Bibliography
-
-- Tap **`Bibliography`** in the sidebar
-
-### 7.2 Layout & Search
-
-You'll find:
-
-- A list of citations, each showing:
-  - Authors
-  - Year
-  - Title
-  - Source (journal / book / etc.)
-- A **search bar** to filter by:
-  - Author name
-  - Year
-  - Keywords in the title
-
-### 7.3 Using References
-
-- Tap a reference to view more details
-- Use references when:
-  - Verifying details encountered in the Timeline or Neuromodulator views
-  - Exploring the original literature
+- **Interactions**
+  - Tap events for detailed information
+  - Zoom in/out for different time scales
+  - Filter events by type or category
 
 ---
 
-## 8. Methodology
+## 7. Cognitive Integration
 
-The **Methodology** section explains the framework and approaches used in the APGI system.
+The **Cognitive Integration** category bridges the APGI framework with cognitive and psychological constructs.
 
-### 8.1 Accessing Methodology
+### 7.1 Available Sections
 
-- Tap **`Methodology`** in the sidebar
+- **Mapping Cognitive Constructs → APGI** - Cognitive to framework mapping
+- **APGI Parameters → Cognitive Constructs** - Framework to cognitive mapping
+- **Psychological States** - Comprehensive psychological state definitions
+- **APGI Parameters → Psychological States** - Parameter-state relationships
 
-### 8.2 Content Overview
+### 7.2 Psychological States Section
 
-This section covers:
-- **APGI Framework** explanation
-- **Mathematical models** and their implementation
-- **Epistemic standards** and validation approaches
-- **Thermodynamic efficiency** considerations
-- **Parameter identifiability** in the models
+This section provides detailed information on psychological states:
 
----
-
-## 9. Psychiatric Disorders
-
-The **Psychiatric Disorders** section connects the APGI framework to clinical applications.
-
-### 9.1 Accessing Disorders Section
-
-- Tap **`Psychiatric Disorders`** in the sidebar
-
-### 9.2 Content Structure
-
-- **Disorder listings** with APGI connections
-- **Neuromodulator associations** for each condition
-- **Timeline correlations** with research developments
-- **Clinical implications** and applications
+- **Positive States** - Flow, joy, gratitude, hope, optimism, awe, inspiration, serenity, pride, amusement, love, curiosity, engagement, mindfulness
+- **Neutral States** - Neutrality, boredom, daydreaming, distraction, fatigue
+- **Negative States** - Anxiety, stress, depression, anger, fear, guilt, shame, loneliness, frustration, confusion
+- **Complex States** - Disgust, envy, jealousy, regret, pessimism, overwhelm, dissociation, trance, hallucination, déjà vu, hypnagogia, empathy, sympathy, belonging, rejection, trust, focus, creativity, decision fatigue, cognitive dissonance, hyperfocus, hunger, thirst
 
 ---
 
-## 10. Sidebar & Global Navigation
+## 8. Applications & Extensions
 
-### 10.1 Sidebar Sections
+The **Applications & Extensions** category shows practical applications and extended functionality.
 
-Complete navigation list:
+### 8.1 Available Sections
 
-- **Interactive Timeline** - Chronological exploration
-- **Neuromodulators** - Detailed neuromodulator information
-- **Glossary** - Term definitions and cross-references
+- **Psychiatric Disorders** - Clinical applications and disorder analysis
+- **Life Stages** - APGI parameters across development
+- **Thermodynamic and Evolutionary Efficiency** - Efficiency considerations
+- **Interactive Visualizations** - 3D neural visualizations and network graphs
+
+### 8.2 Interactive Visualizations
+
+The **Interactive Visualizations** section provides advanced visual exploration:
+
+- **Interactive Neural Visualization**
+  - 3D brain models with SceneKit
+  - Real-time parameter adjustment
+  - Neuromodulator effects visualization
+
+- **Network Graph**
+  - Interactive connectivity diagrams
+  - Brain region relationships
+  - Dynamic parameter mapping
+
+### 8.3 Psychiatric Disorders Section
+
+Clinical applications include:
+- Disorder-specific APGI parameter mappings
+- Neuromodulator associations for each condition
+- Timeline correlations with research developments
+- Clinical implications and treatment considerations
+
+---
+
+## 9. Reference Materials
+
+The **Reference Materials** category provides supporting documentation and search capabilities.
+
+### 9.1 Available Sections
+
+- **Glossary** - Comprehensive term definitions and cross-references
 - **Bibliography** - Reference materials and citations
-- **Methodology** - Framework and approaches
-- **Psychiatric Disorders** - Clinical applications
 
-Tap any item to switch sections.
+### 9.2 Enhanced Glossary
 
-### 10.2 iPhone vs iPad Behavior
+The **Glossary** centralizes definitions with enhanced features:
+
+- **Search Functionality**
+  - Real-time filtering as you type
+  - Search across term names and definitions
+  - Category-based filtering
+
+- **Term Details**
+  - Comprehensive definitions
+  - Related terms with cross-links
+  - Links to relevant sections throughout the app
+  - Associated neuromodulators and timeline events
+
+### 9.3 Bibliography
+
+The **Bibliography** provides:
+
+- **Comprehensive Reference List**
+  - Authors, year, title, and source information
+  - Full citation formatting
+
+- **Advanced Search**
+  - Filter by author name, year, or keywords
+  - Search within titles and abstracts
+  - Category-based organization
+
+- **Integration Features**
+  - Links from content to relevant references
+  - Cross-reference tracking throughout the app
+
+---
+
+## 10. Navigation & Interface Features
+
+### 10.1 Advanced Navigation
+
+The app provides sophisticated navigation capabilities:
+
+- **Three-Panel Layout** (iPad/desktop)
+  - Category sidebar
+  - Section list
+  - Content detail with optional inspector
+
+- **Keyboard Shortcuts**
+  - Focus search (⌘F)
+  - Navigate sections (⌘[ / ⌘])
+  - Toggle sidebar/inspector
+
+- **Search System**
+  - Global search across all content
+  - Multiple search scopes: all, titles, content, formulas, references, glossary
+  - Real-time results with relevance ranking
+  - Category filtering
+
+### 10.2 Focus Mode
+
+- **Distraction-Free Reading**
+  - Hide all UI elements except content
+  - Clean typography optimized for reading
+  - Easy toggle in/out of focus mode
+
+### 10.3 Inspector Panel
+
+The inspector provides context for the current section:
+- Section title and category
+- Content type indicators (tables, visualizations)
+- Metadata and cross-references
+- Toggle visibility for more screen space
+
+### 10.4 Device Adaptations
+
+- **iPad/Mac**
+  - Full three-panel interface
+  - Multiple windows support
+  - Rich keyboard shortcuts
 
 - **iPhone**
-  - Screens are typically stacked
-  - Detail views appear full‑screen with back buttons
-
-- **iPad**
-  - Multi‑pane layouts (sidebar + list + detail) may be visible simultaneously
-  - Faster navigation between list and details
+  - Streamlined navigation
+  - Stack-based navigation
+  - Optimized touch interactions
 
 ---
 
-## 11. Advanced Usage & Study Tips
+## 11. Advanced Features & Tips
 
-### 11.1 Structured Study Sessions
+### 11.1 Structured Study Approaches
 
-- **Chronological Approach**
-  - Start with the **Interactive Timeline** for overview
-  - Drill into specific events and their connections
-  - Use **Neuromodulators** to understand mechanisms
-  - Clarify terminology via the **Glossary**
-  - Consult the **Bibliography** for primary literature
+- **Theoretical Foundation**
+  1. Start with **Methodology** for framework understanding
+  2. Review **APGI Statement** for core concepts
+  3. Study **Epistemic Standards** for validation criteria
 
-- **System-Based Approach**
-  - Begin with **Neuromodulators** to understand mechanisms
-  - Use the **Timeline** to see historical development
-  - Connect to **Psychiatric Disorders** for clinical context
-  - Reference **Methodology** for theoretical framework
+- **Mathematical Framework**
+  1. Begin with **Mathematical Model** for core equations
+  2. Study **APGI Mapping** for parameter relationships
+  3. Review **Parameter Identifiability** for model validation
 
-### 11.2 Cross-Linking Strategies
+- **Biological Integration**
+  1. Start with **Biological Implementation** for neural mapping
+  2. Explore **Neuromodulator Effects** for system impacts
+  3. Use **Ignition Timeline** for temporal dynamics
 
-- Follow term links between sections to build conceptual networks
-- Use the **Glossary** as a central hub for terminology
-- Connect **Timeline** events to **Neuromodulator** discoveries
-- Reference **Bibliography** entries for deeper understanding
+### 11.2 Cross-Reference Navigation
 
-### 11.3 Clinical Applications
+The app is designed for interconnected learning:
 
-- Use **Psychiatric Disorders** section to understand clinical relevance
-- Connect disorders to specific **Neuromodulator** imbalances
-- Reference **Timeline** for treatment development history
-- Consult **Methodology** for evidence-based approaches
+- **From Theory to Practice**
+  - Start with theoretical concepts
+  - Follow links to mathematical models
+  - Explore biological implementations
+  - Apply to psychiatric disorders
+
+- **Parameter Tracking**
+  - Trace parameters across different sections
+  - See how mathematical concepts map to biological systems
+  - Understand cognitive and psychological implications
+
+### 11.3 Search Strategies
+
+- **Broad Exploration**
+  - Use scope "All" for comprehensive searches
+  - Filter by categories to focus on specific areas
+
+- **Targeted Research**
+  - Search "Content" for detailed information
+  - Search "Formulas" for mathematical content
+  - Search "References" for source material
+  - Search "Glossary" for term definitions
+
+### 11.4 Interactive Features
+
+- **Timeline Interactions**
+  - Use playback controls for dynamic exploration
+  - Adjust playback speed for detailed study
+  - Tap events for detailed information
+
+- **3D Visualizations**
+  - Rotate and zoom neural models
+  - Adjust parameters in real-time
+  - Explore network connectivity patterns
+
+### 11.5 Professional Use Cases
+
+- **Clinical Practice**
+  - Reference psychiatric disorder sections
+  - Study neuromodulator effects
+  - Apply theoretical frameworks to cases
+
+- **Academic Research**
+  - Use bibliography for source tracking
+  - Reference mathematical models
+  - Study epistemic standards
+
+- **Education**
+  - Use structured progression through categories
+  - Leverage cross-references for connections
+  - Utilize interactive visualizations for engagement
 
 ---
 

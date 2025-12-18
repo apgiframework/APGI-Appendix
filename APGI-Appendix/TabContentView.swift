@@ -47,6 +47,8 @@ struct TabContentView: View {
                 EpistemicStandardsView()
             case .bibliography:
                 BibliographyView()
+            case .interactiveVisualizations:
+                InteractiveVisualizationsView()
             case .glossary:
                 GlossaryView()
             }

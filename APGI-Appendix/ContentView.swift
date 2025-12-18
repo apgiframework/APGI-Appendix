@@ -51,7 +51,7 @@ struct ContentView: View {
                     } label: {
                         Image(systemName: "magnifyingglass")
                     }
-                    .keyboardShortcut("k", modifiers: [.command])
+                    .keyboardShortcut("f", modifiers: [.command])
                     .apgiAccessibility(
                         label: "Search",
                         hint: "Search all content",
@@ -66,6 +66,68 @@ struct ContentView: View {
         }
         .environmentObject(bookmarkManager)
         .frame(minWidth: 1000, minHeight: 700)
+        .onReceive(NotificationCenter.default.publisher(for: .focusSearch)) { _ in
+            searchPresented = true
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .navigateToSection)) { notification in
+            if let section = notification.object as? String {
+                navigateToSection(section)
+            }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .navigateNext)) { _ in
+            navigateToNext()
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .navigatePrevious)) { _ in
+            navigateToPrevious()
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .toggleSidebar)) { _ in
+            sidebarVisible.toggle()
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .zoomIn)) { _ in
+            // Zoom in functionality
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .zoomOut)) { _ in
+            // Zoom out functionality
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .exportPDF)) { _ in
+            // Export PDF functionality
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .exportCurrentSection)) { _ in
+            // Export current section functionality
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .copyCitation)) { _ in
+            let pb = NSPasteboard.general
+            pb.clearContents()
+            pb.setString("APGI Framework (2024). \(selectedTab.rawValue)", forType: .string)
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .openHelpGuide)) { _ in
+            // Open help guide functionality
+        }
+    }
+    
+    private func navigateToSection(_ section: String) {
+        switch section.lowercased() {
+        case "biological":
+            selectedTab = .biologicalImplementation
+        case "neuromodulators":
+            selectedTab = .neuromodulatorEffects
+        case "clinical":
+            selectedTab = .psychiatricDisorders
+        default:
+            break
+        }
+    }
+    
+    private func navigateToNext() {
+        guard let currentIndex = Tab.allCases.firstIndex(of: selectedTab),
+              currentIndex < Tab.allCases.count - 1 else { return }
+        selectedTab = Tab.allCases[currentIndex + 1]
+    }
+    
+    private func navigateToPrevious() {
+        guard let currentIndex = Tab.allCases.firstIndex(of: selectedTab),
+              currentIndex > 0 else { return }
+        selectedTab = Tab.allCases[currentIndex - 1]
     }
 
     private var sidebarVisibilityBinding: Binding<NavigationSplitViewVisibility> {
