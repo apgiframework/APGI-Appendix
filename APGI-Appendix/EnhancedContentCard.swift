@@ -9,6 +9,7 @@ struct EnhancedContentCard: View {
     @AppStorage("contentFontSize") private var fontSize: Double = 15.0
     @State private var isFocusModeEnabled: Bool = false
     @State private var scrollProgress: Double = 0
+    @State private var isTableExpanded: Bool = true
 
     var body: some View {
         ZStack {
@@ -72,6 +73,38 @@ struct EnhancedContentCard: View {
                                 .preference(key: ScrollOffsetPreferenceKey.self, value: proxy.frame(in: .named("EnhancedContentCardScroll")).minY)
                         }
                         .frame(height: 0)
+
+                        if hasDataTable, let parsedTable {
+                            DisclosureGroup(isExpanded: $isTableExpanded) {
+                                EnhancedDataTable(
+                                    columns: parsedTable.columns,
+                                    rows: parsedTable.rows
+                                )
+                                .padding(.top, 8)
+                            } label: {
+                                HStack(spacing: 8) {
+                                    Image(systemName: "tablecells")
+                                        .foregroundStyle(category.color)
+
+                                    Text("Table")
+                                        .font(.system(size: 15, weight: .semibold))
+
+                                    Text("(derived from the text below)")
+                                        .font(.system(size: 13))
+                                        .foregroundStyle(.secondary)
+                                }
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                            }
+                            .padding(.vertical, 12)
+                            .padding(.horizontal, 12)
+                            .background(category.color.opacity(0.06))
+                            .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 12, style: .continuous)
+                                    .strokeBorder(category.color.opacity(0.18), lineWidth: 1)
+                            )
+                            .padding(.bottom, 16)
+                        }
 
                         LazyGlossaryHighlightedContent(text: content)
                             .font(.system(size: fontSize, design: .default))
@@ -147,6 +180,81 @@ struct EnhancedContentCard: View {
         let scrollable = max(1, scrollState.contentHeight - scrollState.viewportHeight)
         let raw = (-scrollState.offset) / scrollable
         scrollProgress = min(max(raw, 0), 1)
+    }
+
+    private var parsedTable: ParsedDataTable? {
+        ParsedDataTable.parse(from: content)
+    }
+}
+
+private struct ParsedDataTable {
+    let columns: [EnhancedDataTable.Column]
+    let rows: [EnhancedDataTable.Row]
+
+    static func parse(from text: String) -> ParsedDataTable? {
+        let lines = text
+            .components(separatedBy: .newlines)
+            .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
+
+        guard let stateHeaderIndex = lines.firstIndex(of: "State") else { return nil }
+
+        let expectedHeaders = [
+            "State",
+            "Prediction Error (ε)",
+            "Precision (π)",
+            "Threshold (θₜ)",
+            "Somatic Bias (β)",
+            "Key Signature"
+        ]
+
+        guard lines.count > stateHeaderIndex + expectedHeaders.count - 1 else { return nil }
+        let actualHeaders = Array(lines[stateHeaderIndex..<(stateHeaderIndex + expectedHeaders.count)])
+        guard actualHeaders == expectedHeaders else { return nil }
+
+        let columns: [EnhancedDataTable.Column] = expectedHeaders.enumerated().map { index, header in
+            switch index {
+            case 0:
+                return .init(header: header, width: 160, alignment: .leading)
+            default:
+                return .init(header: header, width: nil, alignment: .leading)
+            }
+        }
+
+        var i = stateHeaderIndex + expectedHeaders.count
+        var rows: [EnhancedDataTable.Row] = []
+
+        func isMeaningful(_ line: String) -> Bool {
+            !line.isEmpty
+        }
+
+        while i < lines.count {
+            while i < lines.count, !isMeaningful(lines[i]) {
+                i += 1
+            }
+            if i >= lines.count { break }
+
+            var cells: [String] = []
+            cells.reserveCapacity(6)
+
+            for _ in 0..<6 {
+                guard i < lines.count else { break }
+                let line = lines[i]
+                if !isMeaningful(line) {
+                    break
+                }
+                cells.append(line)
+                i += 1
+            }
+
+            guard cells.count == 6 else {
+                break
+            }
+
+            rows.append(.init(cells: cells))
+        }
+
+        guard !rows.isEmpty else { return nil }
+        return ParsedDataTable(columns: columns, rows: rows)
     }
 }
 

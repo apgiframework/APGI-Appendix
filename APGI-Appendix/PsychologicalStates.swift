@@ -76,14 +76,159 @@ Similar parametric structure to hunger—interoceptive precision Π_i elevated 2
 
 """
 
+    @AppStorage("contentFontSize") private var fontSize: Double = 15.0
+
+    private struct StateSection: Identifiable, Hashable {
+        let id: String
+        let headerLine: String
+        let body: String
+
+        var displayTitle: String {
+            headerLine.trimmingCharacters(in: .whitespacesAndNewlines)
+        }
+    }
+
+    private struct ParsedContent {
+        let introTitle: String
+        let introBody: String
+        let sections: [StateSection]
+    }
+
+    private var parsedContent: ParsedContent {
+        let lines = psychologicalStatesIntro.split(separator: "\n", omittingEmptySubsequences: false).map(String.init)
+
+        func isStateHeader(_ line: String) -> Bool {
+            let trimmed = line.trimmingCharacters(in: .whitespacesAndNewlines)
+            guard trimmed.count >= 3 else { return false }
+            guard trimmed == trimmed.uppercased() else { return false }
+            guard trimmed.rangeOfCharacter(from: .letters) != nil else { return false }
+            guard trimmed.rangeOfCharacter(from: .lowercaseLetters) == nil else { return false }
+            return true
+        }
+
+        var headerIndices: [Int] = []
+        headerIndices.reserveCapacity(32)
+        for (idx, line) in lines.enumerated() {
+            if isStateHeader(line) {
+                headerIndices.append(idx)
+            }
+        }
+
+        let introEndIndex = headerIndices.first ?? lines.count
+        let introLines = Array(lines.prefix(introEndIndex))
+        let trimmedIntroLines = introLines.drop { $0.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }
+        let introTitle = trimmedIntroLines.first?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        let introBody: String = {
+            guard !trimmedIntroLines.isEmpty else { return "" }
+            let rest = Array(trimmedIntroLines.dropFirst())
+            return rest.joined(separator: "\n")
+        }()
+
+        var sections: [StateSection] = []
+        for (pos, start) in headerIndices.enumerated() {
+            let end = (pos + 1 < headerIndices.count) ? headerIndices[pos + 1] : lines.count
+            let headerLine = lines[start]
+            let bodyLines = Array(lines[(start + 1)..<end])
+            let body = bodyLines.joined(separator: "\n")
+            let id = headerLine.trimmingCharacters(in: .whitespacesAndNewlines)
+            sections.append(.init(id: id, headerLine: headerLine, body: body))
+        }
+
+        return ParsedContent(introTitle: introTitle, introBody: introBody, sections: sections)
+    }
+
     var body: some View {
-        EnhancedContentCard(
-            title: "Psychological States",
-            content: psychologicalStatesIntro,
-            category: .cognitive,
-            hasDataTable: true
-        )
-        .padding()
+        ScrollViewReader { proxy in
+            ScrollView {
+                LazyVStack(alignment: .leading, spacing: APGISpacing.sectionSpacing) {
+                    VStack(alignment: .leading, spacing: 12) {
+                        Text("Psychological States")
+                            .font(APGITypography.titleLarge)
+                            .foregroundStyle(.primary)
+
+                        if !parsedContent.introTitle.isEmpty {
+                            Text(parsedContent.introTitle)
+                                .font(.system(size: 18, weight: .semibold))
+                                .foregroundStyle(.primary)
+                        }
+
+                        if !parsedContent.introBody.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                            LazyGlossaryHighlightedContent(text: parsedContent.introBody)
+                                .font(.system(size: fontSize, design: .default))
+                                .lineSpacing(6)
+                                .foregroundStyle(.primary)
+                                .textSelection(.enabled)
+                        }
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(APGISpacing.cardPadding)
+                    .background {
+                        RoundedRectangle(cornerRadius: APGIRadius.lg, style: .continuous)
+                            .fill(.background)
+                            .shadow(color: Color.apgiBlue.opacity(0.08), radius: 10, y: 4)
+                    }
+                    .overlay {
+                        RoundedRectangle(cornerRadius: APGIRadius.lg, style: .continuous)
+                            .strokeBorder(Color.apgiBlue.opacity(0.18), lineWidth: 1)
+                    }
+
+                    if !parsedContent.sections.isEmpty {
+                        ScrollView(.horizontal, showsIndicators: false) {
+                            HStack(spacing: 8) {
+                                ForEach(parsedContent.sections) { section in
+                                    Button {
+                                        withAnimation(.easeInOut(duration: 0.25)) {
+                                            proxy.scrollTo(section.id, anchor: .top)
+                                        }
+                                    } label: {
+                                        Text(section.displayTitle)
+                                            .font(.system(size: 13, weight: .semibold))
+                                            .foregroundStyle(.primary)
+                                            .lineLimit(1)
+                                            .padding(.vertical, 8)
+                                            .padding(.horizontal, 12)
+                                            .background(Color.apgiBlue.opacity(0.12))
+                                            .clipShape(Capsule())
+                                            .overlay(Capsule().strokeBorder(Color.apgiBlue.opacity(0.22), lineWidth: 1))
+                                    }
+                                    .buttonStyle(.plain)
+                                }
+                            }
+                            .padding(.horizontal, 2)
+                        }
+                    }
+
+                    ForEach(parsedContent.sections) { section in
+                        VStack(alignment: .leading, spacing: 12) {
+                            Text(section.headerLine)
+                                .font(.system(size: 20, weight: .bold, design: .rounded))
+                                .foregroundStyle(.primary)
+                                .kerning(0.6)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+
+                            LazyGlossaryHighlightedContent(text: section.body)
+                                .font(.system(size: fontSize, design: .default))
+                                .lineSpacing(6)
+                                .foregroundStyle(.primary)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .textSelection(.enabled)
+                        }
+                        .id(section.id)
+                        .padding(APGISpacing.cardPadding)
+                        .background {
+                            RoundedRectangle(cornerRadius: APGIRadius.lg, style: .continuous)
+                                .fill(.background)
+                                .shadow(color: Color.apgiPurple.opacity(0.06), radius: 10, y: 4)
+                        }
+                        .overlay {
+                            RoundedRectangle(cornerRadius: APGIRadius.lg, style: .continuous)
+                                .strokeBorder(Color.apgiPurple.opacity(0.16), lineWidth: 1)
+                        }
+                    }
+                }
+                .padding(APGISpacing.screenMargin)
+            }
+        }
     }
 }
 
