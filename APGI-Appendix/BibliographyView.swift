@@ -1,6 +1,6 @@
 import SwiftUI
 
-struct BibliographyView: View {
+struct BibliographyCardView: View {
     private let bibliographyBody: String
 
     init(bibliographyBody: String = "") {
@@ -19,5 +19,5 @@ struct BibliographyView: View {
 }
 
 #Preview {
-    BibliographyView()
+    BibliographyCardView()
 }

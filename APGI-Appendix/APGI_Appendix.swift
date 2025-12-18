@@ -203,6 +203,8 @@ struct EnhancedTabContentView: View {
                 NeuromodulatoryControlsView()
             case .psychiatricDisorders:
                 PsychiatricDisordersView()
+            case .disordersConditions:
+                DisordersConditionsView()
             case .apgiStatement:
                 APGIStatementView()
             case .lifeStages:

@@ -102,6 +102,8 @@ struct NavigationButton: View {
             return "Neuromodulatory Control"
         case .psychiatricDisorders:
             return "Psychiatric Disorders"
+        case .disordersConditions:
+            return "Disorders & Conditions"
         case .apgiStatement:
             return "APGI Statement"
         case .lifeStages:

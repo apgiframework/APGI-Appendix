@@ -16,6 +16,7 @@ enum Tab: String, CaseIterable, Identifiable {
     case ignitionTimeline = "Ignition Timeline"
     case neuromodulatoryControl = "Neuromodulatory Control System"
     case psychiatricDisorders = "APGI for Psychiatric Disorders"
+    case disordersConditions = "APGI Parameter Table — Disorders & Conditions"
     case apgiStatement = "APGI Statement about Consciousness"
     case lifeStages = "APGI Parameters Across Life Stages"
     case thermodynamicEfficiency = "Thermodynamic and Evolutionary Efficiency"
@@ -43,6 +44,7 @@ enum Tab: String, CaseIterable, Identifiable {
         case .ignitionTimeline: return "clock"
         case .neuromodulatoryControl: return "switch.2"
         case .psychiatricDisorders: return "cross.case"
+        case .disordersConditions: return "tablecells"
         case .apgiStatement: return "brain.head.profile"
         case .lifeStages: return "person.2"
         case .thermodynamicEfficiency: return "flame"
@@ -65,7 +67,7 @@ enum Tab: String, CaseIterable, Identifiable {
             return .biological
         case .mappingCognitiveToApgi, .apgiToCognitive, .psychologicalStates, .apgiToPsyState:
             return .cognitive
-        case .psychiatricDisorders, .lifeStages, .thermodynamicEfficiency, .interactiveVisualizations:
+        case .psychiatricDisorders, .disordersConditions, .lifeStages, .thermodynamicEfficiency, .interactiveVisualizations:
             return .applications
         case .glossary, .bibliography:
             return .reference
@@ -89,6 +91,7 @@ enum Tab: String, CaseIterable, Identifiable {
         case .ignitionTimeline: return "Ignition Timeline"
         case .neuromodulatoryControl: return "Neuromodulatory Control"
         case .psychiatricDisorders: return "Psychiatric Disorders"
+        case .disordersConditions: return "Disorders & Conditions"
         case .apgiStatement: return "APGI Statement"
         case .lifeStages: return "Life Stages"
         case .thermodynamicEfficiency: return "Thermodynamic Efficiency"
@@ -103,7 +106,7 @@ enum Tab: String, CaseIterable, Identifiable {
         switch self {
         case .biologicalImplementation, .neuromodulatorEffects, 
              .explicitNeuromodulator, .ignitionTimeline, .lifeStages,
-             .psychologicalStates, .apgiToPsyState:
+             .psychologicalStates, .apgiToPsyState, .disordersConditions:
             return true
         default:
             return false
@@ -144,6 +147,14 @@ enum Tab: String, CaseIterable, Identifiable {
             return rawValue
         case .psychiatricDisorders:
             return rawValue
+        case .disordersConditions:
+            return "APGI Parameter Table — Disorders & Conditions\n" +
+            "Disorder\n" +
+            "Prediction Error ε (σ)\n" +
+            "Precision π (dominant channels)\n" +
+            "Threshold θₜ (%)\n" +
+            "Somatic Bias β\n" +
+            "ADHD\nAutism Spectrum Disorder\nSchizophrenia\nMajor Depressive Disorder\nGeneralized Anxiety Disorder\nPTSD"
         case .apgiStatement:
             return rawValue
         case .lifeStages:
