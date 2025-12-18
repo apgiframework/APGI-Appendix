@@ -114,8 +114,6 @@ struct NavigationButton: View {
             return "Epistemic Standards"
         case .bibliography:
             return "Bibliography"
-        case .interactiveVisualizations:
-            return "Visualizations"
         case .glossary:
             return "Glossary"
         case .apgiSimulator:

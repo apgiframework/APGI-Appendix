@@ -67,14 +67,7 @@ struct APGI_AppendixApp: App {
         }
         .defaultSize(width: 600, height: 800)
         .defaultPosition(.trailing)
-        
-        Window("Neural Circuit", id: "neural-circuit") {
-            InteractiveVisualizationsView()
-                .applyTheme()
-                .environmentObject(themeManager)
-        }
-        .defaultSize(width: 1000, height: 800)
-        
+
         Window("APGI Simulator", id: "simulator") {
             APGISimulatorView()
                 .applyTheme()
@@ -222,8 +215,6 @@ struct EnhancedTabContentView: View {
                 EpistemicStandardsView()
             case .bibliography:
                 BibliographyView()
-            case .interactiveVisualizations:
-                InteractiveVisualizationsView()
             case .glossary:
                 GlossaryView()
             case .apgiSimulator:

@@ -22,7 +22,6 @@ enum Tab: String, CaseIterable, Identifiable {
     case thermodynamicEfficiency = "Thermodynamic and Evolutionary Efficiency"
     case epistemicStandards = "Epistemic Standards"
     case bibliography = "Bibliography"
-    case interactiveVisualizations = "Interactive Visualizations"
     case glossary = "Glossary"
     case apgiSimulator = "APGI Simulator"
     
@@ -51,7 +50,6 @@ enum Tab: String, CaseIterable, Identifiable {
         case .thermodynamicEfficiency: return "flame"
         case .epistemicStandards: return "checkmark.seal"
         case .bibliography: return "books.vertical"
-        case .interactiveVisualizations: return "view.3d"
         case .glossary: return "character.book.closed"
         case .apgiSimulator: return "waveform.path.ecg.rectangle"
         }
@@ -63,7 +61,7 @@ enum Tab: String, CaseIterable, Identifiable {
             return .theoretical
         case .mathematicalModel, .apgiMapping, .parameterIdentifiability:
             return .mathematical
-        case .ignitionTimeline, .interactiveVisualizations, .apgiSimulator:
+        case .ignitionTimeline, .apgiSimulator:
             return .navigation
         case .biologicalImplementation, .neuromodulatorEffects,
              .neuromodulatoryImplementation, .explicitNeuromodulator,
@@ -101,7 +99,6 @@ enum Tab: String, CaseIterable, Identifiable {
         case .thermodynamicEfficiency: return "Thermodynamic Efficiency"
         case .epistemicStandards: return "Epistemic Standards"
         case .bibliography: return "Bibliography"
-        case .interactiveVisualizations: return "Visualizations"
         case .glossary: return "Glossary"
         case .apgiSimulator: return "APGI Simulator"
         }
@@ -170,15 +167,6 @@ enum Tab: String, CaseIterable, Identifiable {
             return rawValue
         case .bibliography:
             return rawValue
-        case .interactiveVisualizations:
-            return "Interactive Visualizations\n" +
-            "Interactive Neural Visualization\n" +
-            "Network Graph\n" +
-            "Neuromodulators\n" +
-            "Brain regions\n" +
-            "3D model\n" +
-            "Connectivity\n" +
-            "Parameters"
         case .glossary:
             return rawValue
         case .apgiSimulator:

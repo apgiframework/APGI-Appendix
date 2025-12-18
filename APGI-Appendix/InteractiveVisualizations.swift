@@ -26,10 +26,6 @@ struct InteractiveVisualizationsView: View {
             .padding(.vertical)
         }
     }
-
-    private func clampedZoom(_ value: CGFloat) -> CGFloat {
-        min(max(0.5, value), 2.5)
-    }
 }
 
 enum Neuromodulator: String, CaseIterable, Identifiable {
@@ -187,7 +183,7 @@ private struct BrainModelView: View {
         ZStack {
             BrainRegionsSceneView(highlighted: highlighted)
 
-            if !BrainRegionsSceneLoader.hasBundledAsset {
+            if !BrainRegionsSceneLoader.canLoadScene {
                 BrainModelFallbackView()
             }
         }
@@ -217,14 +213,12 @@ private enum BrainRegionsSceneLoader {
         "BrainRegions.dae"
     ]
 
-    static var hasBundledAsset: Bool {
-        assetCandidates.contains(where: { Bundle.main.url(forResource: $0, withExtension: nil) != nil })
-    }
-
-    static func loadScene() -> SCNScene? {
+    private static let cachedScene: SCNScene? = {
         for candidate in assetCandidates {
             if let url = Bundle.main.url(forResource: candidate, withExtension: nil) {
-                return try? SCNScene(url: url, options: nil)
+                if let scene = try? SCNScene(url: url, options: nil) {
+                    return scene
+                }
             }
         }
 
@@ -233,6 +227,55 @@ private enum BrainRegionsSceneLoader {
         }
 
         return nil
+    }()
+
+    private static let placeholderScene: SCNScene = {
+        let scene = SCNScene()
+
+        let hull = SCNSphere(radius: 1.45)
+        let hullMaterial = SCNMaterial()
+        hullMaterial.diffuse.contents = NSColor.systemGray.withAlphaComponent(0.16)
+        hullMaterial.lightingModel = .physicallyBased
+        hullMaterial.isDoubleSided = true
+        hull.materials = [hullMaterial]
+
+        let hullNode = SCNNode(geometry: hull)
+        hullNode.scale = SCNVector3(1.25, 0.95, 1.05)
+        scene.rootNode.addChildNode(hullNode)
+
+        let locations: [BrainRegion: SCNVector3] = [
+            .anteriorInsula: SCNVector3(-0.65, 0.10, 0.85),
+            .anteriorCingulate: SCNVector3(-0.10, 0.55, 0.95),
+            .thalamicReticularNucleus: SCNVector3(0.10, -0.05, 0.25),
+            .sensoryCortex: SCNVector3(0.85, 0.15, 0.55),
+            .basalForebrain: SCNVector3(0.20, -0.45, 0.55),
+            .rapheNuclei: SCNVector3(0.00, -0.25, -0.15),
+            .prefrontalCortex: SCNVector3(0.35, 0.75, 0.75),
+            .striatum: SCNVector3(0.65, -0.05, 0.35)
+        ]
+
+        for (region, position) in locations {
+            let marker = SCNSphere(radius: 0.18)
+            let material = SCNMaterial()
+            material.diffuse.contents = NSColor.systemTeal.withAlphaComponent(0.55)
+            material.lightingModel = .physicallyBased
+            marker.materials = [material]
+
+            let node = SCNNode(geometry: marker)
+            node.name = region.rawValue
+            node.position = position
+            scene.rootNode.addChildNode(node)
+        }
+
+        return scene
+    }()
+
+    static var canLoadScene: Bool {
+        true
+    }
+
+    static func loadScene() -> SCNScene? {
+        cachedScene ?? placeholderScene
     }
 }
 
@@ -245,10 +288,12 @@ private struct BrainRegionsSceneView: NSViewRepresentable {
         view.allowsCameraControl = true
         view.autoenablesDefaultLighting = true
         view.rendersContinuously = true
+        view.antialiasingMode = .multisampling4X
 
         if let scene = BrainRegionsSceneLoader.loadScene() {
             view.scene = scene
             context.coordinator.captureBaseMaterials(from: scene)
+            context.coordinator.configureSceneIfNeeded(scene, in: view)
             context.coordinator.applyHighlight(highlighted, in: scene)
         }
 
@@ -260,11 +305,13 @@ private struct BrainRegionsSceneView: NSViewRepresentable {
             if let scene = BrainRegionsSceneLoader.loadScene() {
                 nsView.scene = scene
                 context.coordinator.captureBaseMaterials(from: scene)
+                context.coordinator.configureSceneIfNeeded(scene, in: nsView)
                 context.coordinator.applyHighlight(highlighted, in: scene)
             }
             return
         }
 
+        context.coordinator.configureSceneIfNeeded(scene, in: nsView)
         context.coordinator.applyHighlight(highlighted, in: scene)
     }
 
@@ -274,6 +321,7 @@ private struct BrainRegionsSceneView: NSViewRepresentable {
 
     final class Coordinator {
         private var baseMaterialsByNodeName: [String: [SCNMaterial]] = [:]
+        private var didConfigureScene = false
 
         func captureBaseMaterials(from scene: SCNScene) {
             guard baseMaterialsByNodeName.isEmpty else { return }
@@ -284,6 +332,53 @@ private struct BrainRegionsSceneView: NSViewRepresentable {
                 }
                 baseMaterialsByNodeName[name] = materials.map { $0.copy() as? SCNMaterial ?? $0 }
             }
+        }
+
+        func configureSceneIfNeeded(_ scene: SCNScene, in view: SCNView) {
+            guard !didConfigureScene else { return }
+
+            if let cameraNode = scene.rootNode.enumerateHierarchyFirst(where: { $0.camera != nil }) {
+                view.pointOfView = cameraNode
+            } else {
+                let (center, radius) = scene.rootNode.approximateBounds()
+                let cameraNode = SCNNode()
+                cameraNode.camera = SCNCamera()
+                cameraNode.camera?.zNear = max(0.01, Double(radius) * 0.01)
+                cameraNode.camera?.zFar = max(1000, Double(radius) * 20)
+                let cameraDistance = max(2.5 as CGFloat, radius * (2.2 as CGFloat))
+                cameraNode.position = SCNVector3(center.x, center.y, center.z + cameraDistance)
+                cameraNode.look(at: center)
+                scene.rootNode.addChildNode(cameraNode)
+                view.pointOfView = cameraNode
+            }
+
+            if scene.rootNode.enumerateHierarchyFirst(where: { $0.light != nil }) == nil {
+                let (center, radius) = scene.rootNode.approximateBounds()
+
+                let key = SCNNode()
+                key.light = SCNLight()
+                key.light?.type = .omni
+                key.light?.intensity = 900
+                let keyPos = SCNVector3(center.x + radius, center.y + radius, center.z + radius)
+                key.position = keyPos
+                scene.rootNode.addChildNode(key)
+
+                let fill = SCNNode()
+                fill.light = SCNLight()
+                fill.light?.type = .omni
+                fill.light?.intensity = 450
+                let fillPos = SCNVector3(center.x - radius, center.y, center.z + radius)
+                fill.position = fillPos
+                scene.rootNode.addChildNode(fill)
+
+                let ambient = SCNNode()
+                ambient.light = SCNLight()
+                ambient.light?.type = .ambient
+                ambient.light?.intensity = 250
+                scene.rootNode.addChildNode(ambient)
+            }
+
+            didConfigureScene = true
         }
 
         func applyHighlight(_ regions: [BrainRegion], in scene: SCNScene) {
@@ -313,6 +408,78 @@ private struct BrainRegionsSceneView: NSViewRepresentable {
 private extension BrainRegion {
     var nodeName: String {
         rawValue
+    }
+}
+
+private extension SCNNode {
+    func enumerateHierarchyFirst(where predicate: (SCNNode) -> Bool) -> SCNNode? {
+        if predicate(self) { return self }
+        for child in childNodes {
+            if let found = child.enumerateHierarchyFirst(where: predicate) {
+                return found
+            }
+        }
+        return nil
+    }
+
+    func approximateBounds() -> (center: SCNVector3, radius: CGFloat) {
+        var minX = CGFloat.greatestFiniteMagnitude
+        var minY = CGFloat.greatestFiniteMagnitude
+        var minZ = CGFloat.greatestFiniteMagnitude
+        var maxX = -CGFloat.greatestFiniteMagnitude
+        var maxY = -CGFloat.greatestFiniteMagnitude
+        var maxZ = -CGFloat.greatestFiniteMagnitude
+        var found = false
+
+        enumerateHierarchy { node, _ in
+            guard let geometry = node.geometry else { return }
+            let localMin = geometry.boundingBox.min
+            let localMax = geometry.boundingBox.max
+
+            let corners = [
+                SCNVector3(localMin.x, localMin.y, localMin.z),
+                SCNVector3(localMin.x, localMin.y, localMax.z),
+                SCNVector3(localMin.x, localMax.y, localMin.z),
+                SCNVector3(localMin.x, localMax.y, localMax.z),
+                SCNVector3(localMax.x, localMin.y, localMin.z),
+                SCNVector3(localMax.x, localMin.y, localMax.z),
+                SCNVector3(localMax.x, localMax.y, localMin.z),
+                SCNVector3(localMax.x, localMax.y, localMax.z)
+            ]
+
+            for corner in corners {
+                let world = node.convertPosition(corner, to: self)
+                let wx = CGFloat(world.x)
+                let wy = CGFloat(world.y)
+                let wz = CGFloat(world.z)
+
+                minX = min(minX, wx)
+                minY = min(minY, wy)
+                minZ = min(minZ, wz)
+                maxX = max(maxX, wx)
+                maxY = max(maxY, wy)
+                maxZ = max(maxZ, wz)
+                found = true
+            }
+        }
+
+        if !found {
+            return (SCNVector3(0, 0, 0), 1)
+        }
+
+        let cx = (minX + maxX) / 2
+        let cy = (minY + maxY) / 2
+        let cz = (minZ + maxZ) / 2
+
+        let dx = maxX - minX
+        let dy = maxY - minY
+        let dz = maxZ - minZ
+        let distSq = (dx * dx) + (dy * dy) + (dz * dz)
+        let diameter = sqrt(distSq)
+        let radius = max(0.1 as CGFloat, diameter / 2)
+
+        let center = SCNVector3(x: cx, y: cy, z: cz)
+        return (center, radius)
     }
 }
 
@@ -389,23 +556,32 @@ struct NetworkGraphView: View {
     @GestureState private var gestureZoom: CGFloat = 1.0
     @State private var pan: CGSize = .zero
     @GestureState private var dragOffset: CGSize = .zero
+    @State private var canvasSize: CGSize = .zero
 
     var body: some View {
-        Canvas { context, size in
-            let center = CGPoint(x: size.width / 2, y: size.height / 2)
-            let offset = CGSize(width: pan.width + dragOffset.width, height: pan.height + dragOffset.height)
-            let effectiveZoom = clampedZoom(zoom * gestureZoom)
+        GeometryReader { proxy in
+            Canvas { context, size in
+                let center = CGPoint(x: size.width / 2, y: size.height / 2)
+                let offset = CGSize(width: pan.width + dragOffset.width, height: pan.height + dragOffset.height)
+                let effectiveZoom = clampedZoom(zoom * gestureZoom)
 
-            for node in nodes {
-                for connectionId in node.connections {
-                    if let target = nodes.first(where: { $0.id == connectionId }) {
-                        drawConnection(context, from: node, to: target, center: center, offset: offset, zoom: effectiveZoom)
+                for node in nodes {
+                    for connectionId in node.connections {
+                        if let target = nodes.first(where: { $0.id == connectionId }) {
+                            drawConnection(context, from: node, to: target, center: center, offset: offset, zoom: effectiveZoom)
+                        }
                     }
                 }
-            }
 
-            for node in nodes {
-                drawNode(context, node: node, center: center, offset: offset, zoom: effectiveZoom, isSelected: node.id == selectedNode?.id)
+                for node in nodes {
+                    drawNode(context, node: node, center: center, offset: offset, zoom: effectiveZoom, isSelected: node.id == selectedNode?.id)
+                }
+            }
+            .onAppear {
+                canvasSize = proxy.size
+            }
+            .onChange(of: proxy.size) {
+                canvasSize = proxy.size
             }
         }
         .background(.quaternary.opacity(0.3))
@@ -447,13 +623,13 @@ struct NetworkGraphView: View {
         DragGesture(minimumDistance: 0)
             .onEnded { value in
                 let point = value.location
-                selectedNode = node(at: point, canvasSize: value.startLocation == .zero ? nil : nil)
+                selectedNode = node(at: point, canvasSize: canvasSize)
             }
     }
 
-    private func node(at point: CGPoint, canvasSize: CGSize?) -> GraphNode? {
+    private func node(at point: CGPoint, canvasSize: CGSize) -> GraphNode? {
         let hitRadius: CGFloat = 18
-        let center = CGPoint(x: (canvasSize?.width ?? 0) / 2, y: (canvasSize?.height ?? 0) / 2)
+        let center = CGPoint(x: canvasSize.width / 2, y: canvasSize.height / 2)
         let offset = CGSize(width: pan.width, height: pan.height)
         let effectiveZoom = clampedZoom(zoom)
 
@@ -498,6 +674,10 @@ struct NetworkGraphView: View {
 
         let text = Text(node.title).font(.caption2.weight(.semibold)).foregroundStyle(.primary)
         context.draw(text, at: CGPoint(x: p.x, y: p.y - r - 10), anchor: .center)
+    }
+
+    private func clampedZoom(_ value: CGFloat) -> CGFloat {
+        min(max(0.5, value), 2.5)
     }
 
     private static func makeDefaultNodes() -> [GraphNode] {

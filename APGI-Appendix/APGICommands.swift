@@ -25,10 +25,6 @@ struct APGICommands: Commands {
                 navigateToTab(.ignitionTimeline)
             }
 
-            Button("Visualizations") {
-                navigateToTab(.interactiveVisualizations)
-            }
-
             Divider()
 
             Button("Open Timeline Window") {
