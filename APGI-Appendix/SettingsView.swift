@@ -1,5 +1,11 @@
 import SwiftUI
 
+struct EnhancedSettingsView: View {
+    var body: some View {
+        SettingsView()
+    }
+}
+
 struct SettingsView: View {
     @AppStorage("contentFontSize") private var fontSize: Double = 15.0
     @AppStorage("sidebarVisible") private var sidebarVisible: Bool = true

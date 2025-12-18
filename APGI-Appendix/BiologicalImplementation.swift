@@ -33,9 +33,9 @@ Orexin | Coordinate β, others | Context-dependent β; meta-modulation | OX1R, O
 
     var body: some View {
         EnhancedContentCard(
-            title: "Biological Implementation: Explicit Neural Mapping",
+            title: "Biological Implementation",
             content: implementationBody,
-            category: .biological,
+            category: SectionCategory.biological,
             hasDataTable: true
         )
         .padding()

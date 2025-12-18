@@ -396,7 +396,7 @@ Angiotensin signaling, cognitive impairment
         EnhancedContentCard(
             title: "APGI Parameters → Psychological States",
             content: mappingBody,
-            category: .cognitive,
+            category: SectionCategory.cognitive,
             hasDataTable: true
         )
         .padding()

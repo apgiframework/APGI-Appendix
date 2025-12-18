@@ -17,7 +17,7 @@ While energy acquisition provides the core selective pressure, the content and s
         EnhancedContentCard(
             title: "APGI Statement about Consciousness",
             content: statementBody,
-            category: .theoretical,
+            category: SectionCategory.theoretical,
             hasDataTable: false
         )
         .padding()

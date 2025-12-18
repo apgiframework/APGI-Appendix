@@ -23,7 +23,7 @@ dSₜ/dt (Rate of Surprise Change) | Urgency Perception, Time Pressure Sensitivi
         EnhancedContentCard(
             title: "APGI Parameters → Cognitive Constructs",
             content: mappingBody,
-            category: .cognitive,
+            category: SectionCategory.cognitive,
             hasDataTable: true
         )
         .padding()

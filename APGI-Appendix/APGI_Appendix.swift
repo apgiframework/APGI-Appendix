@@ -1,206 +1,233 @@
 import SwiftUI
 import AppKit
-import UniformTypeIdentifiers
+
+// MARK: - Updated Main App Entry Point
 
 @main
 struct APGI_AppendixApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
+    @StateObject private var themeManager = ThemeManager.shared
+    @StateObject private var onboardingManager = OnboardingManager.shared
+    @StateObject private var navigationManager = KeyboardNavigationManager.shared
     
     var body: some Scene {
         WindowGroup("APGI Framework") {
-            MainContentView()
+            OnboardingContainer {
+                MainContentView()
+            }
+            .applyTheme()
+            .environmentObject(themeManager)
+            .environmentObject(onboardingManager)
+            .environmentObject(navigationManager)
         }
         .commands {
             APGICommands()
+            
+            // Help menu additions
+            CommandGroup(replacing: .help) {
+                Button("APGI Help") {
+                    showHelp()
+                }
+                .keyboardShortcut("?", modifiers: [.command, .shift])
+                
+                Divider()
+                
+                Button("Take a Tour") {
+                    onboardingManager.startOnboarding()
+                }
+                
+                Button("What's New") {
+                    showWhatsNew()
+                }
+                
+                Button("Quick Start Guide") {
+                    showQuickStart()
+                }
+                
+                Divider()
+                
+                Button("Keyboard Shortcuts") {
+                    navigationManager.showKeyboardShortcuts = true
+                }
+                .keyboardShortcut("/", modifiers: [.command])
+            }
         }
-
+        
         Window("Neural Timeline", id: "timeline") {
             IgnitionTimelineView()
+                .applyTheme()
+                .environmentObject(themeManager)
         }
         .defaultSize(width: 1200, height: 800)
-
+        
         Window("Glossary", id: "glossary") {
             GlossaryView()
+                .applyTheme()
+                .environmentObject(themeManager)
         }
         .defaultSize(width: 600, height: 800)
         .defaultPosition(.trailing)
-
+        
+        Window("Neural Circuit", id: "neural-circuit") {
+            InteractiveVisualizationsView()
+                .applyTheme()
+                .environmentObject(themeManager)
+        }
+        .defaultSize(width: 1000, height: 800)
+        
         Settings {
-            SettingsView()
+            EnhancedSettingsView()
+                .applyTheme()
+                .environmentObject(themeManager)
         }
-    }
-    
-    // Menu action implementations
-    private func showAboutDialog() {
-        let alert = NSAlert()
-        alert.messageText = "APGI Appendix"
-        alert.informativeText = "Version 1.0\n\nA comprehensive application for exploring consciousness theories, integrating Global Neuronal Workspace Theory with predictive processing through APGI (Awareness-Precision-Gain-Ignition) model.\n\n© 2025"
-        alert.alertStyle = .informational
-        alert.runModal()
-    }
-    
-    private func createNewWindow() {
-        // Create a new window with ContentView
-        let newWindow = NSWindow(
-            contentRect: NSRect(x: 100, y: 100, width: 800, height: 600),
-            styleMask: [.titled, .closable, .miniaturizable, .resizable],
-            backing: .buffered,
-            defer: false
-        )
-        newWindow.title = "APGI Appendix"
-        newWindow.contentView = NSHostingView(rootView: ContentView())
-        newWindow.makeKeyAndOrderFront(nil)
-    }
-    
-    private func showOpenDialog() {
-        let panel = NSOpenPanel()
-        panel.allowsMultipleSelection = false
-        panel.canChooseDirectories = false
-        panel.canChooseFiles = true
-        if panel.runModal() == .OK {
-            print("File selected: \(panel.url?.path ?? "")")
-        }
-    }
-    
-    private func saveDocument() {
-        print("Save document")
-    }
-    
-    private func saveDocumentAs() {
-        let panel = NSSavePanel()
-        panel.allowedContentTypes = [.plainText, .pdf]
-        if panel.runModal() == .OK {
-            print("Save to: \(panel.url?.path ?? "")")
-        }
-    }
-    
-    private func printDocument() {
-        print("Print document")
-    }
-    
-    private func closeWindow() {
-        if let window = NSApplication.shared.keyWindow {
-            window.close()
-        }
-    }
-    
-    private func undo() {
-        if let responder = NSApplication.shared.keyWindow?.firstResponder as? NSTextView {
-            responder.undoManager?.undo()
-        }
-    }
-    
-    private func redo() {
-        if let responder = NSApplication.shared.keyWindow?.firstResponder as? NSTextView {
-            responder.undoManager?.redo()
-        }
-    }
-    
-    private func cut() {
-        NSPasteboard.general.clearContents()
-        if let responder = NSApplication.shared.keyWindow?.firstResponder as? NSTextView {
-            responder.cut(nil)
-        }
-    }
-    
-    private func copy() {
-        NSPasteboard.general.clearContents()
-        if let responder = NSApplication.shared.keyWindow?.firstResponder as? NSTextView {
-            responder.copy(nil)
-        }
-    }
-    
-    private func paste() {
-        if let responder = NSApplication.shared.keyWindow?.firstResponder as? NSTextView {
-            responder.paste(nil)
-        }
-    }
-    
-    private func pasteAndMatchStyle() {
-        if let responder = NSApplication.shared.keyWindow?.firstResponder as? NSTextView {
-            responder.pasteAsPlainText(nil)
-        }
-    }
-    
-    private func selectAll() {
-        if let responder = NSApplication.shared.keyWindow?.firstResponder as? NSTextView {
-            responder.selectAll(nil)
-        }
-    }
-    
-    private func showFind() {
-        print("Show find")
-    }
-    
-    private func showFindAndReplace() {
-        print("Show find and replace")
-    }
-    
-    private func zoomIn() {
-        print("Zoom in")
-    }
-    
-    private func zoomOut() {
-        print("Zoom out")
-    }
-    
-    private func actualSize() {
-        print("Actual size")
-    }
-    
-    private func toggleFullScreen() {
-        if let window = NSApplication.shared.keyWindow {
-            window.toggleFullScreen(nil)
-        }
-    }
-    
-    private func minimizeWindow() {
-        if let window = NSApplication.shared.keyWindow {
-            window.miniaturize(nil)
-        }
-    }
-    
-    private func zoomWindow() {
-        if let window = NSApplication.shared.keyWindow {
-            window.zoom(nil)
-        }
-    }
-    
-    private func bringAllToFront() {
-        NSApplication.shared.arrangeInFront(nil)
     }
     
     private func showHelp() {
-        print("Show help")
-    }
-    
-    private func openWebsite() {
-        if let url = URL(string: "https://example.com") {
+        if let url = URL(string: "https://apgi-framework.com/help") {
             NSWorkspace.shared.open(url)
         }
     }
     
-    private func reportIssue() {
-        if let url = URL(string: "https://github.com/example/issues") {
-            NSWorkspace.shared.open(url)
-        }
+    private func showWhatsNew() {
+        let window = NSWindow(
+            contentRect: NSRect(x: 0, y: 0, width: 400, height: 450),
+            styleMask: [.titled, .closable],
+            backing: .buffered,
+            defer: false
+        )
+        window.title = "What's New"
+        window.contentView = NSHostingView(rootView: WhatsNewView())
+        window.center()
+        window.makeKeyAndOrderFront(nil)
     }
     
-    private func checkForUpdates() {
-        print("Check for updates")
-    }
-    
-    private func quitApp() {
-        NSApplication.shared.terminate(nil)
+    private func showQuickStart() {
+        let window = NSWindow(
+            contentRect: NSRect(x: 0, y: 0, width: 400, height: 500),
+            styleMask: [.titled, .closable],
+            backing: .buffered,
+            defer: false
+        )
+        window.title = "Quick Start"
+        window.contentView = NSHostingView(rootView: QuickStartPanel())
+        window.center()
+        window.makeKeyAndOrderFront(nil)
     }
 }
 
+// MARK: - App Delegate
+
 class AppDelegate: NSObject, NSApplicationDelegate {
+    func applicationDidFinishLaunching(_ notification: Notification) {
+        // Setup any initial configurations
+        setupAppearance()
+    }
+    
     func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {
         return .terminateNow
     }
     
-    func applicationDidFinishLaunching(_ notification: Notification) {
-        // Additional setup if needed
+    private func setupAppearance() {
+        // Apply saved theme
+        ThemeManager.shared.applyTheme()
     }
+}
+
+// MARK: - Theme Toggle Button
+
+struct ThemeToggleButton: View {
+    @ObservedObject private var themeManager = ThemeManager.shared
+    
+    var body: some View {
+        Menu {
+            ForEach(AppTheme.allCases) { theme in
+                Button {
+                    themeManager.selectedTheme = theme
+                } label: {
+                    HStack {
+                        Image(systemName: theme.icon)
+                        Text(theme.rawValue)
+                        if themeManager.selectedTheme == theme {
+                            Image(systemName: "checkmark")
+                        }
+                    }
+                }
+            }
+            
+            Divider()
+            
+            Toggle("High Contrast", isOn: $themeManager.highContrastMode)
+        } label: {
+            Image(systemName: themeManager.selectedTheme.icon)
+        }
+        .help("Appearance Settings")
+    }
+}
+
+// MARK: - Updated Tab Content View with Enhanced Cards
+
+struct EnhancedTabContentView: View {
+    let tab: Tab
+    @Binding var selectedTab: Tab
+    
+    var body: some View {
+        Group {
+            switch tab {
+            case .methodology:
+                MethodologyView()
+            case .mathematicalModel:
+                MathematicalModelView()
+            case .apgiMapping:
+                ApgiMappingView()
+            case .parameterIdentifiability:
+                ParameterIdentifiabilityView()
+            case .biologicalImplementation:
+                BiologicalImplementationView()
+            case .neuromodulatorEffects:
+                NeuromodulatorEffectsView()
+            case .neuromodulatoryImplementation:
+                NeuromodulatoryImplementationView()
+            case .explicitNeuromodulator:
+                ExplicitNeuromodulatorsView()
+            case .mappingCognitiveToApgi:
+                MappingCognitiveToApgiView()
+            case .apgiToCognitive:
+                ApgiToCognitiveView()
+            case .psychologicalStates:
+                PsychologicalStatesView()
+            case .apgiToPsyState:
+                ApgiToPsyStateView()
+            case .ignitionTimeline:
+                IgnitionTimelineView()
+            case .neuromodulatoryControl:
+                NeuromodulatoryControlsView()
+            case .psychiatricDisorders:
+                PsychiatricDisordersView()
+            case .apgiStatement:
+                APGIStatementView()
+            case .lifeStages:
+                LifeStagesView()
+            case .thermodynamicEfficiency:
+                ThermodynamicEfficiencyView()
+            case .epistemicStandards:
+                EpistemicStandardsView()
+            case .bibliography:
+                BibliographyView()
+            case .interactiveVisualizations:
+                InteractiveVisualizationsView()
+            case .glossary:
+                GlossaryView()
+            }
+        }
+    }
+}
+
+// MARK: - Preview
+
+#Preview("Main App") {
+    MainContentView()
+        .environmentObject(ThemeManager.shared)
+        .environmentObject(OnboardingManager.shared)
+        .environmentObject(KeyboardNavigationManager.shared)
+        .frame(width: 1200, height: 800)
 }
