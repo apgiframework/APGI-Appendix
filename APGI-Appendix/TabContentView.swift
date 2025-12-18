@@ -53,6 +53,8 @@ struct TabContentView: View {
                 InteractiveVisualizationsView()
             case .glossary:
                 GlossaryView()
+            case .apgiSimulator:
+                APGISimulatorView()
             }
         }
     }

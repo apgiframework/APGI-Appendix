@@ -75,6 +75,13 @@ struct APGI_AppendixApp: App {
         }
         .defaultSize(width: 1000, height: 800)
         
+        Window("APGI Simulator", id: "simulator") {
+            APGISimulatorView()
+                .applyTheme()
+                .environmentObject(themeManager)
+        }
+        .defaultSize(width: 1000, height: 850)
+        
         Settings {
             EnhancedSettingsView()
                 .applyTheme()
@@ -219,6 +226,8 @@ struct EnhancedTabContentView: View {
                 InteractiveVisualizationsView()
             case .glossary:
                 GlossaryView()
+            case .apgiSimulator:
+                APGISimulatorView()
             }
         }
     }

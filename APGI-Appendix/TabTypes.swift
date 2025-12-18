@@ -24,6 +24,7 @@ enum Tab: String, CaseIterable, Identifiable {
     case bibliography = "Bibliography"
     case interactiveVisualizations = "Interactive Visualizations"
     case glossary = "Glossary"
+    case apgiSimulator = "APGI Simulator"
     
     var id: String { rawValue }
     
@@ -52,6 +53,7 @@ enum Tab: String, CaseIterable, Identifiable {
         case .bibliography: return "books.vertical"
         case .interactiveVisualizations: return "view.3d"
         case .glossary: return "character.book.closed"
+        case .apgiSimulator: return "waveform.path.ecg.rectangle"
         }
     }
     
@@ -67,7 +69,7 @@ enum Tab: String, CaseIterable, Identifiable {
             return .biological
         case .mappingCognitiveToApgi, .apgiToCognitive, .psychologicalStates, .apgiToPsyState:
             return .cognitive
-        case .psychiatricDisorders, .disordersConditions, .lifeStages, .thermodynamicEfficiency, .interactiveVisualizations:
+        case .psychiatricDisorders, .disordersConditions, .lifeStages, .thermodynamicEfficiency, .interactiveVisualizations, .apgiSimulator:
             return .applications
         case .glossary, .bibliography:
             return .reference
@@ -99,6 +101,7 @@ enum Tab: String, CaseIterable, Identifiable {
         case .bibliography: return "Bibliography"
         case .interactiveVisualizations: return "Visualizations"
         case .glossary: return "Glossary"
+        case .apgiSimulator: return "APGI Simulator"
         }
     }
     
@@ -175,6 +178,8 @@ enum Tab: String, CaseIterable, Identifiable {
             "Connectivity\n" +
             "Parameters"
         case .glossary:
+            return rawValue
+        case .apgiSimulator:
             return rawValue
         }
     }

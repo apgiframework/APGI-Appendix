@@ -118,6 +118,8 @@ struct NavigationButton: View {
             return "Visualizations"
         case .glossary:
             return "Glossary"
+        case .apgiSimulator:
+            return "APGI Simulator"
         }
     }
 }

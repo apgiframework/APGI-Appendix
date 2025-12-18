@@ -46,7 +46,7 @@ final class TableParser {
         var inTable = false
         var tableTitle: String?
         
-        for (index, line) in lines.enumerated() {
+        for (_, line) in lines.enumerated() {
             let trimmed = line.trimmingCharacters(in: .whitespaces)
             
             // Detect table row (contains | and has content on both sides)

@@ -14,6 +14,11 @@ struct APGICommands: Commands {
                 openGlossaryWindow()
             }
             .keyboardShortcut("g", modifiers: [.command])
+
+            Button("Open APGI Simulator") {
+                openSimulatorWindow()
+            }
+            .keyboardShortcut("m", modifiers: [.command])
             
             Button("Search Framework") {
                 focusSearch()
@@ -95,6 +100,10 @@ struct APGICommands: Commands {
 
     private func openGlossaryWindow() {
         openWindow(id: "glossary")
+    }
+    
+    private func openSimulatorWindow() {
+        openWindow(id: "simulator")
     }
     
     private func focusSearch() {
