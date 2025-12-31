@@ -1,44 +1,59 @@
 # APGI Appendix - TODO List
 
-## 🔄 Missing View Implementations
+## 🔄 Remaining View Implementations
 
-Several content views referenced but not fully implemented:
-- **WhatsNewView** - referenced in main app but file doesn't exist
-- **QuickStartPanel** - referenced but missing implementation
-- **FocusModeView** - referenced but incomplete implementation
-- **FontSizeControl** - used in toolbar but not defined
+Some content views still need attention:
+- **WhatsNewView** - may need update integration with new app update system
+- **QuickStartPanel** - referenced but implementation status unclear
+- **FocusModeView** - referenced in consolidated navigation, needs verification
+- **FontSizeControl** - should be integrated in MainContentView toolbar
+- **PerformanceMonitor** - used in simulator but implementation status unclear
 
 ## 🚧 Remaining Issues
 
-### Navigation System
-- Two different navigation systems (ContentView vs MainContentView) still need consolidation
-- Search navigation could be more intuitive
+### Documentation
+- Complex mathematical models lack inline comments
+- Simulator algorithms need explanatory documentation
+- Network integration and TableParser need usage documentation
 
 ### Code Quality
 - Some magic numbers in simulator parameters
 - Inconsistent naming conventions (some views use "View" suffix, others don't)
-- Missing documentation for complex mathematical models
+- Verify all imports are properly updated after consolidation
 
 ### User Experience
 - Limited feedback for some user actions
 - Some UI elements could be more responsive
-
-### Performance
-- Large content files loaded synchronously
-- No lazy loading for heavy visualizations
-- Memory usage could be optimized for CoreML operations
+- Network connectivity feedback could be enhanced
 
 ## 🎯 Missing Features
 
 ### High Priority
-- **Complete Help System**: Implement missing WhatsNewView and QuickStartPanel
-- **Focus Mode**: Complete the focus mode implementation
-- **Error Recovery**: Add comprehensive error handling throughout non-CoreML areas
-- **Export Functionality**: PDF export not implemented (only clipboard copy)
+- **Verify Help System**: Ensure WhatsNewView works with app update system
+- **Complete Focus Mode**: Verify and complete focus mode in MainContentView
+- **Error Recovery**: Add comprehensive error handling for network operations
 
 ### Medium Priority
-- **User Preferences**: Enhanced settings with more customization options
-- **Performance Optimization**: Lazy loading and memory optimization
-- **Advanced Search**: Full-text search with highlighting improvements
+- **User Preferences**: Enhanced settings with network customization options
+- **Advanced Search**: Full-text search with remote content integration
+- **Data Persistence**: Enhanced bookmark management with cloud sync potential
+
+### Low Priority
+- **Analytics/Telemetry**: Usage tracking and performance monitoring
+- **Advanced Export**: HTML, EPUB, and batch export functionality (beyond current table export)
+- **Data Synchronization**: iCloud sync for bookmarks and settings
+
+## 📊 Current Feature Status
+
+### 🔄 In Progress
+- Help system verification and enhancement
+- Error recovery for network operations
+- Focus mode verification in consolidated navigation
+
+### ❌ Not Started
+- User analytics and telemetry
+- Advanced export formats (HTML, EPUB)
+- Data synchronization services
+- Performance monitoring implementation
 
 

@@ -1,16 +1,6 @@
 import SwiftUI
 
-// MARK: - Table Data Models
-
-struct ParsedTable: Identifiable, Equatable {
-    let id = UUID()
-    let headers: [String]
-    let rows: [[String]]
-    let title: String?
-    
-    var columnCount: Int { headers.count }
-    var rowCount: Int { rows.count }
-}
+// MARK: - Content Segments
 
 struct TableParseResult {
     let textSegments: [ContentSegment]
@@ -28,12 +18,10 @@ enum ContentSegment: Identifiable {
     }
 }
 
-// MARK: - Table Parser
+// MARK: - Simple Table Parser Wrapper
 
-final class TableParser {
-    
-    static let shared = TableParser()
-    
+final class SimpleTableParser {
+    static let shared = SimpleTableParser()
     private init() {}
     
     /// Parse content string and extract tables from pipe-delimited format
@@ -67,7 +55,7 @@ final class TableParser {
                     // Flush accumulated text
                     if !currentTextLines.isEmpty {
                         let text = currentTextLines.joined(separator: "\n")
-                        if !text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                        if !text.trimmingCharacters(in: CharacterSet.whitespacesAndNewlines).isEmpty {
                             segments.append(.text(text))
                         }
                         currentTextLines = []
@@ -97,7 +85,7 @@ final class TableParser {
         
         if !currentTextLines.isEmpty {
             let text = currentTextLines.joined(separator: "\n")
-            if !text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            if !text.trimmingCharacters(in: CharacterSet.whitespacesAndNewlines).isEmpty {
                 segments.append(.text(text))
             }
         }
@@ -146,7 +134,8 @@ final class TableParser {
             return normalized
         }
         
-        return ParsedTable(headers: headers, rows: normalizedRows, title: title)
+        let metadata = TableMetadata(title: title)
+        return ParsedTable(headers: headers, rows: normalizedRows, metadata: metadata)
     }
     
     private func parseTableRow(_ line: String) -> [String] {
@@ -160,8 +149,6 @@ final class TableParser {
             .map { $0.trimmingCharacters(in: .whitespaces) }
     }
 }
-
-// MARK: - Table View Components
 
 struct APGITableView: View {
     let table: ParsedTable
@@ -179,7 +166,7 @@ struct APGITableView: View {
     }
 
     private func normalizedNumber(_ raw: String) -> Double? {
-        let trimmed = raw.trimmingCharacters(in: .whitespacesAndNewlines)
+        let trimmed = raw.trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
         guard !trimmed.isEmpty else { return nil }
         let cleaned = trimmed
             .replacingOccurrences(of: ",", with: "")
@@ -193,7 +180,7 @@ struct APGITableView: View {
         var sampleCount = 0
         for row in table.rows {
             guard index < row.count else { continue }
-            let v = row[index].trimmingCharacters(in: .whitespacesAndNewlines)
+            let v = row[index].trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
             guard !v.isEmpty else { continue }
             sampleCount += 1
             if normalizedNumber(v) != nil { numericCount += 1 }
@@ -477,7 +464,7 @@ struct ParsedContentView: View {
     @AppStorage("contentFontSize") private var fontSize: Double = 15.0
     
     private var segments: [ContentSegment] {
-        TableParser.shared.parse(content).textSegments
+        SimpleTableParser.shared.parse(content).textSegments
     }
     
     var body: some View {

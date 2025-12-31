@@ -3,7 +3,72 @@ import Combine
 import AppKit
 import UniformTypeIdentifiers
 
+@MainActor
+final class BibliographyManager: ObservableObject {
+    @Published var remoteBibliography: String = ""
+    @Published var isLoading = false
+    @Published var lastError: NetworkError?
+    @Published var showRemoteOnly = false
+    
+    private let networkManager = NetworkManager.shared
+    
+    func fetchRemoteBibliography() async {
+        guard let url = networkManager.validateURL("https://api.apgi-framework.org/bibliography.txt") else {
+            lastError = .invalidURL
+            return
+        }
+        
+        isLoading = true
+        lastError = nil
+        
+        do {
+            let data = try await networkManager.fetchExternalResourceWithFallback(
+                primaryURL: url,
+                fallbackURL: networkManager.validateURL("https://raw.githubusercontent.com/apgi/framework/main/bibliography.txt")
+            )
+            
+            remoteBibliography = String(data: data, encoding: .utf8) ?? ""
+            
+        } catch let error as NetworkError {
+            lastError = error
+        } catch {
+            lastError = .unknown(error)
+        }
+        
+        isLoading = false
+    }
+    
+    func getCombinedBibliography() -> String {
+        if showRemoteOnly && !remoteBibliography.isEmpty {
+            return remoteBibliography
+        }
+        
+        let localBibliography = """
+Baars, B. J. (1988). A cognitive theory of consciousness. Cambridge University Press.
+
+Barrett, L. F., & Seth, A. K. (2011). Interoceptive inference in the brain. Nature Reviews Neuroscience, 12(10), 665-679.
+
+Clark, A. (2013). Whatever next? Predictive brains, situated agents, and the future of cognitive science. Behavioral and Brain Sciences, 36(3), 181-204.
+
+Friston, K. (2010). The free-energy principle: a unified brain theory? Nature Reviews Neuroscience, 11(2), 127-138.
+
+Hohwy, J. (2013). The predictive mind. Oxford University Press.
+
+Seth, A. K. (2013). Interoceptive inference, emotion, and the embodied self. Trends in Cognitive Sciences, 17(11), 565-573.
+
+"""
+        
+        if !remoteBibliography.isEmpty {
+            return localBibliography + "\n\n--- Remote Bibliography ---\n\n" + remoteBibliography
+        }
+        
+        return localBibliography
+    }
+}
+
 struct BibliographyView: View {
+    @StateObject private var bibliographyManager = BibliographyManager()
+    
     private let bibliographyBody = """
 
 Baars, B. J. (1988). A cognitive theory of consciousness. Cambridge University Press.
@@ -237,13 +302,61 @@ Open Science Collaboration. (2015). Estimating the reproducibility of psychologi
 Simmons, J. P., Nelson, L. D., & Simonsohn, U. (2011). False-positive psychology: Undisclosed flexibility in data collection and analysis allows presenting anything as significant. Psychological Science, 22(11), 1359–1366.
 """
     var body: some View {
-        EnhancedContentCard(
-            title: "Bibliography",
-            content: bibliographyBody,
-            category: SectionCategory.reference,
-            hasDataTable: false
-        )
-        .padding()
+        VStack(spacing: 0) {
+            HStack {
+                Text("Bibliography")
+                    .font(.title.bold())
+                
+                Spacer()
+                
+                Toggle("Remote Only", isOn: $bibliographyManager.showRemoteOnly)
+                    .toggleStyle(.switch)
+                    .disabled(bibliographyManager.remoteBibliography.isEmpty)
+                
+                Button("Refresh") {
+                    Task {
+                        await bibliographyManager.fetchRemoteBibliography()
+                    }
+                }
+                .disabled(bibliographyManager.isLoading)
+            }
+            .padding()
+            .background(.thinMaterial)
+            
+            if bibliographyManager.isLoading && bibliographyManager.showRemoteOnly {
+                ProgressView("Loading remote bibliography...")
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+            } else if let error = bibliographyManager.lastError, bibliographyManager.showRemoteOnly {
+                VStack(spacing: APGISimulatorConstants.standardVStackSpacing) {
+                    Text("Network Error")
+                        .font(.headline)
+                    Text(error.localizedDescription)
+                        .foregroundStyle(.secondary)
+                        .multilineTextAlignment(.center)
+                    Button("Retry") {
+                        Task {
+                            await bibliographyManager.fetchRemoteBibliography()
+                        }
+                    }
+                    .buttonStyle(.borderedProminent)
+                }
+                .padding()
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+            } else {
+                EnhancedContentCard(
+                    title: bibliographyManager.showRemoteOnly ? "Remote Bibliography" : "Bibliography",
+                    content: bibliographyManager.getCombinedBibliography(),
+                    category: SectionCategory.reference,
+                    hasDataTable: false
+                )
+                .padding()
+            }
+        }
+        .task {
+            if !bibliographyManager.remoteBibliography.isEmpty {
+                await bibliographyManager.fetchRemoteBibliography()
+            }
+        }
     }
 }
 

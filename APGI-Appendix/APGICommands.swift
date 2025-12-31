@@ -48,52 +48,107 @@ struct APGICommands: Commands {
             }
             .keyboardShortcut("2", modifiers: [.command])
             Button("Clinical Translations") { 
-                navigateToClinical()
+                NotificationCenter.default.post(name: .navigateToSection, object: "clinical")
             }
             .keyboardShortcut("3", modifiers: [.command])
+            Button("Mathematical Framework") { 
+                NotificationCenter.default.post(name: .navigateToSection, object: "mathematical")
+            }
+            .keyboardShortcut("4", modifiers: [.command])
+            Button("Psychiatric Disorders") { 
+                NotificationCenter.default.post(name: .navigateToSection, object: "psychiatric")
+            }
+            .keyboardShortcut("5", modifiers: [.command])
+            
             Divider()
-            Button("Next Section") { 
-                navigateToNext()
+            
+            Button("Next Section") {
+                NotificationCenter.default.post(name: .navigateNext, object: nil)
             }
-            .keyboardShortcut(.rightArrow, modifiers: [.command])
-            Button("Previous Section") { 
-                navigateToPrevious()
+            .keyboardShortcut("]", modifiers: [.command])
+            
+            Button("Previous Section") {
+                NotificationCenter.default.post(name: .navigatePrevious, object: nil)
             }
-            .keyboardShortcut(.leftArrow, modifiers: [.command])
+            .keyboardShortcut("[", modifiers: [.command])
         }
         
         CommandMenu("View") {
-            Button("Toggle Sidebar") { 
+            Button("Toggle Sidebar") {
                 toggleSidebar()
             }
             .keyboardShortcut("s", modifiers: [.command, .option])
-            Button("Toggle Inspector") { 
+            
+            Button("Toggle Inspector") {
                 toggleInspector()
             }
             .keyboardShortcut("i", modifiers: [.command, .option])
+            
             Divider()
-            Button("Zoom In") { 
+            
+            Button("Zoom In") {
                 zoomIn()
             }
             .keyboardShortcut("+", modifiers: [.command])
-            Button("Zoom Out") { 
+            
+            Button("Zoom Out") {
                 zoomOut()
             }
             .keyboardShortcut("-", modifiers: [.command])
+            
+            Button("Reset Zoom") {
+                zoomReset()
+            }
+            .keyboardShortcut("0", modifiers: [.command])
         }
         
         CommandMenu("Export") {
-            Button("Export as PDF") { 
+            Button("Export as PDF") {
                 exportPDF()
             }
-            .keyboardShortcut("e", modifiers: [.command, .shift])
-            Button("Export Current Section") { 
+            .keyboardShortcut("p", modifiers: [.command, .shift])
+            
+            Button("Export Current Section") {
                 exportCurrentSection()
             }
-            Button("Copy Citation") { 
+            .keyboardShortcut("e", modifiers: [.command])
+            
+            Divider()
+            
+            Button("Copy Citation") {
                 copyCitation()
             }
-            .keyboardShortcut("c", modifiers: [.command, .shift])
+            .keyboardShortcut("c", modifiers: [.command, .option])
+        }
+        
+        CommandMenu("Help") {
+            Button("APGI Help Guide") {
+                openHelpGuide()
+            }
+            .keyboardShortcut("?", modifiers: [.command])
+            
+            Button("Online Documentation") {
+                openOnlineHelp()
+            }
+            
+            Divider()
+            
+            Button("Check for Updates") {
+                checkForUpdates()
+            }
+            
+            Divider()
+            
+            Button("Report Issue") {
+                reportIssue()
+            }
+        }
+        
+        CommandGroup(replacing: .help) {
+            Button("APGI Help Guide") {
+                openHelpGuide()
+            }
+            .keyboardShortcut("?", modifiers: [.command])
         }
         
         CommandGroup(after: .help) {
@@ -166,6 +221,10 @@ struct APGICommands: Commands {
         NotificationCenter.default.post(name: .zoomOut, object: nil)
     }
     
+    private func zoomReset() {
+        NotificationCenter.default.post(name: .zoomReset, object: nil)
+    }
+    
     // MARK: - Export Actions
     
     private func exportPDF() {
@@ -183,7 +242,21 @@ struct APGICommands: Commands {
     // MARK: - Help Actions
     
     private func openHelpGuide() {
-        if let url = URL(string: "https://github.com/your-repo/APGI-Appendix/blob/main/User-Guide.md") {
+        NotificationCenter.default.post(name: .openHelpGuide, object: nil)
+    }
+    
+    private func openOnlineHelp() {
+        if let url = URL(string: "https://docs.apgi-framework.org") {
+            NSWorkspace.shared.open(url)
+        }
+    }
+    
+    private func checkForUpdates() {
+        NotificationCenter.default.post(name: .checkForUpdates, object: nil)
+    }
+    
+    private func reportIssue() {
+        if let url = URL(string: "https://github.com/apgi/framework/issues") {
             NSWorkspace.shared.open(url)
         }
     }
@@ -201,8 +274,10 @@ extension Notification.Name {
     static let toggleInspector = Notification.Name("toggleInspector")
     static let zoomIn = Notification.Name("zoomIn")
     static let zoomOut = Notification.Name("zoomOut")
+    static let zoomReset = Notification.Name("zoomReset")
     static let exportPDF = Notification.Name("exportPDF")
     static let exportCurrentSection = Notification.Name("exportCurrentSection")
     static let copyCitation = Notification.Name("copyCitation")
     static let openHelpGuide = Notification.Name("openHelpGuide")
+    static let checkForUpdates = Notification.Name("checkForUpdates")
 }

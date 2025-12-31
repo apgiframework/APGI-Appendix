@@ -687,7 +687,7 @@ actor StateManager {
     }
 
     func reset(configuration: APGIConfiguration) async {
-        self.currentState = APGIState.initial(configuration: configuration)
+        self.currentState = await APGIState.initial(configuration: configuration)
     }
 }
 
@@ -705,14 +705,18 @@ final class APGIInferenceEngine: ObservableObject {
     private var simpleModel: SimpleAPGIModel?
     private let stateManager: StateManager
     private let performanceMonitor = PerformanceMonitor()
+    private let memoryManager = CoreMLMemoryManager()
 
     private var fpsUpdateTimer: Timer?
     private var lastInferenceTime: TimeInterval = 0.0
+    private var inferenceQueue: DispatchQueue
+    private var memoryPressureObserver: NSObjectProtocol?
 
     var configuration: APGIConfiguration { config }
 
     init(configuration: APGIConfiguration) {
         self.config = configuration
+        self.inferenceQueue = DispatchQueue(label: "com.apgi.inference", qos: .userInitiated, attributes: .concurrent)
 
         let initialState = APGIState.initialize(hiddenSize: configuration.hiddenSize, numLevels: configuration.numLevels)
         self.currentState = initialState
@@ -735,10 +739,35 @@ final class APGIInferenceEngine: ObservableObject {
             acetylcholine: 0.0,
             refractoryTimer: 0.0
         )
+        
+        setupMemoryPressureObserver()
     }
 
     deinit {
         fpsUpdateTimer?.invalidate()
+        if let observer = memoryPressureObserver {
+            NotificationCenter.default.removeObserver(observer)
+        }
+    }
+    
+    private func setupMemoryPressureObserver() {
+        // macOS doesn't have the same memory warning notification as iOS
+        // We'll use a different approach or manual triggering
+    }
+    
+    private func handleMemoryPressure() {
+        // Reduce model complexity under memory pressure
+        memoryManager.optimizeForMemoryPressure()
+        
+        // Clear non-essential caches
+        performanceMonitor.clearCaches()
+        
+        // Reduce inference frequency
+        if isInferring {
+            Task {
+                try? await Task.sleep(nanoseconds: 100_000_000) // 100ms delay
+            }
+        }
     }
 
     func loadModel() async throws {
@@ -793,6 +822,9 @@ final class APGIInferenceEngine: ObservableObject {
         let startTime = Date()
 
         do {
+            // Use memory-optimized configuration if under pressure
+            _ = memoryManager.getOptimizedConfiguration(for: config)
+            
             let stateSnapshot = await stateManager.getSnapshot()
 
             let result = model.forward(
@@ -820,9 +852,22 @@ final class APGIInferenceEngine: ObservableObject {
             } else {
                 averageInferenceTime = performanceMonitor.averageInferenceTime
             }
+            
+            // Memory cleanup after inference
+            if memoryManager.shouldBatchInferences() {
+                await performMemoryCleanup()
+            }
         } catch {
             throw APGIError.inferenceFailed(error)
         }
+    }
+    
+    private func performMemoryCleanup() async {
+        // Clear temporary arrays and perform garbage collection
+        MLMultiArrayPool.shared.clearPool()
+        
+        // Force a brief pause to allow memory to be reclaimed
+        try? await Task.sleep(nanoseconds: 10_000_000) // 10ms
     }
     
     private func validateContext(context: APGIContext) throws {
@@ -954,54 +999,6 @@ struct PerformanceMetrics {
 extension APGIState {
     static func initial(configuration: APGIConfiguration) -> APGIState {
         APGIState.initialize(hiddenSize: configuration.hiddenSize, numLevels: configuration.numLevels)
-    }
-}
-
-@MainActor
-final class PerformanceMonitor: ObservableObject {
-    @Published var averageInferenceTime: Double = 0.0
-    @Published var peakMemoryUsage: Double = 0.0
-    @Published var currentFPS: Double = 0.0
-
-    private var inferenceTimes: [Double] = []
-    private let maxSamples = 100
-
-    func recordInference(duration: TimeInterval) {
-        inferenceTimes.append(duration)
-        if inferenceTimes.count > maxSamples { inferenceTimes.removeFirst() }
-
-        averageInferenceTime = inferenceTimes.reduce(0, +) / Double(inferenceTimes.count)
-
-        if averageInferenceTime > 0 {
-            currentFPS = 1.0 / averageInferenceTime
-        }
-    }
-
-    func getStatistics() -> PerformanceStats {
-        guard !inferenceTimes.isEmpty else {
-            return PerformanceStats(meanLatency: 0.0, p50Latency: 0.0, p95Latency: 0.0, throughput: 0.0)
-        }
-
-        let mean = inferenceTimes.reduce(0, +) / Double(inferenceTimes.count)
-        let sorted = inferenceTimes.sorted()
-        let p50 = sorted[sorted.count / 2]
-        let p95Index = min(Int(Double(sorted.count) * 0.95), sorted.count - 1)
-        let p95 = sorted[p95Index]
-        let throughput = mean > 0 ? 1.0 / mean : 0.0
-
-        return PerformanceStats(
-            meanLatency: mean * 1000,
-            p50Latency: p50 * 1000,
-            p95Latency: p95 * 1000,
-            throughput: throughput
-        )
-    }
-
-    func reset() {
-        inferenceTimes.removeAll()
-        averageInferenceTime = 0.0
-        peakMemoryUsage = 0.0
-        currentFPS = 0.0
     }
 }
 

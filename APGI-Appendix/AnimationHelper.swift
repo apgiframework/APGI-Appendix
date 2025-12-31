@@ -5,7 +5,7 @@ import SwiftUI
 struct AnimationHelper {
     static func animated(_ animation: Animation? = nil) -> Animation? {
         if ThemeManager.shared.enableAnimations {
-            return animation ?? .easeInOut(duration: 0.3)
+            return animation ?? .easeInOut(duration: APGISimulatorConstants.animationDuration)
         } else {
             return nil
         }
@@ -13,7 +13,7 @@ struct AnimationHelper {
     
     static func transition(_ transition: AnyTransition? = nil) -> AnyTransition {
         if ThemeManager.shared.enableAnimations {
-            return transition ?? .opacity.combined(with: .scale(scale: 0.95))
+            return transition ?? .opacity.combined(with: .scale(scale: APGISimulatorConstants.transitionScale))
         } else {
             return .identity
         }

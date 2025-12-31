@@ -10,9 +10,23 @@ struct SearchView: View {
     @State private var searchScope: SearchScope = .all
     @State private var isSearching = false
     @State private var searchError: String?
+    @StateObject private var performanceManager = PerformanceManager.shared
+    @State private var searchTask: Task<Void, Never>?
+    @State private var debounceTimer: Timer?
 
     enum SearchScope: Hashable {
         case all, titles, content, formulas, references, glossary
+        
+        var rawValue: String {
+            switch self {
+            case .all: return "all"
+            case .titles: return "titles"
+            case .content: return "content"
+            case .formulas: return "formulas"
+            case .references: return "references"
+            case .glossary: return "glossary"
+            }
+        }
     }
 
     struct SearchResult: Identifiable {
@@ -38,11 +52,34 @@ struct SearchView: View {
                         performSearch()
                     }
                     .onChange(of: searchText) { _, newValue in
-                        Task {
-                            try await Task.sleep(nanoseconds: 300_000_000) // 300ms debounce
-                            if newValue == searchText { // Only search if text hasn't changed
-                                performSearch()
+                        // Cancel previous search and timer
+                        searchTask?.cancel()
+                        debounceTimer?.invalidate()
+                        
+                        // Clear results for empty search
+                        if newValue.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                            searchResults = []
+                            searchError = nil
+                            isSearching = false
+                            return
+                        }
+                        
+                        // Check cache first
+                        let cacheKey = generateCacheKey(query: newValue, scope: searchScope, filters: selectedFilters)
+                        if let cachedResults = performanceManager.getCachedSearchResults(for: cacheKey) {
+                            // Use cached results if they're less than 5 minutes old
+                            if Date().timeIntervalSince(cachedResults.timestamp) < 300 {
+                                searchResults = cachedResults.results
+                                searchError = nil
+                                isSearching = false
+                                return
                             }
+                        }
+                        
+                        // Debounced search with adaptive delay
+                        let debounceDelay = performanceManager.shouldReduceAnimations ? 500 : 300
+                        debounceTimer = Timer.scheduledTimer(withTimeInterval: TimeInterval(debounceDelay) / 1000.0, repeats: false) { _ in
+                            performSearch()
                         }
                     }
 
@@ -173,25 +210,43 @@ struct SearchView: View {
             return
         }
 
+        // Cancel previous search task
+        searchTask?.cancel()
+        
         isSearching = true
         searchError = nil
 
-        Task {
+        searchTask = Task {
             do {
                 let results = try await performAsyncSearch(query: query)
+                
+                // Cache the results
+                let cacheKey = generateCacheKey(query: query, scope: searchScope, filters: selectedFilters)
+                let cachedResults = CachedSearchResults(results: results, cost: results.count)
+                performanceManager.setCachedSearchResults(cachedResults, for: cacheKey)
+                
                 await MainActor.run {
-                    self.searchResults = results
-                    self.isSearching = false
-                    self.searchError = nil
+                    if !Task.isCancelled {
+                        self.searchResults = results
+                        self.isSearching = false
+                        self.searchError = nil
+                    }
                 }
             } catch {
                 await MainActor.run {
-                    self.searchResults = []
-                    self.isSearching = false
-                    self.searchError = error.localizedDescription
+                    if !Task.isCancelled {
+                        self.searchResults = []
+                        self.isSearching = false
+                        self.searchError = error.localizedDescription
+                    }
                 }
             }
         }
+    }
+    
+    private func generateCacheKey(query: String, scope: SearchScope, filters: Set<SectionCategory>) -> String {
+        let sortedFilters = Array(filters).sorted { $0.rawValue < $1.rawValue }.map { $0.rawValue }.joined(separator: ",")
+        return "\(query)_\(scope.rawValue)_\(sortedFilters)"
     }
     
     private func performAsyncSearch(query: String) async throws -> [SearchResult] {

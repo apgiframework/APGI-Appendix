@@ -6,6 +6,7 @@ struct TabContentView: View {
     @State private var isLoading = false
     @State private var errorMessage: String?
     @State private var contentLoadAttempted = false
+    @StateObject private var performanceManager = PerformanceManager.shared
     
     var body: some View {
         Group {
@@ -133,16 +134,30 @@ struct TabContentView: View {
         
         Task {
             do {
-                // Check if this is heavy content that needs longer loading time
-                let isHeavyContent = isHeavyContentTab(tab)
-                let loadingDelay: UInt64 = isHeavyContent ? 200_000_000 : 50_000_000 // 200ms for heavy, 50ms for light
+                // Check cache first
+                let cacheKey = "content_\(tab.rawValue)"
+                if let _ = performanceManager.getCachedContent(for: cacheKey) {
+                    await MainActor.run {
+                        isLoading = false
+                        errorMessage = nil
+                    }
+                    return
+                }
                 
-                try await Task.sleep(nanoseconds: loadingDelay)
+                // Determine content type and loading delay
+                let contentType = getContentType(tab)
+                let loadingDelay = performanceManager.getOptimizedLoadingDelay(for: contentType)
+                
+                try await Task.sleep(nanoseconds: UInt64(loadingDelay * 1_000_000_000))
                 
                 // Validate content availability
                 guard !tab.content.isEmpty else {
                     throw ContentLoadError.emptyContent
                 }
+                
+                // Cache the content
+                let cachedContent = CachedContent(content: tab.content, cost: getContentCost(tab))
+                performanceManager.setCachedContent(cachedContent, for: cacheKey)
                 
                 await MainActor.run {
                     isLoading = false
@@ -157,12 +172,27 @@ struct TabContentView: View {
         }
     }
     
-    private func isHeavyContentTab(_ tab: Tab) -> Bool {
+    private func getContentType(_ tab: Tab) -> ContentType {
         switch tab {
+        case .methodology, .apgiStatement:
+            return .light
+        case .mathematicalModel, .apgiMapping, .parameterIdentifiability, .lifeStages:
+            return .medium
         case .psychiatricDisorders, .bibliography, .apgiSimulator:
-            return true
+            return .heavy
+        case .neuromodulatorEffects, .psychologicalStates, .apgiToPsyState:
+            return .critical
         default:
-            return false
+            return .medium
+        }
+    }
+    
+    private func getContentCost(_ tab: Tab) -> Int {
+        switch getContentType(tab) {
+        case .light: return 1
+        case .medium: return 3
+        case .heavy: return 5
+        case .critical: return 10
         }
     }
     

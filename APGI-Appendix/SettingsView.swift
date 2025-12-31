@@ -1,4 +1,53 @@
 import SwiftUI
+import Combine
+
+@MainActor
+final class NetworkSettingsManager: ObservableObject {
+    @Published var enableRemoteContent = true
+    @Published var autoRefreshRemoteContent = false
+    @Published var refreshInterval: Double = 24.0 // hours
+    @Published var useCellularData = true
+    
+    private let refreshIntervalKey = "networkRefreshInterval"
+    private let enableRemoteContentKey = "enableRemoteContent"
+    private let autoRefreshKey = "autoRefreshRemoteContent"
+    private let useCellularDataKey = "useCellularData"
+    
+    init() {
+        loadSettings()
+    }
+    
+    private func loadSettings() {
+        enableRemoteContent = UserDefaults.standard.bool(forKey: enableRemoteContentKey)
+        if !UserDefaults.standard.object(forKey: enableRemoteContentKey).isNil {
+            enableRemoteContent = true // Default to true for first launch
+        }
+        
+        autoRefreshRemoteContent = UserDefaults.standard.bool(forKey: autoRefreshKey)
+        refreshInterval = UserDefaults.standard.double(forKey: refreshIntervalKey)
+        if refreshInterval == 0 {
+            refreshInterval = 24.0 // Default to 24 hours
+        }
+        
+        useCellularData = UserDefaults.standard.bool(forKey: useCellularDataKey)
+        if !UserDefaults.standard.object(forKey: useCellularDataKey).isNil {
+            useCellularData = true // Default to true
+        }
+    }
+    
+    func saveSettings() {
+        UserDefaults.standard.set(enableRemoteContent, forKey: enableRemoteContentKey)
+        UserDefaults.standard.set(autoRefreshRemoteContent, forKey: autoRefreshKey)
+        UserDefaults.standard.set(refreshInterval, forKey: refreshIntervalKey)
+        UserDefaults.standard.set(useCellularData, forKey: useCellularDataKey)
+    }
+}
+
+extension Optional {
+    var isNil: Bool {
+        self == nil
+    }
+}
 
 struct EnhancedSettingsView: View {
     @StateObject private var themeManager = ThemeManager.shared
@@ -11,6 +60,7 @@ struct EnhancedSettingsView: View {
 
 struct SettingsView: View {
     @EnvironmentObject private var themeManager: ThemeManager
+    @StateObject private var networkSettings = NetworkSettingsManager()
     
     var body: some View {
         TabView {
@@ -102,6 +152,83 @@ struct SettingsView: View {
             .padding()
             .tabItem {
                 Label("Bookmarks", systemImage: "bookmark")
+            }
+            
+            // Network
+            VStack(alignment: .leading, spacing: 20) {
+                Text("Network")
+                    .font(.title2.bold())
+                    .padding(.bottom)
+                
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Remote Content")
+                        .font(.headline)
+                    
+                    Toggle("Enable Remote Content", isOn: $networkSettings.enableRemoteContent)
+                        .onChange(of: networkSettings.enableRemoteContent) { _, _ in
+                            networkSettings.saveSettings()
+                        }
+                    
+                    Toggle("Auto-refresh Remote Content", isOn: $networkSettings.autoRefreshRemoteContent)
+                        .disabled(!networkSettings.enableRemoteContent)
+                        .onChange(of: networkSettings.autoRefreshRemoteContent) { _, _ in
+                            networkSettings.saveSettings()
+                        }
+                    
+                    if networkSettings.autoRefreshRemoteContent {
+                        HStack {
+                            Text("Refresh Interval:")
+                            Slider(value: $networkSettings.refreshInterval, in: 1...168, step: 1)
+                                .disabled(!networkSettings.enableRemoteContent)
+                            Text("\(Int(networkSettings.refreshInterval))h")
+                                .frame(width: 30, alignment: .trailing)
+                        }
+                        .onChange(of: networkSettings.refreshInterval) { _, _ in
+                            networkSettings.saveSettings()
+                        }
+                    }
+                }
+                
+                Divider()
+                
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Data Usage")
+                        .font(.headline)
+                    
+                    Toggle("Use Cellular Data", isOn: $networkSettings.useCellularData)
+                        .onChange(of: networkSettings.useCellularData) { _, _ in
+                            networkSettings.saveSettings()
+                        }
+                }
+                
+                Divider()
+                
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Network Status")
+                        .font(.headline)
+                    
+                    HStack {
+                        Image(systemName: NetworkManager.shared.isConnected ? "wifi" : "wifi.slash")
+                            .foregroundStyle(NetworkManager.shared.isConnected ? .green : .red)
+                        Text(NetworkManager.shared.isConnected ? "Connected" : "Offline")
+                            .foregroundStyle(.secondary)
+                    }
+                }
+                
+                Divider()
+                
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("App Updates")
+                        .font(.headline)
+                    
+                    UpdateCheckView()
+                }
+                
+                Spacer()
+            }
+            .padding()
+            .tabItem {
+                Label("Network", systemImage: "network")
             }
             
             // About

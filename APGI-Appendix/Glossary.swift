@@ -1,4 +1,62 @@
 import SwiftUI
+import Combine
+
+@MainActor
+final class GlossaryManager: ObservableObject {
+    @Published var remoteEntries: [GlossaryEntry] = []
+    @Published var isLoading = false
+    @Published var lastError: NetworkError?
+    
+    private let networkManager = NetworkManager.shared
+    
+    func fetchRemoteGlossary() async {
+        guard let url = networkManager.validateURL("https://api.apgi-framework.org/glossary.json") else {
+            lastError = .invalidURL
+            return
+        }
+        
+        isLoading = true
+        lastError = nil
+        
+        do {
+            let data = try await networkManager.fetchExternalResourceWithFallback(
+                primaryURL: url,
+                fallbackURL: networkManager.validateURL("https://raw.githubusercontent.com/apgi/framework/main/glossary.json")
+            )
+            
+            let decoder = JSONDecoder()
+            let remoteGlossary = try decoder.decode([RemoteGlossaryEntry].self, from: data)
+            
+            remoteEntries = remoteGlossary.compactMap { remoteEntry in
+                GlossaryEntry(term: remoteEntry.term, definition: remoteEntry.definition)
+            }
+            
+        } catch let error as NetworkError {
+            lastError = error
+        } catch {
+            lastError = .unknown(error)
+        }
+        
+        isLoading = false
+    }
+    
+    func getAllEntries() -> [GlossaryEntry] {
+        let allEntries = GlossaryData.entries + remoteEntries
+        return allEntries.removingDuplicates { $0.term.lowercased() }
+    }
+}
+
+private struct RemoteGlossaryEntry: Codable {
+    let term: String
+    let definition: String
+}
+
+extension Array {
+    func removingDuplicates<T: Hashable>(by key: (Element) -> T) -> [Element] {
+        var seen: Set<T> = []
+        return filter { seen.insert(key($0)).inserted }
+    }
+}
 
 struct GlossaryEntry: Identifiable, Hashable {
     let id = UUID()
@@ -61,18 +119,73 @@ enum GlossaryData {
 }
 
 struct GlossaryView: View {
+    @StateObject private var glossaryManager = GlossaryManager()
+    @State private var showRemoteOnly = false
+    
     var body: some View {
-        ScrollView {
-            LazyVStack(alignment: .leading, spacing: 12) {
+        VStack(spacing: 0) {
+            HStack {
                 Text("Glossary")
                     .font(.title.bold())
-                    .padding(.bottom, 6)
-
-                ForEach(GlossaryData.entries) { entry in
-                    GlossaryTermView(term: entry.term, definition: entry.definition)
+                
+                Spacer()
+                
+                Toggle("Remote Only", isOn: $showRemoteOnly)
+                    .toggleStyle(.switch)
+                    .disabled(glossaryManager.remoteEntries.isEmpty)
+                
+                Button("Refresh") {
+                    Task {
+                        await glossaryManager.fetchRemoteGlossary()
+                    }
                 }
+                .disabled(glossaryManager.isLoading)
             }
             .padding()
+            .background(.thinMaterial)
+            
+            if glossaryManager.isLoading && showRemoteOnly {
+                ProgressView("Loading remote glossary...")
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+            } else if let error = glossaryManager.lastError, showRemoteOnly {
+                VStack(spacing: APGISimulatorConstants.standardVStackSpacing) {
+                    Text("Network Error")
+                        .font(.headline)
+                    Text(error.localizedDescription)
+                        .foregroundStyle(.secondary)
+                        .multilineTextAlignment(.center)
+                    Button("Retry") {
+                        Task {
+                            await glossaryManager.fetchRemoteGlossary()
+                        }
+                    }
+                    .buttonStyle(.borderedProminent)
+                }
+                .padding()
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+            } else {
+                ScrollView {
+                    LazyVStack(alignment: .leading, spacing: 12) {
+                        let entries = showRemoteOnly ? glossaryManager.remoteEntries : glossaryManager.getAllEntries()
+                        
+                        if entries.isEmpty {
+                            Text("No glossary entries available")
+                                .foregroundStyle(.secondary)
+                                .padding()
+                        } else {
+                            ForEach(entries) { entry in
+                                GlossaryTermView(term: entry.term, definition: entry.definition)
+                            }
+                        }
+                    }
+                    .padding()
+                }
+            }
+        }
+        .task {
+            if !glossaryManager.remoteEntries.isEmpty {
+                await glossaryManager.fetchRemoteGlossary()
+            }
         }
     }
 }

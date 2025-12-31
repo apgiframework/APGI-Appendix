@@ -160,11 +160,26 @@ struct APGISimulatorConstants {
     /// Animation duration for transitions
     static let animationDuration: Double = 0.3
     
+    /// Scale factor for transitions
+    static let transitionScale: CGFloat = 0.95
+    
     /// Standard padding for UI elements
     static let standardPadding: CGFloat = 12
     
     /// Standard vertical padding for UI elements
     static let standardVerticalPadding: CGFloat = 10
+    
+    /// Standard spacing for VStack elements
+    static let standardVStackSpacing: CGFloat = 12
+    
+    /// Large spacing for section separation
+    static let largeVStackSpacing: CGFloat = 20
+    
+    /// Small spacing for tight layouts
+    static let smallVStackSpacing: CGFloat = 8
+    
+    /// Standard spacing for HStack elements
+    static let standardHStackSpacing: CGFloat = 16
 }
 
 // MARK: - Empirical Constraints Documentation
