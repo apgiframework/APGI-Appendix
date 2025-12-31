@@ -1,18 +1,16 @@
 import SwiftUI
 
 struct EnhancedSettingsView: View {
+    @StateObject private var themeManager = ThemeManager.shared
+    
     var body: some View {
         SettingsView()
+            .environmentObject(themeManager)
     }
 }
 
 struct SettingsView: View {
-    @AppStorage("contentFontSize") private var fontSize: Double = 15.0
-    @AppStorage("sidebarVisible") private var sidebarVisible: Bool = true
-    @AppStorage("focusModeEnabled") private var focusModeEnabled: Bool = false
-    @AppStorage("autoSaveBookmarks") private var autoSaveBookmarks: Bool = true
-    @AppStorage("enableAnimations") private var enableAnimations: Bool = true
-    @AppStorage("darkMode") private var darkMode: Bool = false
+    @EnvironmentObject private var themeManager: ThemeManager
     
     var body: some View {
         TabView {
@@ -28,20 +26,20 @@ struct SettingsView: View {
                         .font(.headline)
                     
                     HStack {
-                        Slider(value: $fontSize, in: 10...24, step: 1)
-                        Text("\(Int(fontSize))pt")
+                        Slider(value: $themeManager.fontSize, in: 10...24, step: 1)
+                        Text("\(Int(themeManager.fontSize))pt")
                             .frame(width: 40, alignment: .trailing)
                     }
                 }
                 
                 // Sidebar
-                Toggle("Show Sidebar by Default", isOn: $sidebarVisible)
+                Toggle("Show Sidebar by Default", isOn: $themeManager.sidebarVisible)
                 
                 // Focus Mode
-                Toggle("Enable Focus Mode", isOn: $focusModeEnabled)
+                Toggle("Enable Focus Mode", isOn: $themeManager.focusModeEnabled)
                 
                 // Animations
-                Toggle("Enable Animations", isOn: $enableAnimations)
+                Toggle("Enable Animations", isOn: $themeManager.enableAnimations)
                 
                 Spacer()
             }
@@ -56,8 +54,21 @@ struct SettingsView: View {
                     .font(.title2.bold())
                     .padding(.bottom)
                 
-                // Dark Mode
-                Toggle("Dark Mode", isOn: $darkMode)
+                // Theme Selection
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Theme")
+                        .font(.headline)
+                    
+                    Picker("Theme", selection: $themeManager.selectedTheme) {
+                        ForEach(AppTheme.allCases) { theme in
+                            Text(theme.rawValue).tag(theme)
+                        }
+                    }
+                    .pickerStyle(.segmented)
+                }
+                
+                // High Contrast
+                Toggle("High Contrast Mode", isOn: $themeManager.highContrastMode)
                 
                 Spacer()
             }
@@ -72,12 +83,19 @@ struct SettingsView: View {
                     .font(.title2.bold())
                     .padding(.bottom)
                 
-                Toggle("Auto-save Bookmarks", isOn: $autoSaveBookmarks)
+                Toggle("Auto-save Bookmarks", isOn: $themeManager.autoSaveBookmarks)
                 
                 Button("Clear All Bookmarks") {
                     clearAllBookmarks()
                 }
                 .foregroundColor(.red)
+                
+                Divider()
+                
+                Button("Reset to Defaults") {
+                    themeManager.resetToDefaults()
+                }
+                .foregroundColor(.orange)
                 
                 Spacer()
             }
@@ -115,9 +133,18 @@ struct SettingsView: View {
     }
     
     private func clearAllBookmarks() {
-        // Implementation to clear all bookmarks
+        // Clear bookmarks from UserDefaults
         UserDefaults.standard.removeObject(forKey: "bookmarkedTabs")
+        
+        // Clear bookmark manager state if available
+        NotificationCenter.default.post(name: .clearAllBookmarks, object: nil)
     }
+}
+
+// MARK: - Notification Extensions
+
+extension Notification.Name {
+    static let clearAllBookmarks = Notification.Name("clearAllBookmarks")
 }
 
 #Preview {

@@ -1,13 +1,14 @@
 import SwiftUI
 import AppKit
 import Combine
+import UniformTypeIdentifiers
 
 struct ContentView: View {
     @State private var selectedTab: Tab = .methodology
     @State private var searchPresented: Bool = false
-    @State private var focusModeEnabled: Bool = false
     @StateObject private var bookmarkManager = BookmarkManager()
-    @AppStorage("sidebarVisible") private var sidebarVisible: Bool = true
+    @StateObject private var navigationManager = KeyboardNavigationManager.shared
+    @EnvironmentObject private var themeManager: ThemeManager
     
     var body: some View {
         NavigationSplitView(columnVisibility: sidebarVisibilityBinding) {
@@ -17,9 +18,9 @@ struct ContentView: View {
             ZStack {
                 TabContentView(tab: selectedTab, selectedTab: $selectedTab)
 
-                if focusModeEnabled {
+                if themeManager.focusModeEnabled {
                     FocusModeView(
-                        isEnabled: $focusModeEnabled,
+                        isEnabled: $themeManager.focusModeEnabled,
                         content: selectedTab.content,
                         title: selectedTab.rawValue
                     )
@@ -36,13 +37,13 @@ struct ContentView: View {
                     BookmarkButton(tab: selectedTab)
 
                     Button {
-                        focusModeEnabled.toggle()
+                        themeManager.focusModeEnabled.toggle()
                     } label: {
                         Image(systemName: "eye")
                     }
                     .apgiAccessibility(
                         label: "Focus mode",
-                        hint: focusModeEnabled ? "Exit focus mode" : "Enter focus mode",
+                        hint: themeManager.focusModeEnabled ? "Exit focus mode" : "Enter focus mode",
                         traits: .isButton
                     )
 
@@ -65,6 +66,7 @@ struct ContentView: View {
             }
         }
         .environmentObject(bookmarkManager)
+        .environmentObject(navigationManager)
         .frame(minWidth: 1000, minHeight: 700)
         .onReceive(NotificationCenter.default.publisher(for: .focusSearch)) { _ in
             searchPresented = true
@@ -72,6 +74,7 @@ struct ContentView: View {
         .onReceive(NotificationCenter.default.publisher(for: .navigateToTab)) { notification in
             if let tab = notification.object as? Tab {
                 selectedTab = tab
+                syncNavigationState()
             }
         }
         .onReceive(NotificationCenter.default.publisher(for: .navigateToSection)) { notification in
@@ -85,20 +88,46 @@ struct ContentView: View {
         .onReceive(NotificationCenter.default.publisher(for: .navigatePrevious)) { _ in
             navigateToPrevious()
         }
+        .onChange(of: selectedTab) { _, newTab in
+            syncNavigationState()
+        }
         .onReceive(NotificationCenter.default.publisher(for: .toggleSidebar)) { _ in
-            sidebarVisible.toggle()
+            themeManager.sidebarVisible.toggle()
         }
         .onReceive(NotificationCenter.default.publisher(for: .zoomIn)) { _ in
-            // Zoom in functionality
+            if NSApp.keyWindow != nil {
+                NSApp.keyWindow?.contentViewController?.view.scaleUnitSquare(to: NSSize(width: 1.2, height: 1.2))
+            }
         }
         .onReceive(NotificationCenter.default.publisher(for: .zoomOut)) { _ in
-            // Zoom out functionality
+            if NSApp.keyWindow != nil {
+                NSApp.keyWindow?.contentViewController?.view.scaleUnitSquare(to: NSSize(width: 0.8, height: 0.8))
+            }
         }
         .onReceive(NotificationCenter.default.publisher(for: .exportPDF)) { _ in
-            // Export PDF functionality
+            let panel = NSSavePanel()
+            panel.allowedContentTypes = [.pdf]
+            panel.nameFieldStringValue = "APGI-Framework-Section.pdf"
+            panel.begin { response in
+                if response == .OK, let url = panel.url {
+                    // Implement PDF export logic here
+                    print("Exporting PDF to: \(url)")
+                }
+            }
         }
         .onReceive(NotificationCenter.default.publisher(for: .exportCurrentSection)) { _ in
-            // Export current section functionality
+            let panel = NSSavePanel()
+            panel.allowedContentTypes = [.plainText]
+            panel.nameFieldStringValue = "\(selectedTab.rawValue).txt"
+            panel.begin { response in
+                if response == .OK, let url = panel.url {
+                    do {
+                        try selectedTab.content.write(to: url, atomically: true, encoding: .utf8)
+                    } catch {
+                        print("Failed to export section: \(error)")
+                    }
+                }
+            }
         }
         .onReceive(NotificationCenter.default.publisher(for: .copyCitation)) { _ in
             let pb = NSPasteboard.general
@@ -106,7 +135,10 @@ struct ContentView: View {
             pb.setString("APGI Framework (2024). \(selectedTab.rawValue)", forType: .string)
         }
         .onReceive(NotificationCenter.default.publisher(for: .openHelpGuide)) { _ in
-            // Open help guide functionality
+            navigationManager.showKeyboardShortcuts = true
+        }
+        .sheet(isPresented: $navigationManager.showKeyboardShortcuts) {
+            KeyboardShortcutsView(isPresented: $navigationManager.showKeyboardShortcuts)
         }
     }
     
@@ -127,19 +159,60 @@ struct ContentView: View {
         guard let currentIndex = Tab.allCases.firstIndex(of: selectedTab),
               currentIndex < Tab.allCases.count - 1 else { return }
         selectedTab = Tab.allCases[currentIndex + 1]
+        syncNavigationState()
     }
     
     private func navigateToPrevious() {
         guard let currentIndex = Tab.allCases.firstIndex(of: selectedTab),
               currentIndex > 0 else { return }
         selectedTab = Tab.allCases[currentIndex - 1]
+        syncNavigationState()
+    }
+    
+    private func syncNavigationState() {
+        if let index = Tab.allCases.firstIndex(of: selectedTab) {
+            navigationManager.currentSectionIndex = index
+        }
+    }
+    
+    private func setupKeyboardShortcuts() {
+        NSEvent.addLocalMonitorForEvents(matching: .keyDown) { event in
+            guard NSApp.keyWindow != nil else { return event }
+            
+            // Handle Command+1-9 for tab navigation
+            if event.modifierFlags.contains(.command) && !event.modifierFlags.contains(.shift) && !event.modifierFlags.contains(.control) {
+                let keyChar = event.charactersIgnoringModifiers
+                if let char = keyChar, char >= "1" && char <= "9" {
+                    let tabIndex = Int(char)! - 1
+                    if tabIndex < Tab.allCases.count {
+                        selectedTab = Tab.allCases[tabIndex]
+                        syncNavigationState()
+                        return nil
+                    }
+                }
+                
+                // Handle Command+/ for keyboard shortcuts
+                if keyChar == "/" {
+                    navigationManager.showKeyboardShortcuts = true
+                    return nil
+                }
+                
+                // Handle Command+G for glossary
+                if keyChar == "g" {
+                    navigationManager.toggleGlossary()
+                    return nil
+                }
+            }
+            
+            return event
+        }
     }
 
     private var sidebarVisibilityBinding: Binding<NavigationSplitViewVisibility> {
         Binding(
-            get: { sidebarVisible ? .all : .detailOnly },
+            get: { themeManager.sidebarVisible ? .all : .detailOnly },
             set: { newValue in
-                sidebarVisible = (newValue != .detailOnly)
+                themeManager.sidebarVisible = (newValue != .detailOnly)
             }
         )
     }
@@ -147,6 +220,34 @@ struct ContentView: View {
 
 final class BookmarkManager: ObservableObject {
     @Published private(set) var bookmarkedTabs: Set<Tab> = []
+    private let storageKey = "bookmarkedTabs"
+    
+    init() {
+        loadBookmarks()
+        setupNotifications()
+    }
+    
+    private func loadBookmarks() {
+        if let bookmarkStrings = UserDefaults.standard.stringArray(forKey: storageKey) {
+            bookmarkedTabs = Set(bookmarkStrings.compactMap { Tab(rawValue: $0) })
+        }
+    }
+    
+    private func saveBookmarks() {
+        let bookmarkStrings = Array(bookmarkedTabs.map { $0.rawValue })
+        UserDefaults.standard.set(bookmarkStrings, forKey: storageKey)
+    }
+    
+    private func setupNotifications() {
+        NotificationCenter.default.publisher(for: .clearAllBookmarks)
+            .sink { _ in
+                self.bookmarkedTabs.removeAll()
+                self.saveBookmarks()
+            }
+            .store(in: &cancellables)
+    }
+    
+    private var cancellables = Set<AnyCancellable>()
 
     func toggle(_ tab: Tab) {
         if bookmarkedTabs.contains(tab) {
@@ -154,10 +255,16 @@ final class BookmarkManager: ObservableObject {
         } else {
             bookmarkedTabs.insert(tab)
         }
+        saveBookmarks()
     }
 
     func isBookmarked(_ tab: Tab) -> Bool {
         bookmarkedTabs.contains(tab)
+    }
+    
+    func clearAll() {
+        bookmarkedTabs.removeAll()
+        saveBookmarks()
     }
 }
 

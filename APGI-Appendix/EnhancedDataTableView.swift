@@ -1,6 +1,6 @@
 import SwiftUI
 
-struct EnhancedDataTable: View {
+struct EnhancedDataTableView: View {
     struct Column: Identifiable {
         let id = UUID()
         let header: String

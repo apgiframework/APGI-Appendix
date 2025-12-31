@@ -295,7 +295,11 @@ struct OnboardingView: View {
                 .strokeBorder(Color.white.opacity(0.1), lineWidth: 1)
         )
         .onAppear {
-            withAnimation(.easeOut(duration: 0.5).delay(0.2)) {
+            if ThemeManager.shared.enableAnimations {
+                withAnimation(.easeOut(duration: 0.5).delay(0.2)) {
+                    animateContent = true
+                }
+            } else {
                 animateContent = true
             }
         }
@@ -408,7 +412,11 @@ struct OnboardingView: View {
             // Back button
             if manager.currentStep > 0 {
                 Button {
-                    withAnimation {
+                    if ThemeManager.shared.enableAnimations {
+                        withAnimation {
+                            manager.currentStep -= 1
+                        }
+                    } else {
                         manager.currentStep -= 1
                     }
                 } label: {
@@ -425,15 +433,20 @@ struct OnboardingView: View {
             // Next/Get Started button
             Button {
                 if manager.currentStep < manager.steps.count - 1 {
-                    withAnimation {
-                        manager.currentStep += 1
-                        // Reset animation for new step
-                        animateContent = false
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                            withAnimation(.easeOut(duration: 0.4)) {
-                                animateContent = true
+                    if ThemeManager.shared.enableAnimations {
+                        withAnimation {
+                            manager.currentStep += 1
+                            // Reset animation for new step
+                            animateContent = false
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                                withAnimation(.easeOut(duration: 0.4)) {
+                                    animateContent = true
+                                }
                             }
                         }
+                    } else {
+                        manager.currentStep += 1
+                        animateContent = true
                     }
                 } else {
                     manager.completeOnboarding()
@@ -571,204 +584,6 @@ struct FeatureSpotlight: View {
     }
 }
 
-// MARK: - Quick Start Panel
-
-struct QuickStartPanel: View {
-    @Environment(\.dismiss) private var dismiss
-    @ObservedObject private var manager = OnboardingManager.shared
-    
-    var body: some View {
-        VStack(alignment: .leading, spacing: 20) {
-            // Header
-            HStack {
-                VStack(alignment: .leading, spacing: 4) {
-                    Text("Quick Start")
-                        .font(.title2.bold())
-                    
-                    Text("Get the most out of APGI Appendix")
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
-                }
-                
-                Spacer()
-                
-                Button {
-                    dismiss()
-                } label: {
-                    Image(systemName: "xmark.circle.fill")
-                        .font(.title2)
-                        .foregroundStyle(.secondary)
-                }
-                .buttonStyle(.plain)
-            }
-            
-            Divider()
-            
-            // Feature spotlights
-            VStack(spacing: 12) {
-                FeatureSpotlight(
-                    title: "Take the Tour",
-                    description: "New here? Walk through all features step by step",
-                    icon: "figure.walk",
-                    color: .blue
-                ) {
-                    dismiss()
-                    manager.startTour()
-                }
-                
-                FeatureSpotlight(
-                    title: "Keyboard Shortcuts",
-                    description: "Learn power user navigation shortcuts",
-                    icon: "keyboard",
-                    color: .purple
-                ) {
-                    dismiss()
-                    KeyboardNavigationManager.shared.showKeyboardShortcuts = true
-                }
-                
-                FeatureSpotlight(
-                    title: "Customize Appearance",
-                    description: "Set up your preferred theme and contrast",
-                    icon: "paintpalette",
-                    color: .orange
-                ) {
-                    dismiss()
-                    // Open settings
-                    NSApp.sendAction(Selector(("showSettingsWindow:")), to: nil, from: nil)
-                }
-                
-                FeatureSpotlight(
-                    title: "Explore Glossary",
-                    description: "A searchable glossary for key technical terms",
-                    icon: "text.book.closed",
-                    color: .green
-                ) {
-                    dismiss()
-                    KeyboardNavigationManager.shared.toggleGlossary()
-                }
-            }
-            
-            Divider()
-            
-            // Tips
-            VStack(alignment: .leading, spacing: 8) {
-                Text("Pro Tips")
-                    .font(.headline)
-                
-                HStack(alignment: .top, spacing: 8) {
-                    Image(systemName: "lightbulb.fill")
-                        .foregroundColor(.yellow)
-                    
-                    Text("Press ⌘/ anytime to see all keyboard shortcuts")
-                        .font(.callout)
-                        .foregroundStyle(.secondary)
-                }
-            }
-        }
-        .padding(24)
-        .frame(width: 400)
-    }
-}
-
-// MARK: - What's New View
-
-struct WhatsNewView: View {
-    @Environment(\.dismiss) private var dismiss
-    
-    private let updates: [(version: String, features: [String])] = [
-        ("2.0", [
-            "APGI Simulator window for interactive modeling",
-            "Interactive visualizations",
-            "Ignition Timeline window",
-            "Improved search, navigation, and keyboard shortcuts",
-            "Dark/light mode support"
-        ]),
-        ("1.1", [
-            "Interactive neural circuit diagrams",
-            "Sortable data tables",
-            "High contrast accessibility mode",
-            "Keyboard navigation shortcuts"
-        ])
-    ]
-    
-    var body: some View {
-        VStack(alignment: .leading, spacing: 20) {
-            // Header
-            HStack {
-                VStack(alignment: .leading) {
-                    Text("What's New")
-                        .font(.title.bold())
-                    
-                    Text("in APGI Appendix")
-                        .font(.title2)
-                        .foregroundStyle(.secondary)
-                }
-                
-                Spacer()
-                
-                Button {
-                    dismiss()
-                } label: {
-                    Image(systemName: "xmark.circle.fill")
-                        .font(.title2)
-                        .foregroundStyle(.secondary)
-                }
-                .buttonStyle(.plain)
-            }
-            
-            Divider()
-            
-            // Updates list
-            ScrollView {
-                VStack(alignment: .leading, spacing: 24) {
-                    ForEach(updates, id: \.version) { update in
-                        VStack(alignment: .leading, spacing: 12) {
-                            HStack {
-                                Text("Version \(update.version)")
-                                    .font(.headline)
-                                
-                                if update.version == updates.first?.version {
-                                    Text("NEW")
-                                        .font(.caption.bold())
-                                        .padding(.horizontal, 8)
-                                        .padding(.vertical, 2)
-                                        .background(Color.green)
-                                        .foregroundColor(.white)
-                                        .clipShape(Capsule())
-                                }
-                            }
-                            
-                            VStack(alignment: .leading, spacing: 8) {
-                                ForEach(update.features, id: \.self) { feature in
-                                    HStack(alignment: .top, spacing: 10) {
-                                        Image(systemName: "checkmark.circle.fill")
-                                            .foregroundColor(.green)
-                                        
-                                        Text(feature)
-                                            .foregroundStyle(.secondary)
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            
-            // Continue button
-            Button {
-                dismiss()
-            } label: {
-                Text("Continue")
-                    .font(.headline)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 12)
-            }
-            .buttonStyle(.borderedProminent)
-        }
-        .padding(24)
-        .frame(width: 400, height: 450)
-    }
-}
 
 // MARK: - Spotlight Overlay
 

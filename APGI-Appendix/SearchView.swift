@@ -8,6 +8,8 @@ struct SearchView: View {
     @State private var selectedFilters: Set<SectionCategory> = []
     @State private var searchResults: [SearchResult] = []
     @State private var searchScope: SearchScope = .all
+    @State private var isSearching = false
+    @State private var searchError: String?
 
     enum SearchScope: Hashable {
         case all, titles, content, formulas, references, glossary
@@ -35,8 +37,13 @@ struct SearchView: View {
                     .onSubmit {
                         performSearch()
                     }
-                    .onChange(of: searchText) { _, _ in
-                        performSearch()
+                    .onChange(of: searchText) { _, newValue in
+                        Task {
+                            try await Task.sleep(nanoseconds: 300_000_000) // 300ms debounce
+                            if newValue == searchText { // Only search if text hasn't changed
+                                performSearch()
+                            }
+                        }
                     }
 
                 Menu {
@@ -92,7 +99,38 @@ struct SearchView: View {
 
             Divider()
 
-            if searchResults.isEmpty && !searchText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            if isSearching {
+                VStack(spacing: 16) {
+                    ProgressView()
+                        .scaleEffect(1.2)
+                    Text("Searching...")
+                        .font(.headline)
+                        .foregroundStyle(.secondary)
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+            } else if let searchError = searchError {
+                VStack(spacing: 12) {
+                    Image(systemName: "exclamationmark.triangle")
+                        .font(.system(size: 48))
+                        .foregroundStyle(.orange)
+                    
+                    Text("Search Error")
+                        .font(.headline)
+                        .foregroundStyle(.secondary)
+                    
+                    Text(searchError)
+                        .font(.subheadline)
+                        .foregroundStyle(.tertiary)
+                        .multilineTextAlignment(.center)
+                    
+                    Button("Retry") {
+                        performSearch()
+                    }
+                    .buttonStyle(.bordered)
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .padding()
+            } else if searchResults.isEmpty && !searchText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
                 VStack(spacing: 12) {
                     Image(systemName: "doc.text.magnifyingglass")
                         .font(.system(size: 48))
@@ -115,8 +153,13 @@ struct SearchView: View {
                             onSelectTab(result.section)
                             isPresented = false
                         }
+                        .transition(.asymmetric(
+                            insertion: .scale.combined(with: .opacity),
+                            removal: .opacity
+                        ))
                 }
                 .listStyle(.plain)
+                .animation(.easeInOut(duration: 0.3), value: searchResults.count)
             }
         }
         .frame(width: 720, height: 560)
@@ -126,9 +169,32 @@ struct SearchView: View {
         let query = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !query.isEmpty else {
             searchResults = []
+            searchError = nil
             return
         }
 
+        isSearching = true
+        searchError = nil
+
+        Task {
+            do {
+                let results = try await performAsyncSearch(query: query)
+                await MainActor.run {
+                    self.searchResults = results
+                    self.isSearching = false
+                    self.searchError = nil
+                }
+            } catch {
+                await MainActor.run {
+                    self.searchResults = []
+                    self.isSearching = false
+                    self.searchError = error.localizedDescription
+                }
+            }
+        }
+    }
+    
+    private func performAsyncSearch(query: String) async throws -> [SearchResult] {
         let effectiveTabs: [Tab] = {
             switch searchScope {
             case .references:
@@ -141,7 +207,6 @@ struct SearchView: View {
         }()
 
         let allowedCategories: Set<SectionCategory> = selectedFilters
-
         var results: [SearchResult] = []
 
         for tab in effectiveTabs {
@@ -165,7 +230,7 @@ struct SearchView: View {
             results.append(contentsOf: filteredGlossaryMatches)
         }
 
-        searchResults = results.sorted { lhs, rhs in
+        return results.sorted { lhs, rhs in
             if lhs.relevance != rhs.relevance {
                 return lhs.relevance > rhs.relevance
             }
@@ -197,12 +262,16 @@ struct SearchView: View {
         let contentMatches = contentLower.components(separatedBy: lowerQuery).count - 1
 
         let shouldSearchTitles: Bool = (searchScope == .all || searchScope == .titles)
-        let shouldSearchContent: Bool = (searchScope == .all || searchScope == .content || searchScope == .formulas || searchScope == .references)
+        let shouldSearchContent: Bool = (searchScope == .all || searchScope == .content)
+        let shouldSearchFormulas: Bool = (searchScope == .all || searchScope == .formulas)
+        let shouldSearchReferences: Bool = (searchScope == .all || searchScope == .references)
 
         let matchedInTitle = shouldSearchTitles && titleMatches > 0
         let matchedInContent = shouldSearchContent && contentMatches > 0
+        let matchedInFormulas = shouldSearchFormulas && containsFormulas(content: content, query: lowerQuery)
+        let matchedInReferences = shouldSearchReferences && containsReferences(content: content, query: lowerQuery)
 
-        guard matchedInTitle || matchedInContent else {
+        guard matchedInTitle || matchedInContent || matchedInFormulas || matchedInReferences else {
             return []
         }
 
@@ -221,22 +290,78 @@ struct SearchView: View {
             )
         }
 
-        if matchedInContent {
+        if matchedInContent || matchedInFormulas || matchedInReferences {
             let sectionTab = tabForTitle(title)
             let snippet = makeContextSnippet(from: content, query: query)
             let excerpt = makeHighlightedExcerpt(from: snippet, query: query)
+            
+            var relevanceScore = Double(contentMatches) * 10
+            if matchedInFormulas {
+                relevanceScore += 500
+            }
+            if matchedInReferences {
+                relevanceScore += 300
+            }
+            
             results.append(
                 SearchResult(
                     title: sectionTab.shortTitle,
                     excerpt: excerpt,
                     category: sectionTab.category,
                     section: sectionTab,
-                    relevance: Double(contentMatches) * 10
+                    relevance: relevanceScore
                 )
             )
         }
 
         return results
+    }
+    
+    private func containsFormulas(content: String, query: String) -> Bool {
+        let formulaPatterns = [
+            "\\$[^$]+\\$",  // LaTeX math mode
+            "\\[[^\\]]+\\]", // Bracket formulas
+            "α|β|γ|δ|ε|ζ|η|θ|λ|μ|π|σ|τ|φ|χ|ψ|ω", // Greek letters
+            "\\b[A-Z][a-z]*\\([a-zA-Z,\\s]*\\)", // Function notation
+            "\\b\\d+\\.?\\d*\\s*[×÷±=<>≤≥]\\s*\\d+\\.?\\d*" // Mathematical expressions
+        ]
+        
+        for pattern in formulaPatterns {
+            let regex = try? NSRegularExpression(pattern: pattern, options: [])
+            let matches = regex?.matches(in: content, options: [], range: NSRange(location: 0, length: content.utf16.count))
+            if let matches = matches, !matches.isEmpty {
+                let formulaContent = matches.map { String(content[Range($0.range, in: content)!]) }.joined(separator: " ")
+                return formulaContent.lowercased().contains(query)
+            }
+        }
+        
+        return false
+    }
+    
+    private func containsReferences(content: String, query: String) -> Bool {
+        let referencePatterns = [
+            "\\(\\d{4}\\)", // Year references
+            "\\[[^\\]]+\\d{4}[^\\]]*\\]", // Bracketed references with years
+            "\\b[A-Z][a-z]+\\s+et\\s+al\\.", // "et al." citations
+            "\\bdoi:\\s*10\\.\\d+", // DOI references
+            "\\bISBN\\s*[:\\s-]*\\d", // ISBN references
+            "\\bFig\\.\\s*\\d+", // Figure references
+            "\\bTable\\s*\\d+", // Table references
+            "\\bChapter\\s*\\d+", // Chapter references
+            "\\bSection\\s*\\d+", // Section references
+            "\\bPage\\s*\\d+" // Page references
+        ]
+        
+        for pattern in referencePatterns {
+            let regex = try? NSRegularExpression(pattern: pattern, options: [.caseInsensitive])
+            let matches = regex?.matches(in: content, options: [], range: NSRange(location: 0, length: content.utf16.count))
+            if let matches = matches, !matches.isEmpty {
+                let referenceContent = matches.map { String(content[Range($0.range, in: content)!]) }.joined(separator: " ")
+                return referenceContent.lowercased().contains(query)
+            }
+        }
+        
+        return false
     }
 
     private func tabForTitle(_ title: String) -> Tab {
@@ -312,6 +437,8 @@ private struct FilterChip: View {
     let isSelected: Bool
     let tint: Color
     let action: () -> Void
+    
+    @State private var isHovered = false
 
     var body: some View {
         Button(action: action) {
@@ -322,15 +449,22 @@ private struct FilterChip: View {
                 .foregroundStyle(isSelected ? .white : .primary)
                 .background {
                     Capsule()
-                        .fill(isSelected ? tint : Color.secondary.opacity(0.15))
+                        .fill(isSelected ? tint : Color.secondary.opacity(isHovered ? 0.25 : 0.15))
                 }
+                .scaleEffect(isSelected ? 1.05 : (isHovered ? 1.02 : 1.0))
+                .animation(.easeInOut(duration: 0.2), value: isSelected)
+                .animation(.easeInOut(duration: 0.15), value: isHovered)
         }
         .buttonStyle(.plain)
+        .onHover { hovering in
+            isHovered = hovering
+        }
     }
 }
 
 private struct SearchResultRow: View {
     let result: SearchView.SearchResult
+    @State private var isHovered = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -354,6 +488,19 @@ private struct SearchResultRow: View {
                 .lineLimit(3)
         }
         .padding(.vertical, 6)
+        .background {
+            RoundedRectangle(cornerRadius: 8)
+                .fill(isHovered ? Color.primary.opacity(0.05) : Color.clear)
+        }
+        .contentShape(Rectangle())
+        .onHover { hovering in
+            isHovered = hovering
+        }
+        .transition(.asymmetric(
+            insertion: .scale.combined(with: .opacity),
+            removal: .opacity
+        ))
+        .animation(.easeInOut(duration: 0.15), value: isHovered)
     }
 }
 

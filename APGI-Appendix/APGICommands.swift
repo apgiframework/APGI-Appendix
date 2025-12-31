@@ -183,7 +183,9 @@ struct APGICommands: Commands {
     // MARK: - Help Actions
     
     private func openHelpGuide() {
-        NotificationCenter.default.post(name: .openHelpGuide, object: nil)
+        if let url = URL(string: "https://github.com/your-repo/APGI-Appendix/blob/main/User-Guide.md") {
+            NSWorkspace.shared.open(url)
+        }
     }
 }
 

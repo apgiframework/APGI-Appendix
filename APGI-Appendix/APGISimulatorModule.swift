@@ -31,7 +31,7 @@ struct APGIState {
     var norepinephrine: Double
     var acetylcholine: Double
 
-    nonisolated static func initialize(hiddenSize: Int = 128, numLevels: Int = 3) -> APGIState {
+    static func initialize(hiddenSize: Int = APGISimulatorConstants.defaultHiddenSize, numLevels: Int = APGISimulatorConstants.defaultNumLevels) -> APGIState {
         let interoStates = try! MLMultiArray(shape: [1, NSNumber(value: hiddenSize * numLevels)], dataType: .float32)
         let exteroStates = try! MLMultiArray(shape: [1, NSNumber(value: hiddenSize * numLevels)], dataType: .float32)
         let workspace = try! MLMultiArray(shape: [1, NSNumber(value: hiddenSize)], dataType: .float32)
@@ -61,12 +61,12 @@ struct APGIState {
             qVar: qVar,
             pMean: pMean,
             pVar: pVar,
-            piIntero: 1.0,
-            piExtero: 1.0,
-            theta: 1.0,
+            piIntero: Double(APGISimulatorConstants.baselineInteroceptivePrecision),
+            piExtero: Double(APGISimulatorConstants.baselineExteroceptivePrecision),
+            theta: Double(APGISimulatorConstants.baselineThreshold),
             prevS: 0.0,
             prevIgnition: 0.0,
-            energyReserves: 0.8,
+            energyReserves: Double(APGISimulatorConstants.defaultEnergyReserves),
             allostaticLoad: 0.0,
             refractoryTimer: 0.0,
             volatility: 0.0,
@@ -129,40 +129,40 @@ struct APGIConfiguration: Equatable {
     let precisionHistoryMax: Int
 
     init(
-        inputSize: Int = 64,
-        hiddenSize: Int = 128,
-        numLevels: Int = 3,
-        dtMs: Float = 10.0,
-        maxWindowMs: Float = 500.0,
-        theta0: Float = 1.0,
-        gamma: Float = 0.1,
-        delta: Float = 0.5,
-        lambdaUrg: Float = 0.2,
-        thetaMin: Float = 0.1,
-        thetaMax: Float = 5.0,
-        betaTransition: Float = 10.0,
-        hysteresis: Float = 0.2,
-        tauMin: Float = 0.01,
-        tauMax: Float = 10.0,
-        tauInteroBaseline: Float = 0.1,
-        tauExteroBaseline: Float = 0.05,
-        precisionMin: Float = 0.01,
-        precisionMax: Float = 10.0,
-        alphaBroadcast: Float = 1.0,
-        betaMaintenance: Float = 0.5,
-        energyDepletionRate: Float = 0.001,
-        energyMin: Float = 0.0,
-        energyMax: Float = 1.0,
-        allostaticIncreaseRate: Float = 0.01,
-        allostaticDecreaseRate: Float = 0.5,
-        allostaticMin: Float = 0.0,
-        allostaticMax: Float = 2.0,
-        maxRefractoryMs: Float = 200.0,
-        historyLength: Int = 100,
-        eps: Float = 1e-8,
-        reservoirScaling: Float = 1.0,
-        reservoirSparsity: Float = 0.1,
-        precisionHistoryMax: Int = 1000
+        inputSize: Int = APGISimulatorConstants.defaultInputSize,
+        hiddenSize: Int = APGISimulatorConstants.defaultHiddenSize,
+        numLevels: Int = APGISimulatorConstants.defaultNumLevels,
+        dtMs: Float = APGISimulatorConstants.defaultDtMs,
+        maxWindowMs: Float = APGISimulatorConstants.maxWindowMs,
+        theta0: Float = APGISimulatorConstants.baselineThreshold,
+        gamma: Float = APGISimulatorConstants.thresholdRecoveryRate,
+        delta: Float = APGISimulatorConstants.postIgnitionRefractory,
+        lambdaUrg: Float = APGISimulatorConstants.urgencyGainFactor,
+        thetaMin: Float = APGISimulatorConstants.minThreshold,
+        thetaMax: Float = APGISimulatorConstants.maxThreshold,
+        betaTransition: Float = APGISimulatorConstants.betaTransition,
+        hysteresis: Float = APGISimulatorConstants.hysteresisFactor,
+        tauMin: Float = APGISimulatorConstants.minPrecision,
+        tauMax: Float = APGISimulatorConstants.maxPrecision,
+        tauInteroBaseline: Float = APGISimulatorConstants.baselineInteroceptivePrecision,
+        tauExteroBaseline: Float = APGISimulatorConstants.baselineExteroceptivePrecision,
+        precisionMin: Float = APGISimulatorConstants.minPrecision,
+        precisionMax: Float = APGISimulatorConstants.maxPrecision,
+        alphaBroadcast: Float = APGISimulatorConstants.alphaBroadcast,
+        betaMaintenance: Float = APGISimulatorConstants.betaMaintenance,
+        energyDepletionRate: Float = APGISimulatorConstants.energyDepletionRate,
+        energyMin: Float = APGISimulatorConstants.minEnergy,
+        energyMax: Float = APGISimulatorConstants.maxEnergy,
+        allostaticIncreaseRate: Float = APGISimulatorConstants.allostaticIncreaseRate,
+        allostaticDecreaseRate: Float = APGISimulatorConstants.allostaticDecreaseRate,
+        allostaticMin: Float = APGISimulatorConstants.minAllostaticLoad,
+        allostaticMax: Float = APGISimulatorConstants.maxAllostaticLoad,
+        maxRefractoryMs: Float = APGISimulatorConstants.maxRefractoryMs,
+        historyLength: Int = APGISimulatorConstants.defaultHistoryLength,
+        eps: Float = APGISimulatorConstants.numericalEpsilon,
+        reservoirScaling: Float = APGISimulatorConstants.reservoirScaling,
+        reservoirSparsity: Float = APGISimulatorConstants.reservoirSparsity,
+        precisionHistoryMax: Int = APGISimulatorConstants.precisionHistoryMax
     ) {
         self.inputSize = inputSize
         self.hiddenSize = hiddenSize
@@ -202,33 +202,33 @@ struct APGIConfiguration: Equatable {
 
     @MainActor
     static let `default` = APGIConfiguration(
-        inputSize: 64,
-        hiddenSize: 128,
-        numLevels: 3,
-        dtMs: 10.0,
-        theta0: 1.0,
-        thetaMin: 0.1,
-        thetaMax: 5.0,
-        precisionMin: 0.01,
-        precisionMax: 10.0,
-        energyMin: 0.0,
-        energyMax: 1.0,
-        historyLength: 100
+        inputSize: APGISimulatorConstants.defaultInputSize,
+        hiddenSize: APGISimulatorConstants.defaultHiddenSize,
+        numLevels: APGISimulatorConstants.defaultNumLevels,
+        dtMs: APGISimulatorConstants.defaultDtMs,
+        theta0: APGISimulatorConstants.baselineThreshold,
+        thetaMin: APGISimulatorConstants.minThreshold,
+        thetaMax: APGISimulatorConstants.maxThreshold,
+        precisionMin: APGISimulatorConstants.minPrecision,
+        precisionMax: APGISimulatorConstants.maxPrecision,
+        energyMin: APGISimulatorConstants.minEnergy,
+        energyMax: APGISimulatorConstants.maxEnergy,
+        historyLength: APGISimulatorConstants.defaultHistoryLength
     )
 
     nonisolated static let defaultConfig = APGIConfiguration(
-        inputSize: 64,
-        hiddenSize: 128,
-        numLevels: 3,
-        dtMs: 10.0,
-        theta0: 1.0,
-        thetaMin: 0.1,
-        thetaMax: 5.0,
-        precisionMin: 0.01,
-        precisionMax: 10.0,
-        energyMin: 0.0,
-        energyMax: 1.0,
-        historyLength: 100
+        inputSize: APGISimulatorConstants.defaultInputSize,
+        hiddenSize: APGISimulatorConstants.defaultHiddenSize,
+        numLevels: APGISimulatorConstants.defaultNumLevels,
+        dtMs: APGISimulatorConstants.defaultDtMs,
+        theta0: APGISimulatorConstants.baselineThreshold,
+        thetaMin: APGISimulatorConstants.minThreshold,
+        thetaMax: APGISimulatorConstants.maxThreshold,
+        precisionMin: APGISimulatorConstants.minPrecision,
+        precisionMax: APGISimulatorConstants.maxPrecision,
+        energyMin: APGISimulatorConstants.minEnergy,
+        energyMax: APGISimulatorConstants.maxEnergy,
+        historyLength: APGISimulatorConstants.defaultHistoryLength
     )
 }
 
@@ -267,14 +267,42 @@ enum APGIError: Error, LocalizedError {
 struct APGICore {
     let config: APGIConfiguration
 
-    func computeSurprise(predictionError: [Float], precision: Float) -> Float {
+// MARK: - APGI Core Computational Functions
+
+/// Computes precision-weighted surprise from prediction errors
+/// 
+/// This function implements the core APGI surprise accumulation mechanism:
+/// - Takes absolute prediction errors to ensure positive contributions
+/// - Computes mean error across all input dimensions
+/// - Weights by precision to reflect reliability of sensory information
+/// 
+/// - Parameters:
+///   - predictionError: Array of prediction errors (observation - prediction)
+///   - precision: Precision weight (0.0 to 1.0) representing reliability
+/// - Returns: Precision-weighted surprise value
+func computeSurprise(predictionError: [Float], precision: Float) -> Float {
         guard !predictionError.isEmpty else { return 0.0 }
         let absoluteError = predictionError.map { abs($0) }
         let meanError = absoluteError.reduce(0, +) / Float(absoluteError.count)
         return precision * meanError
     }
 
-    func computeTotalSurprise(
+/// Computes total surprise by combining exteroceptive and interoceptive sources
+/// 
+/// Implements the multi-modal surprise accumulation in APGI framework:
+/// - S_extero: Precision-weighted exteroceptive (external sensory) surprise
+/// - S_intero: Precision-weighted interoceptive (internal bodily) surprise, modulated by somatic marker
+/// 
+/// The somatic marker biases interoceptive processing based on metabolic, cognitive, and affective states
+/// 
+/// - Parameters:
+///   - exteroError: Prediction errors from external sensory channels
+///   - interoError: Prediction errors from internal bodily channels
+///   - piExtero: Precision weight for exteroceptive information
+///   - piIntero: Precision weight for interoceptive information
+///   - somaticMarker: Modulation factor for interoceptive processing (typically 0.5-2.0)
+/// - Returns: Combined precision-weighted surprise
+func computeTotalSurprise(
         exteroError: [Float],
         interoError: [Float],
         piExtero: Float,
@@ -287,22 +315,74 @@ struct APGICore {
         return sExtero + sIntero
     }
 
-    func computeIgnitionProbability(surprise: Float, threshold: Float, alpha: Float) -> Float {
+/// Computes probability of conscious ignition using sigmoid function
+/// 
+/// Implements the threshold-based ignition decision:
+/// B_t = σ(α(S_t - θ_t))
+/// 
+/// Where:
+/// - B_t: Ignition probability (0.0 to 1.0)
+/// - S_t: Accumulated surprise
+/// - θ_t: Dynamic ignition threshold
+/// - α: Sigmoid steepness parameter (controls decision certainty)
+/// 
+/// - Parameters:
+///   - surprise: Current accumulated surprise value
+///   - threshold: Current dynamic ignition threshold
+///   - alpha: Sigmoid steepness parameter (typically 5-10)
+/// - Returns: Probability of conscious ignition (0.0 to 1.0)
+func computeIgnitionProbability(surprise: Float, threshold: Float, alpha: Float) -> Float {
         let x = alpha * (surprise - threshold)
         return sigmoid(x)
     }
 
-    func sigmoid(_ x: Float) -> Float {
+/// Standard logistic sigmoid activation function
+/// 
+/// σ(x) = 1 / (1 + e^(-x))
+/// 
+/// Maps any real-valued input to range [0, 1], useful for probability computations
+/// 
+/// - Parameter x: Input value
+/// - Returns: Sigmoid activation in range [0, 1]
+func sigmoid(_ x: Float) -> Float {
         1.0 / (1.0 + exp(-x))
     }
 
-    func computeSomaticMarker(metabolic: Float, cognitive: Float, affective: Float) -> Float {
-        let marker = (metabolic * 0.4 + cognitive * 0.3 + affective * 0.3)
-        let scaled = marker * 2.0
-        return clamp(scaled, min: 0.5, max: 2.0)
+/// Computes somatic marker from metabolic, cognitive, and affective components
+/// 
+/// The somatic marker implements Damasio's somatic marker hypothesis:
+/// - Integrates current metabolic, cognitive, and affective states
+/// - Weights metabolic processes most heavily (0.4), cognitive and affective equally (0.3 each)
+/// - Scales result to modulate interoceptive precision (0.5 to 2.0 range)
+/// 
+/// This marker biases the system toward processing interoceptive information
+/// during metabolic stress or high emotional arousal
+/// 
+/// - Parameters:
+///   - metabolic: Current metabolic state (0.0 to 1.0)
+///   - cognitive: Current cognitive load/state (0.0 to 1.0)
+///   - affective: Current affective/emotional state (0.0 to 1.0)
+/// - Returns: Somatic marker for interoceptive modulation (0.5 to 2.0)
+func computeSomaticMarker(metabolic: Float, cognitive: Float, affective: Float) -> Float {
+        let marker = (metabolic * APGISimulatorConstants.metabolicWeight + 
+                     cognitive * APGISimulatorConstants.cognitiveWeight + 
+                     affective * APGISimulatorConstants.affectiveWeight)
+        let scaled = marker * APGISimulatorConstants.somaticMarkerScaling
+        return clamp(scaled, min: APGISimulatorConstants.somaticBiasFactor, max: 2.0)
     }
 
-    func computePredictionError(observation: [Float], prediction: [Float]) -> [Float] {
+/// Computes prediction errors between observations and predictions
+/// 
+/// Implements the core prediction error computation:
+/// ε = observation - prediction
+/// 
+/// Positive errors indicate under-prediction, negative errors indicate over-prediction
+/// 
+/// - Parameters:
+///   - observation: Actual sensory input values
+///   - prediction: Predicted sensory values from generative model
+/// - Returns: Array of prediction errors
+func computePredictionError(observation: [Float], prediction: [Float]) -> [Float] {
         let minCount = min(observation.count, prediction.count)
         return (0..<minCount).map { observation[$0] - prediction[$0] }
     }
@@ -329,7 +409,26 @@ struct APGICore {
         return clamp(precision, min: config.precisionMin, max: config.precisionMax)
     }
 
-    func updateThreshold(
+/// Updates dynamic ignition threshold based on homeostatic and urgency factors
+/// 
+/// Implements threshold adaptation dynamics:
+/// dθ_t/dt = γ(θ₀ − θ_t) + δ·B_{t-1} − λ·|dS_t/dt|
+/// 
+/// Where:
+/// - γ: Homeostatic recovery rate (returns threshold to baseline)
+/// - θ₀: Baseline threshold value
+/// - δ: Post-ignition refractory elevation
+/// - B_{t-1}: Previous ignition state
+/// - λ: Urgency gain factor (lowers threshold for rapidly increasing surprise)
+/// - |dS_t/dt|: Absolute rate of surprise change (urgency signal)
+/// 
+/// - Parameters:
+///   - currentTheta: Current threshold value
+///   - prevIgnition: Previous ignition state (0.0 or 1.0)
+///   - surpriseRate: Current rate of surprise change
+///   - dt: Time step for integration
+/// - Returns: Updated threshold value
+func updateThreshold(
         current: Float,
         prevIgnition: Float,
         prevSurprise: Float,
@@ -355,20 +454,72 @@ struct APGICore {
         return clamp(newTheta, min: config.thetaMin, max: config.thetaMax)
     }
 
-    func computeBroadcastCost(ignitionProb: Float) -> Float {
+/// Computes metabolic cost of broadcasting ignition signal
+/// 
+/// Implements quadratic cost model for global broadcasting:
+/// Cost = α × B_t²
+/// 
+/// Where:
+/// - α: Broadcast cost coefficient
+/// - B_t: Ignition probability
+/// 
+/// Quadratic scaling reflects the metabolic expense of widespread
+/// neural activation across multiple brain regions
+/// 
+/// - Parameter ignitionProb: Probability of ignition (0.0 to 1.0)
+/// - Returns: Metabolic cost of broadcasting
+func computeBroadcastCost(ignitionProb: Float) -> Float {
         config.alphaBroadcast * pow(ignitionProb, 2)
     }
 
-    func computeMaintenanceCost(state: Float) -> Float {
+/// Computes metabolic cost of maintaining current neural state
+/// 
+/// Implements linear maintenance cost model:
+/// Cost = β × |state|
+/// 
+/// Where:
+/// - β: Maintenance cost coefficient
+/// - state: Current neural activation level
+/// 
+/// Reflects ongoing ATP consumption for maintaining membrane potentials
+/// and neural firing patterns
+/// 
+/// - Parameter state: Current neural state activation level
+/// - Returns: Metabolic maintenance cost
+func computeMaintenanceCost(state: Float) -> Float {
         config.betaMaintenance * abs(state)
     }
 
-    func computeBenefit(surprise: Float, prevSurprise: Float) -> Float {
+/// Computes functional benefit from surprise reduction
+/// 
+/// Implements benefit model based on prediction error minimization:
+/// Benefit = λ × max(S_{t-1} - S_t, 0)
+/// 
+/// Where:
+/// - λ: Benefit scaling factor
+/// - S_{t-1}: Previous surprise level
+/// - S_t: Current surprise level
+/// 
+/// Benefit only accrues when surprise is actually reduced,
+/// reflecting improved predictive accuracy
+/// 
+/// - Parameters:
+///   - surprise: Current surprise level
+///   - prevSurprise: Previous surprise level
+/// - Returns: Functional benefit from prediction improvement
+func computeBenefit(surprise: Float, prevSurprise: Float) -> Float {
         let reduction = max(prevSurprise - surprise, 0.0)
-        return reduction * 0.5
+        return reduction * APGISimulatorConstants.benefitScaling
     }
 
-    func clamp(_ value: Float, min minValue: Float, max maxValue: Float) -> Float {
+/// Utility function to clamp values within specified range
+/// 
+/// - Parameters:
+///   - value: Value to clamp
+///   - minValue: Minimum allowed value
+///   - maxValue: Maximum allowed value
+/// - Returns: Clamped value within [minValue, maxValue]
+func clamp(_ value: Float, min minValue: Float, max maxValue: Float) -> Float {
         Swift.max(minValue, Swift.min(maxValue, value))
     }
 }
@@ -592,12 +743,31 @@ final class APGIInferenceEngine: ObservableObject {
 
     func loadModel() async throws {
         do {
+            // Validate configuration before loading
+            guard config.inputSize > 0 && config.hiddenSize > 0 && config.numLevels > 0 else {
+                throw APGIError.invalidInput("Invalid configuration parameters")
+            }
+            
             self.simpleModel = SimpleAPGIModel(configuration: config)
+            
+            // Simulate model loading with validation
             try await Task.sleep(nanoseconds: 100_000_000)
+            
+            // Validate model initialization
+            guard simpleModel != nil else {
+                throw APGIError.modelLoadFailed("Model initialization failed")
+            }
+            
             isModelLoaded = true
         } catch {
             isModelLoaded = false
-            throw APGIError.modelLoadFailed(error.localizedDescription)
+            simpleModel = nil
+            
+            if let apgiError = error as? APGIError {
+                throw apgiError
+            } else {
+                throw APGIError.modelLoadFailed(error.localizedDescription)
+            }
         }
     }
 
@@ -607,37 +777,83 @@ final class APGIInferenceEngine: ObservableObject {
     }
 
     func runInference(interoInput: [Float], exteroInput: [Float], context: APGIContext) async throws {
-        guard let model = simpleModel else { throw APGIError.modelNotLoaded }
+        guard let model = simpleModel else { 
+            throw APGIError.modelNotLoaded 
+        }
+        
+        // Enhanced input validation
         try validateInputs(interoInput: interoInput, exteroInput: exteroInput)
+        try validateContext(context: context)
 
         isInferring = true
-        defer { isInferring = false }
+        defer { 
+            isInferring = false 
+        }
 
         let startTime = Date()
 
-        let stateSnapshot = await stateManager.getSnapshot()
+        do {
+            let stateSnapshot = await stateManager.getSnapshot()
 
-        let result = model.forward(
-            interoInput: interoInput,
-            exteroInput: exteroInput,
-            state: stateSnapshot,
-            context: context
-        )
+            let result = model.forward(
+                interoInput: interoInput,
+                exteroInput: exteroInput,
+                state: stateSnapshot,
+                context: context
+            )
 
-        let inferenceTime = Date().timeIntervalSince(startTime)
-        lastInferenceTime = inferenceTime
+            let inferenceTime = Date().timeIntervalSince(startTime)
+            lastInferenceTime = inferenceTime
 
-        performanceMonitor.recordInference(duration: inferenceTime)
-        updateFPS(inferenceTime: inferenceTime)
+            // Validate inference results
+            try validateInferenceResult(result)
 
-        await stateManager.updateState(result.newState)
+            performanceMonitor.recordInference(duration: inferenceTime)
+            updateFPS(inferenceTime: inferenceTime)
 
-        currentState = result.newState
-        diagnostics = result.diagnostics
+            await stateManager.updateState(result.newState)
 
-        if let timer = fpsUpdateTimer, timer.isValid {
-        } else {
-            averageInferenceTime = performanceMonitor.averageInferenceTime
+            currentState = result.newState
+            diagnostics = result.diagnostics
+
+            if let timer = fpsUpdateTimer, timer.isValid {
+            } else {
+                averageInferenceTime = performanceMonitor.averageInferenceTime
+            }
+        } catch {
+            throw APGIError.inferenceFailed(error)
+        }
+    }
+    
+    private func validateContext(context: APGIContext) throws {
+        let values = [context.metabolic, context.cognitive, context.affective, context.arousal, context.attention]
+        
+        for value in values {
+            guard value >= 0.0 && value <= 1.0 else {
+                throw APGIError.invalidInput("Context values must be between 0.0 and 1.0")
+            }
+            guard !value.isNaN && !value.isInfinite else {
+                throw APGIError.invalidInput("Context values contain NaN or Inf")
+            }
+        }
+    }
+    
+    private func validateInferenceResult(_ result: (newState: APGIState, diagnostics: APGIDiagnostics)) throws {
+        // Check for valid state values
+        let stateValues = [
+            result.newState.piIntero, result.newState.piExtero, result.newState.theta,
+            result.newState.energyReserves, result.newState.allostaticLoad
+        ]
+        
+        for value in stateValues {
+            guard !value.isNaN && !value.isInfinite else {
+                throw APGIError.stateUpdateFailed("Invalid state values detected")
+            }
+        }
+        
+        // Check diagnostics validity
+        guard result.diagnostics.sTotal >= 0 && result.diagnostics.ignitionProb >= 0 && result.diagnostics.ignitionProb <= 1 else {
+            throw APGIError.inferenceError("Invalid diagnostic values")
         }
     }
 
@@ -736,7 +952,7 @@ struct PerformanceMetrics {
 }
 
 extension APGIState {
-    nonisolated static func initial(configuration: APGIConfiguration) -> APGIState {
+    static func initial(configuration: APGIConfiguration) -> APGIState {
         APGIState.initialize(hiddenSize: configuration.hiddenSize, numLevels: configuration.numLevels)
     }
 }

@@ -85,7 +85,11 @@ struct GlossaryTermView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             Button {
-                withAnimation(.spring(response: 0.3)) {
+                if ThemeManager.shared.enableAnimations {
+                    withAnimation(.spring(response: 0.3)) {
+                        isExpanded.toggle()
+                    }
+                } else {
                     isExpanded.toggle()
                 }
             } label: {

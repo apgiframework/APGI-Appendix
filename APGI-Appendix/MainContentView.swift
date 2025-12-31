@@ -9,8 +9,8 @@ struct MainContentView: View {
     @State private var showInspector = true
     @State private var columnVisibility = NavigationSplitViewVisibility.all
     @State private var searchPresented: Bool = false
-    @State private var focusModeEnabled: Bool = false
     @StateObject private var bookmarkManager = BookmarkManager()
+    @EnvironmentObject private var themeManager: ThemeManager
 
     var body: some View {
         NavigationSplitView(columnVisibility: $columnVisibility) {
@@ -28,7 +28,7 @@ struct MainContentView: View {
             ZStack {
                 if let section = selectedSection {
                     HStack(spacing: 0) {
-                        DetailContentView(section: section, focusModeEnabled: $focusModeEnabled)
+                        DetailContentView(section: section, focusModeEnabled: $themeManager.focusModeEnabled)
                             .environmentObject(bookmarkManager)
 
                         if showInspector {

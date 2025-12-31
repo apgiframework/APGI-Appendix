@@ -1,6 +1,7 @@
 import SwiftUI
 import AppKit
 import Combine
+import Foundation
 
 // MARK: - App Theme
 
@@ -27,6 +28,11 @@ class ThemeManager: ObservableObject {
     
     @Published var selectedTheme: AppTheme = .system
     @Published var highContrastMode: Bool = false
+    @AppStorage("contentFontSize") public var fontSize: Double = 15.0
+    @AppStorage("enableAnimations") public var enableAnimations: Bool = true
+    @AppStorage("sidebarVisible") public var sidebarVisible: Bool = true
+    @AppStorage("focusModeEnabled") public var focusModeEnabled: Bool = false
+    @AppStorage("autoSaveBookmarks") public var autoSaveBookmarks: Bool = true
     
     var backgroundColor: Color {
         switch selectedTheme {
@@ -41,6 +47,17 @@ class ThemeManager: ObservableObject {
     
     private init() {
         loadSettings()
+        setupAutoSave()
+    }
+    
+    private func setupAutoSave() {
+        NotificationCenter.default.addObserver(
+            forName: NSApplication.didResignActiveNotification,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            self?.saveSettings()
+        }
     }
     
     func applyTheme() {
@@ -55,19 +72,42 @@ class ThemeManager: ObservableObject {
     }
     
     private func loadSettings() {
-        // Load saved theme preferences
         if let themeRaw = UserDefaults.standard.string(forKey: "selectedTheme"),
            let theme = AppTheme(rawValue: themeRaw) {
             selectedTheme = theme
         }
         
         highContrastMode = UserDefaults.standard.bool(forKey: "highContrastMode")
+        fontSize = UserDefaults.standard.object(forKey: "contentFontSize") as? Double ?? 15.0
+        enableAnimations = UserDefaults.standard.object(forKey: "enableAnimations") as? Bool ?? true
+        sidebarVisible = UserDefaults.standard.object(forKey: "sidebarVisible") as? Bool ?? true
+        focusModeEnabled = UserDefaults.standard.object(forKey: "focusModeEnabled") as? Bool ?? false
+        autoSaveBookmarks = UserDefaults.standard.object(forKey: "autoSaveBookmarks") as? Bool ?? true
+        
         applyTheme()
     }
     
     func saveSettings() {
         UserDefaults.standard.set(selectedTheme.rawValue, forKey: "selectedTheme")
         UserDefaults.standard.set(highContrastMode, forKey: "highContrastMode")
+        UserDefaults.standard.set(fontSize, forKey: "contentFontSize")
+        UserDefaults.standard.set(enableAnimations, forKey: "enableAnimations")
+        UserDefaults.standard.set(sidebarVisible, forKey: "sidebarVisible")
+        UserDefaults.standard.set(focusModeEnabled, forKey: "focusModeEnabled")
+        UserDefaults.standard.set(autoSaveBookmarks, forKey: "autoSaveBookmarks")
+        
+        UserDefaults.standard.synchronize()
+    }
+    
+    func resetToDefaults() {
+        fontSize = 15.0
+        enableAnimations = true
+        sidebarVisible = true
+        focusModeEnabled = false
+        autoSaveBookmarks = true
+        selectedTheme = .system
+        highContrastMode = false
+        saveSettings()
     }
 }
 
