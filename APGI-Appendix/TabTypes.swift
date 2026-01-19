@@ -24,9 +24,9 @@ enum Tab: String, CaseIterable, Identifiable {
     case bibliography = "Bibliography"
     case glossary = "Glossary"
     case apgiSimulator = "APGI Simulator"
-    
+
     var id: String { rawValue }
-    
+
     var icon: String {
         switch self {
         case .methodology: return "book"
@@ -54,7 +54,7 @@ enum Tab: String, CaseIterable, Identifiable {
         case .apgiSimulator: return "waveform.path.ecg.rectangle"
         }
     }
-    
+
     var category: SectionCategory {
         switch self {
         case .methodology, .apgiStatement, .epistemicStandards:
@@ -75,7 +75,7 @@ enum Tab: String, CaseIterable, Identifiable {
             return .reference
         }
     }
-    
+
     var shortTitle: String {
         switch self {
         case .methodology: return "Methodology"
@@ -103,10 +103,10 @@ enum Tab: String, CaseIterable, Identifiable {
         case .apgiSimulator: return "APGI Simulator"
         }
     }
-    
+
     var hasTables: Bool {
         switch self {
-        case .biologicalImplementation, .neuromodulatorEffects, 
+        case .biologicalImplementation, .neuromodulatorEffects,
              .explicitNeuromodulator, .ignitionTimeline, .lifeStages,
              .psychologicalStates, .apgiToPsyState, .disordersConditions:
             return true

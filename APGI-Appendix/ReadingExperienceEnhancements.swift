@@ -128,7 +128,7 @@ extension View {
 
 struct WhatsNewView: View {
     @Environment(\.colorScheme) private var colorScheme
-    
+
     private let updates = [
         Update(
             version: "1.2.0",
@@ -139,7 +139,7 @@ struct WhatsNewView: View {
         ),
         Update(
             version: "1.1.0",
-            date: "November 2024", 
+            date: "November 2024",
             title: "APGI Simulator",
             description: "Interactive simulation environment for real-time parameter manipulation and system behavior visualization.",
             features: ["Real-time parameter controls", "Dynamic system visualization", "Predictive coding simulations", "Neuromodulatory modeling"]
@@ -152,19 +152,19 @@ struct WhatsNewView: View {
             features: ["Full framework documentation", "Interactive visualizations", "Comprehensive glossary", "Cross-referenced content"]
         )
     ]
-    
+
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
                 Text("What's New")
                     .font(.largeTitle.weight(.bold))
                     .padding(.bottom, 10)
-                
+
                 Text("Latest updates and improvements to the APGI Appendix")
                     .font(.title3)
                     .foregroundStyle(.secondary)
                     .padding(.bottom, 30)
-                
+
                 ForEach(updates) { update in
                     UpdateCard(update: update)
                 }
@@ -178,7 +178,7 @@ struct WhatsNewView: View {
 
 private struct UpdateCard: View {
     let update: Update
-    
+
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
@@ -186,34 +186,34 @@ private struct UpdateCard: View {
                     Text(update.version)
                         .font(.headline.weight(.semibold))
                         .foregroundStyle(Color.accentColor)
-                    
+
                     Text(update.date)
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }
-                
+
                 Spacer()
             }
-            
+
             Text(update.title)
                 .font(.title3.weight(.medium))
-            
+
             Text(update.description)
                 .font(.body)
                 .foregroundStyle(.primary)
-            
+
             VStack(alignment: .leading, spacing: 6) {
                 Text("Features:")
                     .font(.caption.weight(.semibold))
                     .foregroundStyle(.secondary)
-                
+
                 ForEach(update.features, id: \.self) { feature in
                     HStack(alignment: .top, spacing: 8) {
                         Image(systemName: "checkmark.circle.fill")
                             .font(.caption2)
                             .foregroundStyle(Color.accentColor)
                             .padding(.top, 2)
-                        
+
                         Text(feature)
                             .font(.caption)
                             .foregroundStyle(.primary)
@@ -244,12 +244,12 @@ private struct Update: Identifiable {
 
 struct QuickStartPanel: View {
     @Environment(\.colorScheme) private var colorScheme
-    
+
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 24) {
                 HeaderSection()
-                
+
                 QuickStartNavigationSection()
                 FeaturesSection()
                 WorkflowSection()
@@ -267,7 +267,7 @@ private struct HeaderSection: View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Quick Start Guide")
                 .font(.largeTitle.weight(.bold))
-            
+
             Text("Get up and running with the APGI Appendix in minutes")
                 .font(.title3)
                 .foregroundStyle(.secondary)
@@ -280,20 +280,20 @@ private struct QuickStartNavigationSection: View {
         VStack(alignment: .leading, spacing: 12) {
             Text("🧭 Navigation")
                 .font(.title2.weight(.semibold))
-            
+
             VStack(alignment: .leading, spacing: 8) {
                 QuickStartItem(
                     icon: "sidebar.left",
                     title: "Three-Panel Layout",
                     description: "Categories → Sections → Content"
                 )
-                
+
                 QuickStartItem(
                     icon: "magnifyingglass",
                     title: "Global Search",
                     description: "Press ⌘F to search everything"
                 )
-                
+
                 QuickStartItem(
                     icon: "bookmark",
                     title: "Bookmarks",
@@ -309,20 +309,20 @@ private struct FeaturesSection: View {
         VStack(alignment: .leading, spacing: 12) {
             Text("✨ Key Features")
                 .font(.title2.weight(.semibold))
-            
+
             VStack(alignment: .leading, spacing: 8) {
                 QuickStartItem(
                     icon: "eye",
                     title: "Focus Mode",
                     description: "Distraction-free reading"
                 )
-                
+
                 QuickStartItem(
                     icon: "play.circle",
                     title: "Interactive Timeline",
                     description: "Explore temporal dynamics"
                 )
-                
+
                 QuickStartItem(
                     icon: "gearshape.2",
                     title: "APGI Simulator",
@@ -338,20 +338,20 @@ private struct WorkflowSection: View {
         VStack(alignment: .leading, spacing: 12) {
             Text("📖 Recommended Workflow")
                 .font(.title2.weight(.semibold))
-            
+
             VStack(alignment: .leading, spacing: 8) {
                 QuickStartItem(
                     icon: "1.circle",
                     title: "Start with Methodology",
                     description: "Understand the framework foundation"
                 )
-                
+
                 QuickStartItem(
                     icon: "2.circle",
                     title: "Explore Mathematical Framework",
                     description: "Learn the quantitative models"
                 )
-                
+
                 QuickStartItem(
                     icon: "3.circle",
                     title: "Study Biological Implementation",
@@ -367,20 +367,20 @@ private struct KeyboardShortcutsSection: View {
         VStack(alignment: .leading, spacing: 12) {
             Text("⌨️ Essential Shortcuts")
                 .font(.title2.weight(.semibold))
-            
+
             VStack(alignment: .leading, spacing: 8) {
                 QuickStartItem(
                     icon: "commandkey",
                     title: "⌘F",
                     description: "Open search"
                 )
-                
+
                 QuickStartItem(
                     icon: "commandkey",
                     title: "⌘B",
                     description: "Toggle bookmark"
                 )
-                
+
                 QuickStartItem(
                     icon: "commandkey",
                     title: "⌘[ / ⌘]",
@@ -395,18 +395,18 @@ private struct QuickStartItem: View {
     let icon: String
     let title: String
     let description: String
-    
+
     var body: some View {
         HStack(alignment: .top, spacing: 12) {
             Image(systemName: icon)
                 .font(.system(size: 16, weight: .medium))
                 .foregroundStyle(Color.accentColor)
                 .frame(width: 20, alignment: .center)
-            
+
             VStack(alignment: .leading, spacing: 2) {
                 Text(title)
                     .font(.body.weight(.medium))
-                
+
                 Text(description)
                     .font(.caption)
                     .foregroundStyle(.secondary)

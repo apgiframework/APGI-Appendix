@@ -16,7 +16,7 @@ struct SearchView: View {
 
     enum SearchScope: Hashable {
         case all, titles, content, formulas, references, glossary
-        
+
         var rawValue: String {
             switch self {
             case .all: return "all"
@@ -55,7 +55,7 @@ struct SearchView: View {
                         // Cancel previous search and timer
                         searchTask?.cancel()
                         debounceTimer?.invalidate()
-                        
+
                         // Clear results for empty search
                         if newValue.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
                             searchResults = []
@@ -63,7 +63,7 @@ struct SearchView: View {
                             isSearching = false
                             return
                         }
-                        
+
                         // Check cache first
                         let cacheKey = generateCacheKey(query: newValue, scope: searchScope, filters: selectedFilters)
                         if let cachedResults = performanceManager.getCachedSearchResults(for: cacheKey) {
@@ -75,7 +75,7 @@ struct SearchView: View {
                                 return
                             }
                         }
-                        
+
                         // Debounced search with adaptive delay
                         let debounceDelay = performanceManager.shouldReduceAnimations ? 500 : 300
                         debounceTimer = Timer.scheduledTimer(withTimeInterval: TimeInterval(debounceDelay) / 1000.0, repeats: false) { _ in
@@ -150,16 +150,16 @@ struct SearchView: View {
                     Image(systemName: "exclamationmark.triangle")
                         .font(.system(size: 48))
                         .foregroundStyle(.orange)
-                    
+
                     Text("Search Error")
                         .font(.headline)
                         .foregroundStyle(.secondary)
-                    
+
                     Text(searchError)
                         .font(.subheadline)
                         .foregroundStyle(.tertiary)
                         .multilineTextAlignment(.center)
-                    
+
                     Button("Retry") {
                         performSearch()
                     }
@@ -212,19 +212,19 @@ struct SearchView: View {
 
         // Cancel previous search task
         searchTask?.cancel()
-        
+
         isSearching = true
         searchError = nil
 
         searchTask = Task {
             do {
                 let results = try await performAsyncSearch(query: query)
-                
+
                 // Cache the results
                 let cacheKey = generateCacheKey(query: query, scope: searchScope, filters: selectedFilters)
                 let cachedResults = CachedSearchResults(results: results, cost: results.count)
                 performanceManager.setCachedSearchResults(cachedResults, for: cacheKey)
-                
+
                 await MainActor.run {
                     if !Task.isCancelled {
                         self.searchResults = results
@@ -243,12 +243,12 @@ struct SearchView: View {
             }
         }
     }
-    
+
     private func generateCacheKey(query: String, scope: SearchScope, filters: Set<SectionCategory>) -> String {
         let sortedFilters = Array(filters).sorted { $0.rawValue < $1.rawValue }.map { $0.rawValue }.joined(separator: ",")
         return "\(query)_\(scope.rawValue)_\(sortedFilters)"
     }
-    
+
     private func performAsyncSearch(query: String) async throws -> [SearchResult] {
         let effectiveTabs: [Tab] = {
             switch searchScope {
@@ -349,7 +349,7 @@ struct SearchView: View {
             let sectionTab = tabForTitle(title)
             let snippet = makeContextSnippet(from: content, query: query)
             let excerpt = makeHighlightedExcerpt(from: snippet, query: query)
-            
+
             var relevanceScore = Double(contentMatches) * 10
             if matchedInFormulas {
                 relevanceScore += 500
@@ -357,7 +357,7 @@ struct SearchView: View {
             if matchedInReferences {
                 relevanceScore += 300
             }
-            
+
             results.append(
                 SearchResult(
                     title: sectionTab.shortTitle,
@@ -371,7 +371,7 @@ struct SearchView: View {
 
         return results
     }
-    
+
     private func containsFormulas(content: String, query: String) -> Bool {
         let formulaPatterns = [
             "\\$[^$]+\\$",  // LaTeX math mode
@@ -380,7 +380,7 @@ struct SearchView: View {
             "\\b[A-Z][a-z]*\\([a-zA-Z,\\s]*\\)", // Function notation
             "\\b\\d+\\.?\\d*\\s*[×÷±=<>≤≥]\\s*\\d+\\.?\\d*" // Mathematical expressions
         ]
-        
+
         for pattern in formulaPatterns {
             let regex = try? NSRegularExpression(pattern: pattern, options: [])
             let matches = regex?.matches(in: content, options: [], range: NSRange(location: 0, length: content.utf16.count))
@@ -389,10 +389,10 @@ struct SearchView: View {
                 return formulaContent.lowercased().contains(query)
             }
         }
-        
+
         return false
     }
-    
+
     private func containsReferences(content: String, query: String) -> Bool {
         let referencePatterns = [
             "\\(\\d{4}\\)", // Year references
@@ -406,7 +406,7 @@ struct SearchView: View {
             "\\bSection\\s*\\d+", // Section references
             "\\bPage\\s*\\d+" // Page references
         ]
-        
+
         for pattern in referencePatterns {
             let regex = try? NSRegularExpression(pattern: pattern, options: [.caseInsensitive])
             let matches = regex?.matches(in: content, options: [], range: NSRange(location: 0, length: content.utf16.count))
@@ -415,7 +415,7 @@ struct SearchView: View {
                 return referenceContent.lowercased().contains(query)
             }
         }
-        
+
         return false
     }
 
@@ -446,7 +446,7 @@ struct SearchView: View {
             snippet = "…" + snippet
         }
         if end != text.endIndex {
-            snippet = snippet + "…"
+            snippet += "…"
         }
 
         return snippet
@@ -492,7 +492,7 @@ private struct FilterChip: View {
     let isSelected: Bool
     let tint: Color
     let action: () -> Void
-    
+
     @State private var isHovered = false
 
     var body: some View {

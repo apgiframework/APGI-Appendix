@@ -8,7 +8,7 @@ struct TableParserExamples: View {
     @State private var selectedExample: ExampleType = .markdown
     @State private var parsedTable: ParsedTable?
     @State private var parseError: String?
-    
+
     enum ExampleType: String, CaseIterable {
         case markdown = "Markdown Table"
         case csv = "CSV Data"
@@ -17,7 +17,7 @@ struct TableParserExamples: View {
         case structured = "Structured Text"
         case keyValue = "Key-Value Pairs"
     }
-    
+
     var body: some View {
         VStack(spacing: 20) {
             // Example Selector
@@ -28,19 +28,19 @@ struct TableParserExamples: View {
             }
             .pickerStyle(.segmented)
             .padding()
-            
+
             // Parsed Table Display
             if let table = parsedTable {
                 VStack(alignment: .leading, spacing: 12) {
                     Text("Parsed Table (\(String(describing: table.metadata.format)))")
                         .font(.headline)
-                    
+
                     if let title = table.metadata.title {
                         Text(title)
                             .font(.subheadline)
                             .foregroundStyle(.secondary)
                     }
-                    
+
                     table.toSwiftUIView()
                 }
             } else if let error = parseError {
@@ -66,10 +66,10 @@ struct TableParserExamples: View {
             parseExample()
         }
     }
-    
+
     private func parseExample() {
         let content = getContentForExample(selectedExample)
-        
+
         do {
             switch selectedExample {
             case .markdown:
@@ -91,7 +91,7 @@ struct TableParserExamples: View {
             parsedTable = nil
         }
     }
-    
+
     private func getContentForExample(_ example: ExampleType) -> String {
         switch example {
         case .markdown:
@@ -103,7 +103,7 @@ struct TableParserExamples: View {
             | Surprise | S | Variable | Prediction error magnitude |
             | Gain | G | 0.1-10.0 | Amplification factor |
             """
-            
+
         case .csv:
             return """
             "Neuromodulator","Primary Function","Typical Level","Effect on θ"
@@ -112,7 +112,7 @@ struct TableParserExamples: View {
             "Dopamine","Reward/ Motivation","Variable","Influences gain"
             "Serotonin","Mood/ Stability","Baseline","Stabilizes system"
             """
-            
+
         case .tsv:
             return """
             Life Stage	Threshold (θ)	Precision Weighting (Π)	Working Memory
@@ -122,7 +122,7 @@ struct TableParserExamples: View {
             Adulthood	5-7/10	Well-calibrated	4±1 items
             Aging	6-8/10	Conservative	3-4 items
             """
-            
+
         case .json:
             return """
             [
@@ -146,7 +146,7 @@ struct TableParserExamples: View {
               }
             ]
             """
-            
+
         case .structured:
             return """
             Parameter  Value  Unit    Description
@@ -156,7 +156,7 @@ struct TableParserExamples: View {
             β          1.2    --      Somatic bias factor
             τ          2.5    s       Time constant
             """
-            
+
         case .keyValue:
             return """
             Model: APGI Framework v2.0
@@ -176,7 +176,7 @@ struct AdvancedTableUsage: View {
     private let tableParser = TableParser()
     @State private var tables: [ParsedTable] = []
     @State private var selectedTableIndex = 0
-    
+
     var body: some View {
         VStack(spacing: 20) {
             // Table Selector
@@ -189,24 +189,24 @@ struct AdvancedTableUsage: View {
                 }
                 .pickerStyle(.menu)
                 .padding()
-                
+
                 // Export Options
                 HStack {
                     Button("Export as Markdown") {
                         exportTableAsMarkdown()
                     }
-                    
+
                     Button("Export as CSV") {
                         exportTableAsCSV()
                     }
-                    
+
                     Button("Export as JSON") {
                         exportTableAsJSON()
                     }
                 }
                 .padding()
             }
-            
+
             // Table Display
             if selectedTableIndex < tables.count {
                 let table = tables[selectedTableIndex]
@@ -215,13 +215,13 @@ struct AdvancedTableUsage: View {
                         Text(title)
                             .font(.headline)
                     }
-                    
+
                     if let source = table.metadata.source {
                         Text("Source: \(source)")
                             .font(.caption)
                             .foregroundStyle(.secondary)
                     }
-                    
+
                     table.toSwiftUIView()
                 }
             } else {
@@ -233,7 +233,7 @@ struct AdvancedTableUsage: View {
             loadMultipleTables()
         }
     }
-    
+
     private func loadMultipleTables() {
         let markdownContent = """
         | Region | Function | APGI Parameter |
@@ -242,7 +242,7 @@ struct AdvancedTableUsage: View {
         | Thalamus | Relay | Signal routing |
         | Hippocampus | Memory | Precision weighting |
         """
-        
+
         let csvContent = """
         "Metric","Value","Unit","Status"
         "Accuracy","0.92","--","Good"
@@ -250,11 +250,11 @@ struct AdvancedTableUsage: View {
         "Recall","0.91","--","Good"
         "F1-Score","0.89","--","Good"
         """
-        
+
         do {
             let markdownTable = try tableParser.parseMarkdownTable(markdownContent)
             let csvTable = try tableParser.parseTable(from: csvContent, format: TableFormat.csv)
-            
+
             tables = [
                 markdownTable,
                 csvTable
@@ -263,38 +263,38 @@ struct AdvancedTableUsage: View {
             print("Error loading tables: \(error)")
         }
     }
-    
+
     private func exportTableAsMarkdown() {
         guard selectedTableIndex < tables.count else { return }
         let table = tables[selectedTableIndex]
         let markdown = table.toMarkdown()
-        
+
         let pasteboard = NSPasteboard.general
         pasteboard.clearContents()
         pasteboard.setString(markdown, forType: .string)
     }
-    
+
     private func exportTableAsCSV() {
         guard selectedTableIndex < tables.count else { return }
         let table = tables[selectedTableIndex]
         let csv = table.toCSV()
-        
+
         let pasteboard = NSPasteboard.general
         pasteboard.clearContents()
         pasteboard.setString(csv, forType: .string)
     }
-    
+
     private func exportTableAsJSON() {
         guard selectedTableIndex < tables.count else { return }
         let table = tables[selectedTableIndex]
-        
+
         let jsonDict: [String: Any] = [
             "title": table.metadata.title ?? "",
             "format": String(describing: table.metadata.format),
             "headers": table.headers,
             "rows": table.rows
         ]
-        
+
         do {
             let jsonData = try JSONSerialization.data(withJSONObject: jsonDict, options: .prettyPrinted)
             if let jsonString = String(data: jsonData, encoding: .utf8) {
@@ -316,33 +316,33 @@ struct FileBasedTableLoader: View {
     @State private var parsedTable: ParsedTable?
     @State private var parseError: String?
     @State private var isFileImporterPresented = false
-    
+
     var body: some View {
         VStack(spacing: 20) {
             Button("Load Table File") {
                 isFileImporterPresented = true
             }
             .buttonStyle(.borderedProminent)
-            
+
             if let url = selectedFileURL {
                 Text("Loaded: \(url.lastPathComponent)")
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
-            
+
             if let table = parsedTable {
                 VStack(alignment: .leading, spacing: 12) {
                     Text("Table from \(selectedFileURL?.lastPathComponent ?? "file")")
                         .font(.headline)
-                    
+
                     Text("Format: \(String(describing: table.metadata.format))")
                         .font(.caption)
                         .foregroundStyle(.secondary)
-                    
+
                     Text("Rows: \(table.rows.count), Columns: \(table.headers.count)")
                         .font(.caption)
                         .foregroundStyle(.secondary)
-                    
+
                     table.toSwiftUIView()
                 }
             } else if let error = parseError {
@@ -374,7 +374,7 @@ struct FileBasedTableLoader: View {
             }
         }
     }
-    
+
     private func loadTableFromFile(_ url: URL) {
         do {
             parsedTable = try tableParser.parseTableFromFile(at: url)
@@ -392,12 +392,12 @@ struct FileBasedTableLoader: View {
             .tabItem {
                 Label("Examples", systemImage: "doc.text")
             }
-        
+
         AdvancedTableUsage()
             .tabItem {
                 Label("Advanced", systemImage: "tablecells")
             }
-        
+
         FileBasedTableLoader()
             .tabItem {
                 Label("File Loader", systemImage: "folder")

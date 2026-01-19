@@ -10,7 +10,7 @@ struct AnimationHelper {
             return nil
         }
     }
-    
+
     static func transition(_ transition: AnyTransition? = nil) -> AnyTransition {
         if ThemeManager.shared.enableAnimations {
             return transition ?? .opacity.combined(with: .scale(scale: APGISimulatorConstants.transitionScale))
@@ -25,12 +25,12 @@ struct AnimationHelper {
 struct AnimatedModifier: ViewModifier {
     let animation: Animation?
     let transition: AnyTransition?
-    
+
     init(animation: Animation? = nil, transition: AnyTransition? = nil) {
         self.animation = animation
         self.transition = transition
     }
-    
+
     func body(content: Content) -> some View {
         content
             .animation(AnimationHelper.animated(animation), value: ThemeManager.shared.enableAnimations)
@@ -44,7 +44,7 @@ extension View {
     func animatedTransition(_ transition: AnyTransition? = nil, animation: Animation? = nil) -> some View {
         self.modifier(AnimatedModifier(animation: animation, transition: transition))
     }
-    
+
     func conditionalAnimation(_ condition: Bool, animation: Animation? = nil) -> some View {
         self.modifier(ConditionalAnimationModifier(condition: condition, animation: animation))
     }
@@ -53,7 +53,7 @@ extension View {
 struct ConditionalAnimationModifier: ViewModifier {
     let condition: Bool
     let animation: Animation?
-    
+
     func body(content: Content) -> some View {
         if condition {
             content.animation(AnimationHelper.animated(animation), value: UUID())

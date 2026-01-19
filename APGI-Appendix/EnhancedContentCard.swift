@@ -9,7 +9,7 @@ struct TableParseResult {
 enum ContentSegment: Identifiable {
     case text(String)
     case table(ParsedTable)
-    
+
     var id: String {
         switch self {
         case .text(let content): return "text-\(content.hashValue)"
@@ -23,26 +23,26 @@ enum ContentSegment: Identifiable {
 final class SimpleTableParser {
     static let shared = SimpleTableParser()
     private init() {}
-    
+
     /// Parse content string and extract tables from pipe-delimited format
     func parse(_ content: String) -> TableParseResult {
         var segments: [ContentSegment] = []
         let lines = content.components(separatedBy: "\n")
-        
+
         var currentTextLines: [String] = []
         var tableLines: [String] = []
         var inTable = false
         var tableTitle: String?
-        
-        for (_, line) in lines.enumerated() {
+
+        for line in lines {
             let trimmed = line.trimmingCharacters(in: .whitespaces)
-            
+
             // Detect table row (contains | and has content on both sides)
             if isTableRow(trimmed) {
                 if !inTable {
                     // Starting a new table
                     inTable = true
-                    
+
                     // Check if previous non-empty line is a title
                     if let lastTextLine = currentTextLines.last?.trimmingCharacters(in: .whitespaces),
                        !lastTextLine.isEmpty,
@@ -51,7 +51,7 @@ final class SimpleTableParser {
                         tableTitle = lastTextLine
                         currentTextLines.removeLast()
                     }
-                    
+
                     // Flush accumulated text
                     if !currentTextLines.isEmpty {
                         let text = currentTextLines.joined(separator: "\n")
@@ -75,33 +75,33 @@ final class SimpleTableParser {
                 currentTextLines.append(line)
             }
         }
-        
+
         // Handle remaining content
         if inTable && !tableLines.isEmpty {
             if let table = parseTableLines(tableLines, title: tableTitle) {
                 segments.append(.table(table))
             }
         }
-        
+
         if !currentTextLines.isEmpty {
             let text = currentTextLines.joined(separator: "\n")
             if !text.trimmingCharacters(in: CharacterSet.whitespacesAndNewlines).isEmpty {
                 segments.append(.text(text))
             }
         }
-        
+
         return TableParseResult(textSegments: segments)
     }
-    
+
     private func isTableRow(_ line: String) -> Bool {
         guard line.contains("|") else { return false }
         let parts = line.split(separator: "|", omittingEmptySubsequences: false)
         return parts.count >= 2
     }
-    
+
     private func parseTableLines(_ lines: [String], title: String?) -> ParsedTable? {
         guard !lines.isEmpty else { return nil }
-        
+
         var dataLines = lines.filter { line in
             // Skip separator lines (e.g., |---|---|)
             let cleaned = line.replacingOccurrences(of: "-", with: "")
@@ -110,18 +110,18 @@ final class SimpleTableParser {
                              .trimmingCharacters(in: .whitespaces)
             return !cleaned.isEmpty
         }
-        
+
         guard !dataLines.isEmpty else { return nil }
-        
+
         // First line is headers
         let headerLine = dataLines.removeFirst()
         let headers = parseTableRow(headerLine)
-        
+
         guard !headers.isEmpty else { return nil }
-        
+
         // Remaining lines are data rows
         let rows = dataLines.map { parseTableRow($0) }
-        
+
         // Normalize row lengths to match header count
         let normalizedRows = rows.map { row -> [String] in
             var normalized = row
@@ -133,18 +133,18 @@ final class SimpleTableParser {
             }
             return normalized
         }
-        
+
         let metadata = TableMetadata(title: title)
         return ParsedTable(headers: headers, rows: normalizedRows, metadata: metadata)
     }
-    
+
     private func parseTableRow(_ line: String) -> [String] {
         var row = line
-        
+
         // Remove leading/trailing pipes
         if row.hasPrefix("|") { row.removeFirst() }
         if row.hasSuffix("|") { row.removeLast() }
-        
+
         return row.split(separator: "|", omittingEmptySubsequences: false)
             .map { $0.trimmingCharacters(in: .whitespaces) }
     }
@@ -154,7 +154,7 @@ struct APGITableView: View {
     let table: ParsedTable
     @Environment(\.colorScheme) private var colorScheme
     @AppStorage("highContrastMode") private var highContrastMode = false
-    
+
     @State private var sortColumn: Int?
     @State private var sortAscending = true
     @State private var hoveredRow: Int?
@@ -180,10 +180,10 @@ struct APGITableView: View {
         var sampleCount = 0
         for row in table.rows {
             guard index < row.count else { continue }
-            let v = row[index].trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
-            guard !v.isEmpty else { continue }
+            let value = row[index].trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
+            guard !value.isEmpty else { continue }
             sampleCount += 1
-            if normalizedNumber(v) != nil { numericCount += 1 }
+            if normalizedNumber(value) != nil { numericCount += 1 }
             if sampleCount >= 12 { break }
         }
         guard sampleCount > 0 else { return .text }
@@ -212,13 +212,13 @@ struct APGITableView: View {
 
             switch kind {
             case .number:
-                let n1 = normalizedNumber(val1)
-                let n2 = normalizedNumber(val2)
-                if let n1, let n2 {
-                    return sortAscending ? (n1 < n2) : (n1 > n2)
+                let num1 = normalizedNumber(val1)
+                let num2 = normalizedNumber(val2)
+                if let num1, let num2 {
+                    return sortAscending ? (num1 < num2) : (num1 > num2)
                 }
-                if n1 != nil, n2 == nil { return sortAscending }
-                if n1 == nil, n2 != nil { return !sortAscending }
+                if num1 != nil, num2 == nil { return sortAscending }
+                if num1 == nil, num2 != nil { return !sortAscending }
                 let cmp = val1.localizedStandardCompare(val2)
                 return sortAscending ? (cmp == .orderedAscending) : (cmp == .orderedDescending)
             case .text:
@@ -227,7 +227,7 @@ struct APGITableView: View {
             }
         }
     }
-    
+
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             // Table title
@@ -238,7 +238,7 @@ struct APGITableView: View {
                     .padding(.horizontal, 12)
                     .padding(.vertical, 8)
             }
-            
+
             ScrollView(.horizontal, showsIndicators: true) {
                 ScrollView(.vertical, showsIndicators: true) {
                     LazyVStack(alignment: .leading, spacing: 0, pinnedViews: [.sectionHeaders]) {
@@ -273,7 +273,7 @@ struct APGITableView: View {
         )
         .shadow(color: .black.opacity(0.05), radius: 2, y: 1)
     }
-    
+
     private var headerRow: some View {
         HStack(spacing: 0) {
             ForEach(Array(table.headers.enumerated()), id: \.offset) { index, header in
@@ -305,7 +305,7 @@ struct APGITableView: View {
                     .frame(minWidth: columnWidth(for: index), alignment: .leading)
                 }
                 .buttonStyle(.plain)
-                
+
                 if index < table.headers.count - 1 {
                     Divider()
                         .frame(height: 30)
@@ -314,12 +314,12 @@ struct APGITableView: View {
             }
         }
     }
-    
+
     private func dataRow(_ row: [String], index: Int) -> some View {
         HStack(spacing: 0) {
             ForEach(Array(row.enumerated()), id: \.offset) { colIndex, cell in
                 cellView(cell, columnIndex: colIndex)
-                
+
                 if colIndex < row.count - 1 {
                     Divider()
                         .background(borderColor.opacity(0.3))
@@ -335,7 +335,7 @@ struct APGITableView: View {
             selectedRow = selectedRow == index ? nil : index
         }
     }
-    
+
     private func cellView(_ content: String, columnIndex: Int) -> some View {
         // Parse special formatting
         let displayContent = parseSpecialContent(content)
@@ -368,40 +368,40 @@ struct APGITableView: View {
             }
         }
     }
-    
+
     private func columnWidth(for index: Int) -> CGFloat {
         // Calculate based on content
         let header = index < table.headers.count ? table.headers[index] : ""
         let maxContentLength = table.rows.reduce(header.count) { max($0, index < $1.count ? $1[index].count : 0) }
-        
+
         // Min 80, max 300, scale with content
         let base = min(max(CGFloat(maxContentLength) * 7.5 + 28, 110), 380)
         return columnKind(index) == .number ? max(90, base * 0.9) : base
     }
-    
+
     // MARK: - Styling
-    
+
     private var backgroundColor: Color {
         if highContrastMode {
             return colorScheme == .dark ? Color.black : Color.white
         }
         return Color(NSColor.controlBackgroundColor)
     }
-    
+
     private var headerBackground: Color {
         if highContrastMode {
             return colorScheme == .dark ? Color.gray.opacity(0.3) : Color.gray.opacity(0.15)
         }
         return Color.primary.opacity(0.05)
     }
-    
+
     private var borderColor: Color {
         if highContrastMode {
             return colorScheme == .dark ? Color.white.opacity(0.3) : Color.black.opacity(0.3)
         }
         return Color.primary.opacity(0.1)
     }
-    
+
     private func rowBackground(index: Int) -> Color {
         if selectedRow == index {
             return Color.accentColor.opacity(highContrastMode ? 0.25 : 0.15)
@@ -411,22 +411,22 @@ struct APGITableView: View {
         }
         return index % 2 == 0 ? Color.clear : Color.primary.opacity(0.02)
     }
-    
+
     // MARK: - Content Parsing
-    
+
     private struct DisplayContent {
         let text: String
         let icon: String?
         let iconColor: Color?
         let textColor: Color?
     }
-    
+
     private func parseSpecialContent(_ content: String) -> DisplayContent {
         var text = content
         var icon: String?
         var iconColor: Color?
         var textColor: Color?
-        
+
         // Check for status indicators
         if text.contains("↑") || text.lowercased().contains("increase") {
             icon = "arrow.up"
@@ -445,12 +445,12 @@ struct APGITableView: View {
             icon = "exclamationmark.triangle"
             iconColor = .orange
         }
-        
+
         // Clean up arrows and special characters for display
         text = text
             .replacingOccurrences(of: "→", with: "→ ")
             .replacingOccurrences(of: "——", with: "—")
-        
+
         return DisplayContent(text: text, icon: icon, iconColor: iconColor, textColor: textColor)
     }
 }
@@ -460,13 +460,13 @@ struct APGITableView: View {
 struct ParsedContentView: View {
     let content: String
     let terms: [String]
-    
+
     @AppStorage("contentFontSize") private var fontSize: Double = 15.0
-    
+
     private var segments: [ContentSegment] {
         SimpleTableParser.shared.parse(content).textSegments
     }
-    
+
     var body: some View {
         LazyVStack(alignment: .leading, spacing: 16) {
             ForEach(segments) { segment in
@@ -475,7 +475,7 @@ struct ParsedContentView: View {
                     GlossaryHighlightedText(text: text, terms: terms)
                         .font(.system(size: fontSize))
                         .textSelection(.enabled)
-                    
+
                 case .table(let table):
                     APGITableView(table: table)
                         .padding(.vertical, 8)
@@ -492,20 +492,20 @@ struct EnhancedContentCard: View {
     let content: String
     let category: SectionCategory
     let hasDataTable: Bool
-    
+
     @Environment(\.colorScheme) private var colorScheme
     @AppStorage("highContrastMode") private var highContrastMode = false
     @AppStorage("contentFontSize") private var fontSize: Double = 15.0
-    
+
     @State private var isExpanded = true
     @State private var isFocusMode = false
     @State private var copyFeedback = false
-    
+
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             // Header
             cardHeader
-            
+
             // Content
             if isExpanded {
                 ScrollView {
@@ -537,26 +537,26 @@ struct EnhancedContentCard: View {
             FocusModeView(isEnabled: $isFocusMode, content: content, title: title)
         }
     }
-    
+
     private var cardHeader: some View {
         HStack(spacing: 12) {
             // Category indicator
             Circle()
                 .fill(category.color)
                 .frame(width: 10, height: 10)
-            
+
             Text(title)
                 .font(.system(size: 16, weight: .semibold))
                 .foregroundStyle(.primary)
-            
+
             if hasDataTable {
                 Image(systemName: "tablecells")
                     .font(.system(size: 12))
                     .foregroundStyle(.secondary)
             }
-            
+
             Spacer()
-            
+
             // Action buttons
             HStack(spacing: 8) {
                 Button {
@@ -568,7 +568,7 @@ struct EnhancedContentCard: View {
                 }
                 .buttonStyle(.plain)
                 .help("Copy content")
-                
+
                 Button {
                     isFocusMode = true
                 } label: {
@@ -578,7 +578,7 @@ struct EnhancedContentCard: View {
                 }
                 .buttonStyle(.plain)
                 .help("Focus mode")
-                
+
                 Button {
                     withAnimation(.spring(response: 0.3)) {
                         isExpanded.toggle()
@@ -596,42 +596,42 @@ struct EnhancedContentCard: View {
         .padding(.vertical, 12)
         .background(headerBackground)
     }
-    
+
     private func copyToClipboard() {
         NSPasteboard.general.clearContents()
         NSPasteboard.general.setString(content, forType: .string)
-        
+
         withAnimation {
             copyFeedback = true
         }
-        
+
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
             withAnimation {
                 copyFeedback = false
             }
         }
     }
-    
+
     // MARK: - Styling
-    
+
     private var cardBackground: Color {
         if highContrastMode {
             return colorScheme == .dark ? Color.black : Color.white
         }
         return Color(NSColor.controlBackgroundColor)
     }
-    
+
     private var headerBackground: Color {
         category.color.opacity(highContrastMode ? 0.15 : 0.08)
     }
-    
+
     private var borderColor: Color {
         if highContrastMode {
             return category.color
         }
         return Color.primary.opacity(0.1)
     }
-    
+
     private var shadowColor: Color {
         highContrastMode ? .clear : .black.opacity(0.08)
     }

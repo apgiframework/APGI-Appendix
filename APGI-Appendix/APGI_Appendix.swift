@@ -5,12 +5,12 @@ import Combine
 // MARK: - Updated Main App Entry Point
 
 @main
-struct APGI_AppendixApp: App {
+struct APGIAppendixApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
     @StateObject private var themeManager = ThemeManager.shared
     @StateObject private var onboardingManager = OnboardingManager.shared
     @StateObject private var navigationManager = KeyboardNavigationManager.shared
-    
+
     var body: some Scene {
         WindowGroup("APGI Framework") {
             OnboardingContainer {
@@ -25,44 +25,44 @@ struct APGI_AppendixApp: App {
         }
         .commands {
             APGICommands()
-            
+
             // Help menu additions
             CommandGroup(replacing: .help) {
                 Button("APGI Help") {
                     showHelp()
                 }
                 .keyboardShortcut("?", modifiers: [.command, .shift])
-                
+
                 Divider()
-                
+
                 Button("Take a Tour") {
                     onboardingManager.startTour()
                 }
-                
+
                 Button("What's New") {
                     showWhatsNew()
                 }
-                
+
                 Button("Quick Start Guide") {
                     showQuickStart()
                 }
-                
+
                 Divider()
-                
+
                 Button("Keyboard Shortcuts") {
                     navigationManager.showKeyboardShortcuts = true
                 }
                 .keyboardShortcut("/", modifiers: [.command])
             }
         }
-        
+
         Window("Neural Timeline", id: "timeline") {
             IgnitionTimelineView()
                 .applyTheme()
                 .environmentObject(themeManager)
         }
         .defaultSize(width: 1200, height: 800)
-        
+
         Window("Glossary", id: "glossary") {
             GlossaryView()
                 .applyTheme()
@@ -77,20 +77,20 @@ struct APGI_AppendixApp: App {
                 .environmentObject(themeManager)
         }
         .defaultSize(width: 1000, height: 850)
-        
+
         Settings {
             EnhancedSettingsView()
                 .applyTheme()
                 .environmentObject(themeManager)
         }
     }
-    
+
     private func showHelp() {
         if let url = URL(string: "https://apgi-framework.com/help") {
             NSWorkspace.shared.open(url)
         }
     }
-    
+
     private func showWhatsNew() {
         let window = NSWindow(
             contentRect: NSRect(x: 0, y: 0, width: 400, height: 450),
@@ -103,7 +103,7 @@ struct APGI_AppendixApp: App {
         window.center()
         window.makeKeyAndOrderFront(nil)
     }
-    
+
     private func showQuickStart() {
         let window = NSWindow(
             contentRect: NSRect(x: 0, y: 0, width: 400, height: 500),
@@ -125,11 +125,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         // Setup any initial configurations
         setupAppearance()
     }
-    
+
     func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {
         return .terminateNow
     }
-    
+
     private func setupAppearance() {
         // Apply saved theme
         ThemeManager.shared.applyTheme()
@@ -140,7 +140,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
 struct ThemeToggleButton: View {
     @ObservedObject private var themeManager = ThemeManager.shared
-    
+
     var body: some View {
         Menu {
             ForEach(AppTheme.allCases) { theme in
@@ -156,9 +156,9 @@ struct ThemeToggleButton: View {
                     }
                 }
             }
-            
+
             Divider()
-            
+
             Toggle("High Contrast", isOn: $themeManager.highContrastMode)
         } label: {
             Image(systemName: themeManager.selectedTheme.icon)
@@ -172,7 +172,7 @@ struct ThemeToggleButton: View {
 struct EnhancedTabContentView: View {
     let tab: Tab
     @Binding var selectedTab: Tab
-    
+
     var body: some View {
         Group {
             switch tab {

@@ -2,14 +2,14 @@ import SwiftUI
 
 struct LifeStagesView: View {
     private let lifeStagesIntro = """
- 
+
  APGI Parameters Across Life Stages
  """
-    
+
     private let tableParser = TableParser()
     @State private var parsedTable: ParsedTable?
     @State private var parseError: String?
-    
+
     private let markdownTable = """
 | Life Stage | Threshold (θ) | Precision Weighting (Π) | Ignition Frequency | Working Memory Capacity | Neuromodulator Levels |
 |------------|---------------|-------------------------|--------------------|-----------------------|----------------------|
@@ -30,7 +30,7 @@ struct LifeStagesView: View {
                     category: .applications,
                     hasDataTable: true
                 )
-                
+
                 if let table = parsedTable {
                     table.toSwiftUIView()
                 } else if let error = parseError {
@@ -54,7 +54,7 @@ struct LifeStagesView: View {
             loadTable()
         }
     }
-    
+
     private func loadTable() {
         parsedTable = try? tableParser.parseMarkdownTable(markdownTable)
         if parsedTable == nil {

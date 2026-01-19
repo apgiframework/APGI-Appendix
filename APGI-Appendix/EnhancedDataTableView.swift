@@ -136,7 +136,9 @@ struct EnhancedDataTableView: View {
                                     .font(.system(size: 13))
                                     .foregroundStyle(.primary)
                                     .frame(
-                                        maxWidth: columns.indices.contains(cellIndex) && columns[cellIndex].width == nil ? .infinity : (columns.indices.contains(cellIndex) ? columns[cellIndex].width : nil),
+                                        maxWidth: columns.indices.contains(cellIndex) && columns[cellIndex].width == nil
+                                            ? .infinity
+                                            : (columns.indices.contains(cellIndex) ? columns[cellIndex].width : nil),
                                         alignment: columns.indices.contains(cellIndex) ? frameAlignment(for: columns[cellIndex].alignment) : .leading
                                     )
                                     .padding(.horizontal, 12)

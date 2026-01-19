@@ -30,7 +30,7 @@ struct TourStep: Identifiable {
     let position: TooltipPosition
     let highlightColor: Color
     let action: (() -> Void)?
-    
+
     init(target: TourTarget, title: String, description: String, position: TooltipPosition, highlightColor: Color = .blue, action: (() -> Void)? = nil) {
         self.target = target
         self.title = title
@@ -52,7 +52,7 @@ struct OnboardingStep: Identifiable {
     let imageType: ImageType
     let tips: [String]
     let highlightColor: Color
-    
+
     enum ImageType {
         case system
         case asset
@@ -65,49 +65,49 @@ struct OnboardingStep: Identifiable {
 @MainActor
 final class OnboardingManager: ObservableObject {
     static let shared = OnboardingManager()
-    
+
     @AppStorage("hasCompletedOnboarding") var hasCompletedOnboarding = false
     @AppStorage("onboardingVersion") var completedOnboardingVersion = 0
-    
+
     @Published var isShowingOnboarding = false
     @Published var isShowingTour = false
     @Published var currentStep = 0
     @Published var currentTourStep = 0
-    
+
     private let currentOnboardingVersion = 2
-    
+
     private init() {}
-    
+
     var shouldShowOnboarding: Bool {
         !hasCompletedOnboarding || completedOnboardingVersion < currentOnboardingVersion
     }
-    
+
     func startOnboarding() {
         currentStep = 0
         isShowingOnboarding = true
     }
-    
+
     func startTour() {
         currentTourStep = 0
         isShowingTour = true
     }
-    
+
     func completeOnboarding() {
         hasCompletedOnboarding = true
         completedOnboardingVersion = currentOnboardingVersion
         isShowingOnboarding = false
     }
-    
+
     func completeTour() {
         isShowingTour = false
         currentTourStep = 0
     }
-    
+
     func resetOnboarding() {
         hasCompletedOnboarding = false
         completedOnboardingVersion = 0
     }
-    
+
     let steps: [OnboardingStep] = [
         OnboardingStep(
             title: "Welcome to APGI Appendix",
@@ -219,7 +219,7 @@ final class OnboardingManager: ObservableObject {
             highlightColor: .blue
         )
     ]
-    
+
     let tourSteps: [TourStep] = [
         TourStep(
             target: .sidebar,
@@ -264,15 +264,15 @@ final class OnboardingManager: ObservableObject {
 struct OnboardingView: View {
     @ObservedObject private var manager = OnboardingManager.shared
     @Environment(\.colorScheme) private var colorScheme
-    
+
     @State private var animateContent = false
     @State private var showConfetti = false
-    
+
     var body: some View {
         VStack(spacing: 0) {
             // Progress indicator
             progressBar
-            
+
             // Content area
             TabView(selection: $manager.currentStep) {
                 ForEach(Array(manager.steps.enumerated()), id: \.element.id) { index, step in
@@ -282,7 +282,7 @@ struct OnboardingView: View {
             }
             .tabViewStyle(.automatic)
             .animation(.easeInOut(duration: 0.3), value: manager.currentStep)
-            
+
             // Navigation buttons
             navigationButtons
         }
@@ -304,9 +304,9 @@ struct OnboardingView: View {
             }
         }
     }
-    
+
     // MARK: - Progress Bar
-    
+
     private var progressBar: some View {
         HStack(spacing: 6) {
             ForEach(0..<manager.steps.count, id: \.self) { index in
@@ -321,23 +321,23 @@ struct OnboardingView: View {
         .padding(.horizontal, 40)
         .padding(.top, 20)
     }
-    
+
     // MARK: - Step View
-    
+
     private func stepView(_ step: OnboardingStep, index: Int) -> some View {
         VStack(spacing: 24) {
             Spacer()
-            
+
             // Icon
             ZStack {
                 Circle()
                     .fill(step.highlightColor.opacity(0.2))
                     .frame(width: 120, height: 120)
-                
+
                 Circle()
                     .fill(step.highlightColor.gradient)
                     .frame(width: 100, height: 100)
-                
+
                 Image(systemName: step.imageName)
                     .font(.system(size: 44, weight: .medium))
                     .foregroundColor(.white)
@@ -345,17 +345,17 @@ struct OnboardingView: View {
             }
             .scaleEffect(animateContent ? 1 : 0.5)
             .opacity(animateContent ? 1 : 0)
-            
+
             // Text content
             VStack(spacing: 12) {
                 Text(step.title)
                     .font(.system(size: 28, weight: .bold, design: .rounded))
                     .foregroundColor(.white)
-                
+
                 Text(step.subtitle)
                     .font(.system(size: 16, weight: .medium))
                     .foregroundColor(step.highlightColor)
-                
+
                 Text(step.description)
                     .font(.system(size: 14))
                     .foregroundColor(.white.opacity(0.8))
@@ -365,7 +365,7 @@ struct OnboardingView: View {
             }
             .offset(y: animateContent ? 0 : 20)
             .opacity(animateContent ? 1 : 0)
-            
+
             // Tips
             VStack(alignment: .leading, spacing: 8) {
                 ForEach(Array(step.tips.enumerated()), id: \.offset) { tipIndex, tip in
@@ -373,7 +373,7 @@ struct OnboardingView: View {
                         Image(systemName: "checkmark.circle.fill")
                             .font(.system(size: 14))
                             .foregroundColor(step.highlightColor)
-                        
+
                         Text(tip)
                             .font(.system(size: 13))
                             .foregroundColor(.white.opacity(0.9))
@@ -388,13 +388,13 @@ struct OnboardingView: View {
             }
             .padding(.horizontal, 60)
             .padding(.top, 8)
-            
+
             Spacer()
         }
     }
-    
+
     // MARK: - Navigation Buttons
-    
+
     private var navigationButtons: some View {
         HStack(spacing: 16) {
             // Skip button
@@ -406,9 +406,9 @@ struct OnboardingView: View {
                 .foregroundColor(.white.opacity(0.6))
                 .font(.system(size: 14, weight: .medium))
             }
-            
+
             Spacer()
-            
+
             // Back button
             if manager.currentStep > 0 {
                 Button {
@@ -429,7 +429,7 @@ struct OnboardingView: View {
                 .buttonStyle(.plain)
                 .foregroundColor(.white.opacity(0.8))
             }
-            
+
             // Next/Get Started button
             Button {
                 if manager.currentStep < manager.steps.count - 1 {
@@ -470,9 +470,9 @@ struct OnboardingView: View {
         .padding(.horizontal, 30)
         .padding(.bottom, 30)
     }
-    
+
     // MARK: - Background
-    
+
     private var backgroundGradient: some ShapeStyle {
         LinearGradient(
             colors: [
@@ -491,20 +491,20 @@ struct OnboardingView: View {
 struct OnboardingContainer<Content: View>: View {
     @ObservedObject private var manager = OnboardingManager.shared
     let content: () -> Content
-    
+
     init(@ViewBuilder content: @escaping () -> Content) {
         self.content = content
     }
-    
+
     var body: some View {
         ZStack {
             content()
-            
+
             if manager.isShowingOnboarding {
                 Color.black.opacity(0.5)
                     .ignoresSafeArea()
                     .transition(.opacity)
-                
+
                 OnboardingView()
                     .transition(.scale(scale: 0.9).combined(with: .opacity))
             }
@@ -529,9 +529,9 @@ struct FeatureSpotlight: View {
     let icon: String
     let color: Color
     let action: () -> Void
-    
+
     @State private var isHovered = false
-    
+
     var body: some View {
         Button(action: action) {
             HStack(spacing: 16) {
@@ -539,25 +539,25 @@ struct FeatureSpotlight: View {
                     Circle()
                         .fill(color.opacity(0.15))
                         .frame(width: 50, height: 50)
-                    
+
                     Image(systemName: icon)
                         .font(.system(size: 22))
                         .foregroundColor(color)
                 }
-                
+
                 VStack(alignment: .leading, spacing: 4) {
                     Text(title)
                         .font(.system(size: 14, weight: .semibold))
                         .foregroundColor(.primary)
-                    
+
                     Text(description)
                         .font(.system(size: 12))
                         .foregroundColor(.secondary)
                         .lineLimit(2)
                 }
-                
+
                 Spacer()
-                
+
                 Image(systemName: "chevron.right")
                     .font(.system(size: 12, weight: .semibold))
                     .foregroundColor(.secondary)
@@ -593,7 +593,7 @@ struct SpotlightOverlay: View {
     @State private var isAnimating = false
     @State private var pulseScale: CGFloat = 1.0
     @State private var rotation: Double = 0.0
-    
+
     var body: some View {
         GeometryReader { geometry in
             ZStack {
@@ -608,11 +608,11 @@ struct SpotlightOverlay: View {
                     endPoint: .bottomTrailing
                 )
                 .ignoresSafeArea()
-                
+
                 // Spotlight cutout with smooth edges
                 Path { path in
                     path.addRect(geometry.frame(in: .global))
-                    
+
                     // Create rounded rectangle cutout for smoother appearance
                     let roundedRect = RoundedRectangle(cornerRadius: 12)
                         .inset(by: -4)
@@ -621,7 +621,7 @@ struct SpotlightOverlay: View {
                 }
                 .fill(Color.black.opacity(0.7))
                 .blendMode(.destinationOut)
-                
+
                 // Animated highlight border around target
                 ZStack {
                     // Outer glow
@@ -641,7 +641,7 @@ struct SpotlightOverlay: View {
                         .frame(width: targetFrame.width + 16, height: targetFrame.height + 16)
                         .scaleEffect(pulseScale)
                         .rotationEffect(.degrees(rotation))
-                    
+
                     // Inner border
                     RoundedRectangle(cornerRadius: 8)
                         .stroke(Color.white, lineWidth: 2)
@@ -650,7 +650,7 @@ struct SpotlightOverlay: View {
                 .position(x: targetFrame.midX, y: targetFrame.midY)
                 .opacity(isAnimating ? 1 : 0)
                 .animation(.easeInOut(duration: 0.5), value: isAnimating)
-                
+
                 // Corner indicators
                 if isAnimating {
                     ForEach(0..<4, id: \.self) { corner in
@@ -674,7 +674,7 @@ struct SpotlightOverlay: View {
             }
         }
     }
-    
+
     private func cornerIndicator(at corner: Int, in frame: CGRect) -> some View {
         let positions = [
             CGPoint(x: frame.minX, y: frame.minY),
@@ -682,12 +682,12 @@ struct SpotlightOverlay: View {
             CGPoint(x: frame.maxX, y: frame.maxY),
             CGPoint(x: frame.minX, y: frame.maxY)
         ]
-        
+
         return ZStack {
             Circle()
                 .fill(Color.white)
                 .frame(width: 8, height: 8)
-            
+
             Circle()
                 .stroke(Color.white, lineWidth: 2)
                 .frame(width: 16, height: 16)
@@ -702,7 +702,7 @@ struct SpotlightOverlay: View {
             value: pulseScale
         )
     }
-    
+
     private func startAnimations() {
         withAnimation(
             .easeInOut(duration: 2.0)
@@ -712,7 +712,7 @@ struct SpotlightOverlay: View {
             rotation = 5.0
         }
     }
-    
+
     private func findTargetFrame() {
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
             switch target {
@@ -743,7 +743,7 @@ struct TourTooltip: View {
     @State private var contentOffset: CGSize = .zero
     @State private var glowIntensity: Double = 0.0
     @ObservedObject private var manager = OnboardingManager.shared
-    
+
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             // Header with animated indicator
@@ -753,19 +753,19 @@ struct TourTooltip: View {
                         .fill(step.highlightColor.opacity(0.2))
                         .frame(width: 16, height: 16)
                         .scaleEffect(glowIntensity)
-                    
+
                     Circle()
                         .fill(step.highlightColor)
                         .frame(width: 8, height: 8)
                         .symbolEffect(.pulse, value: isVisible)
                 }
-                
+
                 Text(step.title)
                     .font(.headline)
                     .foregroundColor(.primary)
-                
+
                 Spacer()
-                
+
                 // Step indicator with animation
                 HStack(spacing: 4) {
                     ForEach(0..<manager.tourSteps.count, id: \.self) { index in
@@ -776,7 +776,7 @@ struct TourTooltip: View {
                     }
                 }
             }
-            
+
             // Description with typewriter effect
             Text(step.description)
                 .font(.body)
@@ -784,7 +784,7 @@ struct TourTooltip: View {
                 .fixedSize(horizontal: false, vertical: true)
                 .opacity(isVisible ? 1 : 0)
                 .animation(.easeInOut(duration: 0.6).delay(0.3), value: isVisible)
-            
+
             // Navigation buttons with enhanced styling
             HStack {
                 // Skip button
@@ -803,9 +803,9 @@ struct TourTooltip: View {
                         .fill(Color.gray.opacity(0.1))
                 )
                 .scaleEffect(isVisible ? 1 : 0.8)
-                
+
                 Spacer()
-                
+
                 // Back button
                 if manager.currentTourStep > 0 {
                     Button {
@@ -825,7 +825,7 @@ struct TourTooltip: View {
                         removal: .move(edge: .leading).combined(with: .opacity)
                     ))
                 }
-                
+
                 // Next button
                 Button {
                     if manager.currentTourStep < manager.tourSteps.count - 1 {
@@ -862,7 +862,7 @@ struct TourTooltip: View {
                         RoundedRectangle(cornerRadius: 12)
                             .fill(Material.ultraThinMaterial)
                     )
-                
+
                 // Subtle glow effect
                 RoundedRectangle(cornerRadius: 12)
                     .stroke(
@@ -900,7 +900,7 @@ struct TourTooltip: View {
         .onChange(of: manager.currentTourStep) { _, _ in
             isVisible = false
             contentOffset = CGSize(width: 10, height: 10)
-            
+
             withAnimation(.spring(response: 0.4).delay(0.3)) {
                 isVisible = true
                 contentOffset = .zero
@@ -908,7 +908,7 @@ struct TourTooltip: View {
         }
         .position(tooltipPosition)
     }
-    
+
     private var tooltipPosition: CGPoint {
         switch step.target {
         case .sidebar:
@@ -933,7 +933,7 @@ struct TourTooltip: View {
 
 struct GuidedTour: View {
     @EnvironmentObject var onboardingManager: OnboardingManager
-    
+
     let steps: [TourStep] = [
         TourStep(
             target: .sidebar,
@@ -966,12 +966,12 @@ struct GuidedTour: View {
             position: .below
         )
     ]
-    
+
     var body: some View {
         ZStack {
             // Dimmed overlay with spotlight on current target
             SpotlightOverlay(target: steps[onboardingManager.currentTourStep].target)
-            
+
             // Tooltip at appropriate position
             TourTooltip(step: steps[onboardingManager.currentTourStep])
         }
@@ -984,15 +984,15 @@ struct GuidedTour: View {
 struct TourContainer<Content: View>: View {
     @ObservedObject private var manager = OnboardingManager.shared
     let content: () -> Content
-    
+
     init(@ViewBuilder content: @escaping () -> Content) {
         self.content = content
     }
-    
+
     var body: some View {
         ZStack {
             content()
-            
+
             if manager.isShowingTour {
                 GuidedTour()
                     .transition(.opacity)

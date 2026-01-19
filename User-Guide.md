@@ -236,6 +236,7 @@ The **APGI Simulator** offers an interactive simulation environment:
 ### 8.4 Psychiatric Disorders Section
 
 Clinical applications include:
+
 - Disorder-specific APGI parameter mappings
 - Neuromodulator associations for each condition
 - Timeline correlations with research developments
@@ -244,6 +245,7 @@ Clinical applications include:
 ### 8.5 Disorders & Conditions
 
 Comprehensive parameter table covering:
+
 - ADHD, Autism Spectrum Disorder
 - Schizophrenia, Major Depressive Disorder
 - Generalized Anxiety Disorder, PTSD
@@ -326,6 +328,7 @@ The app provides navigation capabilities designed for fast cross-referencing:
 ### 10.3 Inspector Panel
 
 The inspector provides context for the current section:
+
 - Section title and category
 - Content type indicators (tables, visualizations)
 - Metadata and cross-references
@@ -502,6 +505,7 @@ Access the Settings panel to customize your experience:
 ### 14.2 Support
 
 For technical support or feature requests:
+
 - Check the About section for version information
 - Report issues through appropriate channels
 - Consult the bibliography for additional resources
@@ -521,4 +525,3 @@ For technical support or feature requests:
 
 - **In-App Content**
   - Each section includes contextual help and descriptions
-

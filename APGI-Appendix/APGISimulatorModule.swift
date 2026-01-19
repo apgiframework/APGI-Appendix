@@ -32,25 +32,25 @@ struct APGIState {
     var acetylcholine: Double
 
     static func initialize(hiddenSize: Int = APGISimulatorConstants.defaultHiddenSize, numLevels: Int = APGISimulatorConstants.defaultNumLevels) -> APGIState {
-        let interoStates = try! MLMultiArray(shape: [1, NSNumber(value: hiddenSize * numLevels)], dataType: .float32)
-        let exteroStates = try! MLMultiArray(shape: [1, NSNumber(value: hiddenSize * numLevels)], dataType: .float32)
-        let workspace = try! MLMultiArray(shape: [1, NSNumber(value: hiddenSize)], dataType: .float32)
-        let qMean = try! MLMultiArray(shape: [1, NSNumber(value: hiddenSize)], dataType: .float32)
-        let qVar = try! MLMultiArray(shape: [1, NSNumber(value: hiddenSize)], dataType: .float32)
-        let pMean = try! MLMultiArray(shape: [1, NSNumber(value: hiddenSize)], dataType: .float32)
-        let pVar = try! MLMultiArray(shape: [1, NSNumber(value: hiddenSize)], dataType: .float32)
+        let interoStates = (try? MLMultiArray(shape: [1, NSNumber(value: hiddenSize * numLevels)], dataType: .float32)) ?? MLMultiArray()
+        let exteroStates = (try? MLMultiArray(shape: [1, NSNumber(value: hiddenSize * numLevels)], dataType: .float32)) ?? MLMultiArray()
+        let workspace = (try? MLMultiArray(shape: [1, NSNumber(value: hiddenSize)], dataType: .float32)) ?? MLMultiArray()
+        let qMean = (try? MLMultiArray(shape: [1, NSNumber(value: hiddenSize)], dataType: .float32)) ?? MLMultiArray()
+        let qVar = (try? MLMultiArray(shape: [1, NSNumber(value: hiddenSize)], dataType: .float32)) ?? MLMultiArray()
+        let pMean = (try? MLMultiArray(shape: [1, NSNumber(value: hiddenSize)], dataType: .float32)) ?? MLMultiArray()
+        let pVar = (try? MLMultiArray(shape: [1, NSNumber(value: hiddenSize)], dataType: .float32)) ?? MLMultiArray()
 
-        for i in 0..<(hiddenSize * numLevels) {
-            interoStates[i] = 0.0
-            exteroStates[i] = 0.0
+        for index in 0..<(hiddenSize * numLevels) {
+            interoStates[index] = 0.0
+            exteroStates[index] = 0.0
         }
 
-        for i in 0..<hiddenSize {
-            workspace[i] = 0.0
-            qMean[i] = 0.0
-            qVar[i] = 1.0
-            pMean[i] = 0.0
-            pVar[i] = 1.0
+        for index in 0..<hiddenSize {
+            workspace[index] = 0.0
+            qMean[index] = 0.0
+            qVar[index] = 1.0
+            pMean[index] = 0.0
+            pVar[index] = 1.0
         }
 
         return APGIState(
@@ -270,12 +270,19 @@ struct APGICore {
 // MARK: - APGI Core Computational Functions
 
 /// Computes precision-weighted surprise from prediction errors
-/// 
+///
 /// This function implements the core APGI surprise accumulation mechanism:
+/// S = Π · |ε| where Π is precision and ε is prediction error
+///
+/// Mathematical formulation:
 /// - Takes absolute prediction errors to ensure positive contributions
-/// - Computes mean error across all input dimensions
+/// - Computes mean error across all input dimensions: mean(|ε_i|)
 /// - Weights by precision to reflect reliability of sensory information
-/// 
+///
+/// The precision weighting implements the precision gating mechanism
+/// from predictive coding, where high precision (low uncertainty) signals
+/// have greater influence on surprise accumulation
+///
 /// - Parameters:
 ///   - predictionError: Array of prediction errors (observation - prediction)
 ///   - precision: Precision weight (0.0 to 1.0) representing reliability
@@ -288,13 +295,20 @@ func computeSurprise(predictionError: [Float], precision: Float) -> Float {
     }
 
 /// Computes total surprise by combining exteroceptive and interoceptive sources
-/// 
+///
 /// Implements the multi-modal surprise accumulation in APGI framework:
-/// - S_extero: Precision-weighted exteroceptive (external sensory) surprise
-/// - S_intero: Precision-weighted interoceptive (internal bodily) surprise, modulated by somatic marker
-/// 
-/// The somatic marker biases interoceptive processing based on metabolic, cognitive, and affective states
-/// 
+/// S_total = S_extero + β · S_intero
+///
+/// Where:
+/// - S_extero = Π_extero · |ε_extero|: Precision-weighted exteroceptive (external sensory) surprise
+/// - S_intero = Π_intero · |ε_intero|: Precision-weighted interoceptive (internal bodily) surprise
+/// - β: Somatic marker that modulates interoceptive processing based on internal state
+///
+/// The somatic marker implements Damasio's somatic marker hypothesis,
+/// biasing interoceptive processing during metabolic stress, high cognitive load,
+/// or emotional arousal. This creates a context-dependent weighting of
+/// internal vs. external sensory information
+///
 /// - Parameters:
 ///   - exteroError: Prediction errors from external sensory channels
 ///   - interoError: Prediction errors from internal bodily channels
@@ -316,68 +330,102 @@ func computeTotalSurprise(
     }
 
 /// Computes probability of conscious ignition using sigmoid function
-/// 
-/// Implements the threshold-based ignition decision:
+///
+/// Implements the threshold-based ignition decision from APGI framework:
 /// B_t = σ(α(S_t - θ_t))
-/// 
-/// Where:
+///
+/// Mathematical formulation:
 /// - B_t: Ignition probability (0.0 to 1.0)
-/// - S_t: Accumulated surprise
-/// - θ_t: Dynamic ignition threshold
-/// - α: Sigmoid steepness parameter (controls decision certainty)
-/// 
+/// - S_t: Accumulated precision-weighted surprise
+/// - θ_t: Dynamic ignition threshold that adapts over time
+/// - α: Sigmoid steepness parameter (typically 5-10) controlling decision certainty
+/// - σ(x): Logistic sigmoid function 1/(1 + e^(-x))
+///
+/// This implements a stochastic decision rule where ignition probability
+/// increases sharply when surprise exceeds threshold. The α parameter
+/// controls the "sharpness" of this transition - higher values create
+/// more binary-like behavior, lower values create more graded responses
+///
 /// - Parameters:
 ///   - surprise: Current accumulated surprise value
 ///   - threshold: Current dynamic ignition threshold
 ///   - alpha: Sigmoid steepness parameter (typically 5-10)
 /// - Returns: Probability of conscious ignition (0.0 to 1.0)
 func computeIgnitionProbability(surprise: Float, threshold: Float, alpha: Float) -> Float {
-        let x = alpha * (surprise - threshold)
-        return sigmoid(x)
+        let scaledValue = alpha * (surprise - threshold)
+        return sigmoid(scaledValue)
     }
 
 /// Standard logistic sigmoid activation function
-/// 
-/// σ(x) = 1 / (1 + e^(-x))
-/// 
-/// Maps any real-valued input to range [0, 1], useful for probability computations
-/// 
+///
+/// Mathematical formulation: σ(x) = 1 / (1 + e^(-x))
+///
+/// Properties:
+/// - Maps any real-valued input to range [0, 1]
+/// - Symmetric around x=0 where σ(0) = 0.5
+/// - Monotonically increasing function
+/// - Derivative: σ'(x) = σ(x) · (1 - σ(x))
+///
+/// Used extensively in neural networks and computational neuroscience
+/// for probability computations and smooth thresholding operations
+///
 /// - Parameter x: Input value
 /// - Returns: Sigmoid activation in range [0, 1]
-func sigmoid(_ x: Float) -> Float {
-        1.0 / (1.0 + exp(-x))
+func sigmoid(_ value: Float) -> Float {
+        1.0 / (1.0 + exp(-value))
     }
 
 /// Computes somatic marker from metabolic, cognitive, and affective components
-/// 
-/// The somatic marker implements Damasio's somatic marker hypothesis:
-/// - Integrates current metabolic, cognitive, and affective states
-/// - Weights metabolic processes most heavily (0.4), cognitive and affective equally (0.3 each)
-/// - Scales result to modulate interoceptive precision (0.5 to 2.0 range)
-/// 
-/// This marker biases the system toward processing interoceptive information
-/// during metabolic stress or high emotional arousal
-/// 
+///
+/// Implements Damasio's somatic marker hypothesis for biasing interoceptive processing:
+///
+/// Mathematical formulation:
+/// SM = scaling · (w_m · M + w_c · C + w_a · A)
+///
+/// Where:
+/// - M, C, A: Normalized metabolic, cognitive, and affective states (0.0 to 1.0)
+/// - w_m = 0.4: Metabolic weight (highest priority for survival)
+/// - w_c = 0.3: Cognitive weight (mental load, attention, working memory)
+/// - w_a = 0.3: Affective weight (emotional arousal, valence)
+/// - scaling = 2.0: Maps to range [0.5, 2.0] for interoceptive modulation
+///
+/// Biological rationale:
+/// - Metabolic processes weighted most heavily (energy homeostasis critical)
+/// - Cognitive and affective weighted equally (balanced top-down modulation)
+/// - Result > 1.0 enhances interoceptive processing during stress/arousal
+/// - Result < 1.0 suppresses interoceptive processing during calm states
+///
+/// This creates adaptive precision gating where the system prioritizes
+/// internal bodily signals when they're most behaviorally relevant
+///
 /// - Parameters:
 ///   - metabolic: Current metabolic state (0.0 to 1.0)
 ///   - cognitive: Current cognitive load/state (0.0 to 1.0)
 ///   - affective: Current affective/emotional state (0.0 to 1.0)
 /// - Returns: Somatic marker for interoceptive modulation (0.5 to 2.0)
 func computeSomaticMarker(metabolic: Float, cognitive: Float, affective: Float) -> Float {
-        let marker = (metabolic * APGISimulatorConstants.metabolicWeight + 
-                     cognitive * APGISimulatorConstants.cognitiveWeight + 
+        let marker = (metabolic * APGISimulatorConstants.metabolicWeight +
+                     cognitive * APGISimulatorConstants.cognitiveWeight +
                      affective * APGISimulatorConstants.affectiveWeight)
         let scaled = marker * APGISimulatorConstants.somaticMarkerScaling
         return clamp(scaled, min: APGISimulatorConstants.somaticBiasFactor, max: 2.0)
     }
 
 /// Computes prediction errors between observations and predictions
-/// 
-/// Implements the core prediction error computation:
+///
+/// Implements the core prediction error computation from predictive coding:
 /// ε = observation - prediction
-/// 
-/// Positive errors indicate under-prediction, negative errors indicate over-prediction
-/// 
+///
+/// Mathematical interpretation:
+/// - ε > 0: Under-prediction (observation exceeds prediction)
+/// - ε < 0: Over-prediction (prediction exceeds observation)
+/// - |ε|: Magnitude of prediction error (drives learning and surprise)
+///
+/// In predictive coding frameworks:
+/// - Prediction errors drive hierarchical message passing
+/// - Minimizing prediction errors is the primary computational goal
+/// - Precision weighting determines influence on higher levels
+///
 /// - Parameters:
 ///   - observation: Actual sensory input values
 ///   - prediction: Predicted sensory values from generative model
@@ -389,8 +437,8 @@ func computePredictionError(observation: [Float], prediction: [Float]) -> [Float
 
     func updatePredictor(current: inout [Float], observation: [Float], learningRate: Float = 0.1) {
         let minCount = min(current.count, observation.count)
-        for i in 0..<minCount {
-            current[i] = current[i] * (1.0 - learningRate) + observation[i] * learningRate
+        for index in 0..<minCount {
+            current[index] = current[index] * (1.0 - learningRate) + observation[index] * learningRate
         }
     }
 
@@ -410,10 +458,10 @@ func computePredictionError(observation: [Float], prediction: [Float]) -> [Float
     }
 
 /// Updates dynamic ignition threshold based on homeostatic and urgency factors
-/// 
+///
 /// Implements threshold adaptation dynamics:
 /// dθ_t/dt = γ(θ₀ − θ_t) + δ·B_{t-1} − λ·|dS_t/dt|
-/// 
+///
 /// Where:
 /// - γ: Homeostatic recovery rate (returns threshold to baseline)
 /// - θ₀: Baseline threshold value
@@ -421,7 +469,7 @@ func computePredictionError(observation: [Float], prediction: [Float]) -> [Float
 /// - B_{t-1}: Previous ignition state
 /// - λ: Urgency gain factor (lowers threshold for rapidly increasing surprise)
 /// - |dS_t/dt|: Absolute rate of surprise change (urgency signal)
-/// 
+///
 /// - Parameters:
 ///   - currentTheta: Current threshold value
 ///   - prevIgnition: Previous ignition state (0.0 or 1.0)
@@ -435,7 +483,7 @@ func updateThreshold(
         currentSurprise: Float,
         energyReserves: Float,
         allostaticLoad: Float,
-        dt: Float
+        deltaTime: Float
     ) -> Float {
         let theta0 = config.theta0
         let gamma = config.gamma
@@ -444,28 +492,28 @@ func updateThreshold(
 
         let homeostasis = gamma * (theta0 - current)
         let refractoriness = -delta * prevIgnition
-        let dSdt = (currentSurprise - prevSurprise) / max(dt, 0.001)
+        let dSdt = (currentSurprise - prevSurprise) / max(deltaTime, 0.001)
         let urgency = -lambdaUrg * max(dSdt, 0.0)
         let metabolicPenalty = (1.0 - energyReserves) * 0.2 + allostaticLoad * 0.1
 
         let dTheta = homeostasis + refractoriness + urgency + metabolicPenalty
-        let newTheta = current + dt * dTheta
+        let newTheta = current + deltaTime * dTheta
 
         return clamp(newTheta, min: config.thetaMin, max: config.thetaMax)
     }
 
 /// Computes metabolic cost of broadcasting ignition signal
-/// 
+///
 /// Implements quadratic cost model for global broadcasting:
 /// Cost = α × B_t²
-/// 
+///
 /// Where:
 /// - α: Broadcast cost coefficient
 /// - B_t: Ignition probability
-/// 
+///
 /// Quadratic scaling reflects the metabolic expense of widespread
 /// neural activation across multiple brain regions
-/// 
+///
 /// - Parameter ignitionProb: Probability of ignition (0.0 to 1.0)
 /// - Returns: Metabolic cost of broadcasting
 func computeBroadcastCost(ignitionProb: Float) -> Float {
@@ -473,17 +521,17 @@ func computeBroadcastCost(ignitionProb: Float) -> Float {
     }
 
 /// Computes metabolic cost of maintaining current neural state
-/// 
+///
 /// Implements linear maintenance cost model:
 /// Cost = β × |state|
-/// 
+///
 /// Where:
 /// - β: Maintenance cost coefficient
 /// - state: Current neural activation level
-/// 
+///
 /// Reflects ongoing ATP consumption for maintaining membrane potentials
 /// and neural firing patterns
-/// 
+///
 /// - Parameter state: Current neural state activation level
 /// - Returns: Metabolic maintenance cost
 func computeMaintenanceCost(state: Float) -> Float {
@@ -491,18 +539,18 @@ func computeMaintenanceCost(state: Float) -> Float {
     }
 
 /// Computes functional benefit from surprise reduction
-/// 
+///
 /// Implements benefit model based on prediction error minimization:
 /// Benefit = λ × max(S_{t-1} - S_t, 0)
-/// 
+///
 /// Where:
 /// - λ: Benefit scaling factor
 /// - S_{t-1}: Previous surprise level
 /// - S_t: Current surprise level
-/// 
+///
 /// Benefit only accrues when surprise is actually reduced,
 /// reflecting improved predictive accuracy
-/// 
+///
 /// - Parameters:
 ///   - surprise: Current surprise level
 ///   - prevSurprise: Previous surprise level
@@ -513,7 +561,7 @@ func computeBenefit(surprise: Float, prevSurprise: Float) -> Float {
     }
 
 /// Utility function to clamp values within specified range
-/// 
+///
 /// - Parameters:
 ///   - value: Value to clamp
 ///   - minValue: Minimum allowed value
@@ -545,32 +593,68 @@ final class SimpleAPGIModel {
         self.maxHistoryLength = configuration.precisionHistoryMax
     }
 
+    /// Main forward pass through the APGI computational model
+    ///
+    /// Implements the complete APGI algorithm pipeline:
+    /// 1. Compute prediction errors from observations vs predictions
+    /// 2. Estimate precision from error history (adaptive precision weighting)
+    /// 3. Compute somatic marker for interoceptive modulation
+    /// 4. Calculate precision-weighted surprise from both modalities
+    /// 5. Update dynamic ignition threshold based on system state
+    /// 6. Compute ignition probability using sigmoid decision rule
+    /// 7. Calculate metabolic costs and functional benefits
+    /// 8. Update energy reserves and allostatic load
+    /// 9. Estimate neuromodulatory states (NE, ACh)
+    /// 10. Update predictive models with new observations
+    ///
+    /// This implements the core APGI computational cycle where prediction errors
+    /// drive precision-weighted surprise accumulation, which competes against
+    /// adaptive thresholds to determine conscious access probability
+    ///
+    /// - Parameters:
+    ///   - interoInput: Current interoceptive (internal bodily) sensory input
+    ///   - exteroInput: Current exteroceptive (external sensory) input
+    ///   - state: Current APGI system state containing all dynamic variables
+    ///   - context: Current context including metabolic, cognitive, and affective states
+    /// - Returns: Tuple containing updated system state and diagnostic information
     func forward(
         interoInput: [Float],
         exteroInput: [Float],
         state: APGIState,
         context: APGIContext
     ) -> (newState: APGIState, diagnostics: APGIDiagnostics) {
-        let dt = config.dtMs / 1000.0
+        // Convert time step from milliseconds to seconds for differential equations
+        let deltaTime = config.dtMs / 1000.0
 
+        // Step 1: Compute prediction errors between observations and predictions
+        // ε = observation - prediction (core predictive coding computation)
         let epsilonIntero = core.computePredictionError(observation: interoInput, prediction: interoPredictor)
         let epsilonExtero = core.computePredictionError(observation: exteroInput, prediction: exteroPredictor)
 
+        // Step 2: Update error history for precision estimation
+        // Maintains sliding window of recent prediction errors
         interoErrorHistory.append(epsilonIntero)
         exteroErrorHistory.append(epsilonExtero)
 
+        // Maintain fixed-length history window (FIFO buffer)
         if interoErrorHistory.count > maxHistoryLength { interoErrorHistory.removeFirst() }
         if exteroErrorHistory.count > maxHistoryLength { exteroErrorHistory.removeFirst() }
 
+        // Step 3: Estimate precision from error history (inverse of variance)
+        // High precision = low prediction error variance = reliable information
         let piIntero = core.estimatePrecision(errorHistory: interoErrorHistory, baseline: Float(state.piIntero))
         let piExtero = core.estimatePrecision(errorHistory: exteroErrorHistory, baseline: Float(state.piExtero))
 
+        // Step 4: Compute somatic marker for interoceptive modulation
+        // Implements Damasio's somatic marker hypothesis
         let somaticMarker = core.computeSomaticMarker(
             metabolic: Float(context.metabolic),
             cognitive: Float(context.cognitive),
             affective: Float(context.affective)
         )
 
+        // Step 5: Calculate total precision-weighted surprise
+        // S_total = S_extero + β·S_intero (multi-modal integration)
         let sTotal = core.computeTotalSurprise(
             exteroError: epsilonExtero,
             interoError: epsilonIntero,
@@ -579,9 +663,12 @@ final class SimpleAPGIModel {
             somaticMarker: somaticMarker
         )
 
+        // Calculate individual surprise components for diagnostics
         let sExtero = core.computeSurprise(predictionError: epsilonExtero, precision: piExtero)
         let sIntero = core.computeSurprise(predictionError: epsilonIntero, precision: piIntero * somaticMarker)
 
+        // Step 6: Update dynamic ignition threshold
+        // θ_t evolves based on homeostatic recovery, post-ignition refractory, and urgency
         let newTheta = core.updateThreshold(
             current: Float(state.theta),
             prevIgnition: Float(state.prevIgnition),
@@ -589,43 +676,57 @@ final class SimpleAPGIModel {
             currentSurprise: sTotal,
             energyReserves: Float(state.energyReserves),
             allostaticLoad: Float(state.allostaticLoad),
-            dt: dt
+            deltaTime: deltaTime
         )
 
+        // Step 7: Compute ignition probability using sigmoid decision rule
+        // B_t = σ(α(S_t - θ_t)) - threshold-based stochastic ignition
         let ignitionProb = core.computeIgnitionProbability(
             surprise: sTotal,
             threshold: newTheta,
             alpha: config.betaTransition
         )
 
+        // Step 8: Calculate metabolic costs and functional benefits
+        // Cost-benefit analysis for energy allocation
         let broadcastCost = core.computeBroadcastCost(ignitionProb: ignitionProb)
         let maintenanceCost = core.computeMaintenanceCost(state: Float(state.energyReserves))
         let totalCost = broadcastCost + maintenanceCost
 
+        // Benefit accrues from prediction error reduction (improved model accuracy)
         let benefit = core.computeBenefit(surprise: sTotal, prevSurprise: previousSurprise)
         let freeEnergy = totalCost - benefit
 
-        let energyDelta = -totalCost * config.energyDepletionRate * dt
+        // Step 9: Update energy reserves based on metabolic costs
+        // Energy depletion proportional to total computational cost
+        let energyDelta = -totalCost * config.energyDepletionRate * deltaTime
         let newEnergy = core.clamp(
             Float(state.energyReserves) + Float(energyDelta),
             min: config.energyMin,
             max: config.energyMax
         )
 
-        let allostaticIncrease = sTotal * config.allostaticIncreaseRate * dt
-        let allostaticDecrease = ignitionProb * Float(state.allostaticLoad) * config.allostaticDecreaseRate * dt
+        // Step 10: Update allostatic load (stress accumulation)
+        // Increases with surprise, decreases with successful ignition (stress relief)
+        let allostaticIncrease = sTotal * config.allostaticIncreaseRate * deltaTime
+        let allostaticDecrease = ignitionProb * Float(state.allostaticLoad) * config.allostaticDecreaseRate * deltaTime
         let newAllostatic = core.clamp(
             Float(state.allostaticLoad) + Float(allostaticIncrease) - allostaticDecrease,
             min: config.allostaticMin,
             max: config.allostaticMax
         )
 
-        core.updatePredictor(current: &interoPredictor, observation: interoInput, learningRate: 0.1)
-        core.updatePredictor(current: &exteroPredictor, observation: exteroInput, learningRate: 0.1)
+        // Step 11: Update predictive models with new observations (learning)
+        // Exponential moving average: prediction_new = (1-α)·prediction_old + α·observation
+        core.updatePredictor(current: &interoPredictor, observation: interoInput, learningRate: APGISimulatorConstants.defaultLearningRate)
+        core.updatePredictor(current: &exteroPredictor, observation: exteroInput, learningRate: APGISimulatorConstants.defaultLearningRate)
 
+        // Step 12: Estimate neuromodulatory states from system variables
+        // Volatility drives norepinephrine (arousal/attention)
         let volatility = estimateVolatility(currentPrecision: piIntero)
-        let norepinephrine = core.sigmoid(volatility * 2.0 + Float(context.arousal) - 0.5)
-        let acetylcholine = core.sigmoid(piIntero * 0.5 + Float(context.attention) - 0.5)
+        let norepinephrine = core.sigmoid(volatility * APGISimulatorConstants.norepinephrineVolatilityScaling + Float(context.arousal) - APGISimulatorConstants.neuromodulatoryBaselineOffset)
+        // Precision drives acetylcholine (attention/learning)
+        let acetylcholine = core.sigmoid(piIntero * APGISimulatorConstants.acetylcholinePrecisionScaling + Float(context.attention) - APGISimulatorConstants.neuromodulatoryBaselineOffset)
 
         var newState = state
         newState.piIntero = Double(piIntero)
@@ -739,7 +840,7 @@ final class APGIInferenceEngine: ObservableObject {
             acetylcholine: 0.0,
             refractoryTimer: 0.0
         )
-        
+
         setupMemoryPressureObserver()
     }
 
@@ -749,19 +850,19 @@ final class APGIInferenceEngine: ObservableObject {
             NotificationCenter.default.removeObserver(observer)
         }
     }
-    
+
     private func setupMemoryPressureObserver() {
         // macOS doesn't have the same memory warning notification as iOS
         // We'll use a different approach or manual triggering
     }
-    
+
     private func handleMemoryPressure() {
         // Reduce model complexity under memory pressure
         memoryManager.optimizeForMemoryPressure()
-        
+
         // Clear non-essential caches
         performanceMonitor.clearCaches()
-        
+
         // Reduce inference frequency
         if isInferring {
             Task {
@@ -776,22 +877,22 @@ final class APGIInferenceEngine: ObservableObject {
             guard config.inputSize > 0 && config.hiddenSize > 0 && config.numLevels > 0 else {
                 throw APGIError.invalidInput("Invalid configuration parameters")
             }
-            
+
             self.simpleModel = SimpleAPGIModel(configuration: config)
-            
+
             // Simulate model loading with validation
             try await Task.sleep(nanoseconds: 100_000_000)
-            
+
             // Validate model initialization
             guard simpleModel != nil else {
                 throw APGIError.modelLoadFailed("Model initialization failed")
             }
-            
+
             isModelLoaded = true
         } catch {
             isModelLoaded = false
             simpleModel = nil
-            
+
             if let apgiError = error as? APGIError {
                 throw apgiError
             } else {
@@ -806,17 +907,17 @@ final class APGIInferenceEngine: ObservableObject {
     }
 
     func runInference(interoInput: [Float], exteroInput: [Float], context: APGIContext) async throws {
-        guard let model = simpleModel else { 
-            throw APGIError.modelNotLoaded 
+        guard let model = simpleModel else {
+            throw APGIError.modelNotLoaded
         }
-        
+
         // Enhanced input validation
         try validateInputs(interoInput: interoInput, exteroInput: exteroInput)
         try validateContext(context: context)
 
         isInferring = true
-        defer { 
-            isInferring = false 
+        defer {
+            isInferring = false
         }
 
         let startTime = Date()
@@ -824,7 +925,7 @@ final class APGIInferenceEngine: ObservableObject {
         do {
             // Use memory-optimized configuration if under pressure
             _ = memoryManager.getOptimizedConfiguration(for: config)
-            
+
             let stateSnapshot = await stateManager.getSnapshot()
 
             let result = model.forward(
@@ -852,7 +953,7 @@ final class APGIInferenceEngine: ObservableObject {
             } else {
                 averageInferenceTime = performanceMonitor.averageInferenceTime
             }
-            
+
             // Memory cleanup after inference
             if memoryManager.shouldBatchInferences() {
                 await performMemoryCleanup()
@@ -861,18 +962,18 @@ final class APGIInferenceEngine: ObservableObject {
             throw APGIError.inferenceFailed(error)
         }
     }
-    
+
     private func performMemoryCleanup() async {
         // Clear temporary arrays and perform garbage collection
         MLMultiArrayPool.shared.clearPool()
-        
+
         // Force a brief pause to allow memory to be reclaimed
         try? await Task.sleep(nanoseconds: 10_000_000) // 10ms
     }
-    
+
     private func validateContext(context: APGIContext) throws {
         let values = [context.metabolic, context.cognitive, context.affective, context.arousal, context.attention]
-        
+
         for value in values {
             guard value >= 0.0 && value <= 1.0 else {
                 throw APGIError.invalidInput("Context values must be between 0.0 and 1.0")
@@ -882,20 +983,20 @@ final class APGIInferenceEngine: ObservableObject {
             }
         }
     }
-    
+
     private func validateInferenceResult(_ result: (newState: APGIState, diagnostics: APGIDiagnostics)) throws {
         // Check for valid state values
         let stateValues = [
             result.newState.piIntero, result.newState.piExtero, result.newState.theta,
             result.newState.energyReserves, result.newState.allostaticLoad
         ]
-        
+
         for value in stateValues {
             guard !value.isNaN && !value.isInfinite else {
                 throw APGIError.stateUpdateFailed("Invalid state values detected")
             }
         }
-        
+
         // Check diagnostics validity
         guard result.diagnostics.sTotal >= 0 && result.diagnostics.ignitionProb >= 0 && result.diagnostics.ignitionProb <= 1 else {
             throw APGIError.inferenceError("Invalid diagnostic values")

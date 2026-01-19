@@ -34,7 +34,7 @@ extension SectionCategory {
         case .reference: return .gray
         }
     }
-    
+
     var sections: [Tab] {
         NavigationSection.allCases.first { $0.tabs.contains(where: { $0.category == self }) }?.tabs ?? []
     }

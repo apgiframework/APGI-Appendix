@@ -6,31 +6,31 @@ import Network
 @MainActor
 final class NetworkManager: ObservableObject {
     static let shared = NetworkManager()
-    
+
     @Published var isConnected = true
     @Published var lastError: NetworkError?
-    
+
     private let session: URLSession
     private let monitor: NWPathMonitor
     private let monitorQueue = DispatchQueue(label: "NetworkMonitor")
-    
+
     private init() {
         let config = URLSessionConfiguration.default
         config.timeoutIntervalForRequest = 30
         config.timeoutIntervalForResource = 60
         config.waitsForConnectivity = true
         self.session = URLSession(configuration: config)
-        
+
         self.monitor = NWPathMonitor()
         startNetworkMonitoring()
     }
-    
+
     deinit {
         monitor.cancel()
     }
-    
+
     // MARK: - Network Monitoring
-    
+
     private func startNetworkMonitoring() {
         monitor.pathUpdateHandler = { [weak self] path in
             DispatchQueue.main.async {
@@ -39,25 +39,25 @@ final class NetworkManager: ObservableObject {
         }
         monitor.start(queue: monitorQueue)
     }
-    
+
     // MARK: - Public Methods
-    
+
     func fetchExternalResource(url: URL) async throws -> Data {
         guard isConnected else {
             throw NetworkError.noConnection
         }
-        
+
         do {
             let (data, response) = try await session.data(from: url)
-            
+
             guard let httpResponse = response as? HTTPURLResponse else {
                 throw NetworkError.invalidResponse
             }
-            
+
             guard 200...299 ~= httpResponse.statusCode else {
                 throw NetworkError.serverError(httpResponse.statusCode)
             }
-            
+
             return data
         } catch let error as NetworkError {
             lastError = error
@@ -68,7 +68,7 @@ final class NetworkManager: ObservableObject {
             throw networkError
         }
     }
-    
+
     func fetchExternalResourceWithFallback(
         primaryURL: URL,
         fallbackURL: URL? = nil
@@ -86,15 +86,15 @@ final class NetworkManager: ObservableObject {
             throw error
         }
     }
-    
+
     func validateURL(_ urlString: String) -> URL? {
         guard let url = URL(string: urlString) else { return nil }
         guard url.scheme == "http" || url.scheme == "https" else { return nil }
         return url
     }
-    
+
     // MARK: - Retry Logic
-    
+
     func fetchWithRetry<T>(
         url: URL,
         maxRetries: Int = 3,
@@ -103,20 +103,20 @@ final class NetworkManager: ObservableObject {
         operation: @escaping (URL) async throws -> T
     ) async throws -> T {
         var lastError: Error?
-        
+
         for attempt in 0..<maxRetries {
             do {
                 return try await operation(url)
             } catch {
                 lastError = error
-                
+
                 if attempt < maxRetries - 1 {
                     let delay = initialDelay * pow(backoffMultiplier, Double(attempt))
                     try await Task.sleep(nanoseconds: UInt64(delay * 1_000_000_000))
                 }
             }
         }
-        
+
         throw NetworkError.retryExhausted(lastError ?? URLError(.unknown))
     }
 }
@@ -132,7 +132,7 @@ enum NetworkError: LocalizedError, Equatable {
     case unknown(Error)
     case fallbackFailed(primaryError: Error, fallbackError: Error)
     case retryExhausted(Error)
-    
+
     var errorDescription: String? {
         switch self {
         case .noConnection:
@@ -153,7 +153,7 @@ enum NetworkError: LocalizedError, Equatable {
             return "Request failed after multiple retries: \(error.localizedDescription)"
         }
     }
-    
+
     var recoverySuggestion: String? {
         switch self {
         case .noConnection:
@@ -168,7 +168,7 @@ enum NetworkError: LocalizedError, Equatable {
             return "Try again later or contact support if the issue persists."
         }
     }
-    
+
     static func == (lhs: NetworkError, rhs: NetworkError) -> Bool {
         switch (lhs, rhs) {
         case (.noConnection, .noConnection),
@@ -188,7 +188,7 @@ enum NetworkError: LocalizedError, Equatable {
 
 struct NetworkStatusView: View {
     @StateObject private var networkManager = NetworkManager.shared
-    
+
     var body: some View {
         if !networkManager.isConnected {
             HStack {
@@ -213,11 +213,11 @@ struct RetryableOperation: ViewModifier {
     @State private var isLoading = false
     @State private var errorMessage: String?
     @State private var networkManager = NetworkManager.shared
-    
+
     func body(content: Content) -> some View {
         VStack(spacing: 12) {
             content
-            
+
             if isLoading {
                 ProgressView("Loading...")
                     .frame(maxWidth: .infinity)
@@ -226,7 +226,7 @@ struct RetryableOperation: ViewModifier {
                     Text(errorMessage)
                         .foregroundStyle(.red)
                         .multilineTextAlignment(.center)
-                    
+
                     HStack {
                         Button("Retry") {
                             Task {
@@ -234,7 +234,7 @@ struct RetryableOperation: ViewModifier {
                             }
                         }
                         .buttonStyle(.borderedProminent)
-                        
+
                         if networkManager.lastError != nil {
                             Button("Details") {
                                 // Show error details in an alert or sheet
@@ -254,17 +254,17 @@ struct RetryableOperation: ViewModifier {
             }
         }
     }
-    
+
     private func performOperation() async {
         isLoading = true
         errorMessage = nil
-        
+
         do {
             try await operation()
         } catch {
             errorMessage = error.localizedDescription
         }
-        
+
         isLoading = false
     }
 }

@@ -20,6 +20,7 @@ When you open the app, you'll typically see:
 ### 2.1 Finding Your Way
 
 **On macOS:**
+
 1. **Categories** (left panel) - Choose a content category
 2. **Sections** (middle panel) - Select a specific section within that category
 
@@ -41,6 +42,7 @@ Categories include:
 - **Keyboard shortcuts**: Cmd+F (search), Cmd+B (bookmark)
 
 **Reading tips:**
+
 - Use the hero card at the top of enhanced sections for the key takeaway
 - Expand only the subsections you need
 - Use the Related links to jump between connected sections
@@ -52,6 +54,7 @@ Categories include:
 ### 3.1 Global Search
 
 **How to search:**
+
 - Press **⌘F** (Mac) or tap the search icon
 - Type your query - results appear instantly
 - Choose search scope:
@@ -63,6 +66,7 @@ Categories include:
   - **Glossary** - Term definitions
 
 **Pro tips:**
+
 - Use single words for broader results
 - Filter by category to focus your search
 - Tap any result to jump directly to that content
@@ -70,6 +74,7 @@ Categories include:
 ### 3.2 Focus Mode
 
 **For distraction-free reading:**
+
 - Toggle focus mode to hide all UI elements
 - Clean typography optimized for study
 - Easy toggle back to full interface
@@ -77,6 +82,7 @@ Categories include:
 ### 3.3 Interactive Timeline
 
 **Key features:**
+
 - **Playback controls** - Play/pause timeline animation
 - **Speed adjustment** - Control playback speed
 - **Event interaction** - Tap events for details
@@ -116,20 +122,24 @@ Categories include:
 ### 5.1 Finding Specific Information
 
 **Looking for a specific disorder?**
+
 1. Navigate to Applications & Extensions → Psychiatric Disorders
 2. Or search for the disorder name using Cmd+F
 
 **Need a definition?**
+
 1. Navigate to Reference Materials → Glossary
 2. Or use search with glossary scope
 
 **Want to understand the math?**
+
 1. Go to Mathematical Framework → Mathematical Model
 2. Check APGI Mapping for parameter definitions
 
 ### 5.2 Study Sessions
 
 **Comprehensive study workflow:**
+
 1. Start with Methodology for framework understanding
 2. Progress through Mathematical Framework
 3. Study Biological Implementation
@@ -138,6 +148,7 @@ Categories include:
 6. Use Reference Materials for support
 
 **Quick review workflow:**
+
 1. Use bookmarks to return to key sections
 2. Enable focus mode for concentrated study
 3. Use search to find specific topics quickly
@@ -196,6 +207,7 @@ Categories include:
 - **Interactive features** - Use timelines and visualizations
 
 **For comprehensive understanding:**
+
 1. Read the full **User Guide** for detailed features
 2. Explore each **category** systematically
 3. Use **search** to discover connections
@@ -203,8 +215,8 @@ Categories include:
 5. Reference **bibliography** for source material
 
 **For quick reference:**
+
 - Use **search** for immediate answers
 - Check **glossary** for term definitions
 - Navigate by **category** for structured exploration
 - Use **focus mode** for distraction-free study
-

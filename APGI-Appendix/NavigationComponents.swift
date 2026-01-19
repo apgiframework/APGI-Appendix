@@ -2,7 +2,7 @@ import SwiftUI
 struct NavigationHeader: View {
     @Binding var selectedTab: Tab
     let onTabSelected: (Tab) -> Void
-    
+
     var body: some View {
         VStack(spacing: 8) {
             LazyVGrid(columns: [
@@ -37,14 +37,14 @@ struct NavigationButton: View {
     let tab: Tab
     let isSelected: Bool
     let onTap: () -> Void
-    
+
     var body: some View {
         Button(action: onTap) {
             VStack(spacing: 4) {
                 Image(systemName: tab.icon)
                     .font(.system(size: 16, weight: isSelected ? .bold : .regular))
                     .foregroundColor(isSelected ? .blue : .primary)
-                
+
                 Text(shortenedTitle)
                     .font(.system(size: 10, weight: .medium))
                     .foregroundColor(isSelected ? .blue : .primary)
@@ -64,13 +64,13 @@ struct NavigationButton: View {
         }
         .buttonStyle(PlainButtonStyle())
     }
-    
+
     private var shortenedTitle: String {
         let title = tab.rawValue
         if title.count <= 20 {
             return title
         }
-        
+
         switch tab {
         case .methodology:
             return "Methodology"

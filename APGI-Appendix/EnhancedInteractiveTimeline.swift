@@ -152,7 +152,15 @@ struct TimeMarkers: View {
                     .foregroundStyle(.secondary)
                     .frame(
                         maxWidth: .infinity,
-                        alignment: time == 0 ? .leading : (time == 500 ? .trailing : .center)
+                        alignment: {
+                            if time == 0 {
+                                return .leading
+                            } else if time == 500 {
+                                return .trailing
+                            } else {
+                                return .center
+                            }
+                        }()
                     )
             }
         }
@@ -287,7 +295,15 @@ struct EnhancedInteractiveTimeline: View {
                     .foregroundStyle(.secondary)
                     .frame(
                         maxWidth: .infinity,
-                        alignment: time == 0 ? .leading : (time == maxTime ? .trailing : .center)
+                        alignment: {
+                            if time == 0 {
+                                return .leading
+                            } else if time == maxTime {
+                                return .trailing
+                            } else {
+                                return .center
+                            }
+                        }()
                     )
             }
         }
@@ -477,7 +493,15 @@ struct EventBlock: View {
         .background(isSelected ? event.category.color.opacity(0.35) : Color.clear)
         .clipShape(RoundedRectangle(cornerRadius: APGIRadius.md))
         .offset(x: startX, y: 20)
-        .scaleEffect(isSelected ? 1.05 : (isHovered ? 1.02 : 1.0))
+        .scaleEffect({
+            if isSelected {
+                return 1.05
+            } else if isHovered {
+                return 1.02
+            } else {
+                return 1.0
+            }
+        }())
         .animation(.spring(response: 0.3, dampingFraction: 0.8), value: isSelected)
         .animation(.easeInOut(duration: 0.15), value: isActive)
     }
@@ -534,7 +558,15 @@ struct EnhancedEventBlock: View {
         .background(isSelected ? event.category.color.opacity(0.35) : Color.clear)
         .clipShape(RoundedRectangle(cornerRadius: APGIRadius.md))
         .offset(x: startX, y: 20)
-        .scaleEffect(isSelected ? 1.05 : (isHovered ? 1.02 : 1.0))
+        .scaleEffect({
+            if isSelected {
+                return 1.05
+            } else if isHovered {
+                return 1.02
+            } else {
+                return 1.0
+            }
+        }())
         .animation(.spring(response: 0.3, dampingFraction: 0.7), value: isSelected)
         .animation(.spring(response: 0.2, dampingFraction: 0.8), value: isActive)
         .onHover { hovering in

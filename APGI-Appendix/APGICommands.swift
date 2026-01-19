@@ -9,7 +9,7 @@ struct APGICommands: Commands {
                 openGlossaryWindow()
             }
             .keyboardShortcut("g", modifiers: [.command])
-            
+
             Button("Search Framework") {
                 focusSearch()
             }
@@ -37,130 +37,130 @@ struct APGICommands: Commands {
             }
             .keyboardShortcut("m", modifiers: [.command, .shift])
         }
-        
+
         CommandMenu("Navigate") {
-            Button("Biological Implementation") { 
+            Button("Biological Implementation") {
                 navigateToBiological()
             }
             .keyboardShortcut("1", modifiers: [.command])
-            Button("Neuromodulators") { 
+            Button("Neuromodulators") {
                 navigateToNeuromodulators()
             }
             .keyboardShortcut("2", modifiers: [.command])
-            Button("Clinical Translations") { 
+            Button("Clinical Translations") {
                 NotificationCenter.default.post(name: .navigateToSection, object: "clinical")
             }
             .keyboardShortcut("3", modifiers: [.command])
-            Button("Mathematical Framework") { 
+            Button("Mathematical Framework") {
                 NotificationCenter.default.post(name: .navigateToSection, object: "mathematical")
             }
             .keyboardShortcut("4", modifiers: [.command])
-            Button("Psychiatric Disorders") { 
+            Button("Psychiatric Disorders") {
                 NotificationCenter.default.post(name: .navigateToSection, object: "psychiatric")
             }
             .keyboardShortcut("5", modifiers: [.command])
-            
+
             Divider()
-            
+
             Button("Next Section") {
                 NotificationCenter.default.post(name: .navigateNext, object: nil)
             }
             .keyboardShortcut("]", modifiers: [.command])
-            
+
             Button("Previous Section") {
                 NotificationCenter.default.post(name: .navigatePrevious, object: nil)
             }
             .keyboardShortcut("[", modifiers: [.command])
         }
-        
+
         CommandMenu("View") {
             Button("Toggle Sidebar") {
                 toggleSidebar()
             }
             .keyboardShortcut("s", modifiers: [.command, .option])
-            
+
             Button("Toggle Inspector") {
                 toggleInspector()
             }
             .keyboardShortcut("i", modifiers: [.command, .option])
-            
+
             Divider()
-            
+
             Button("Zoom In") {
                 zoomIn()
             }
             .keyboardShortcut("+", modifiers: [.command])
-            
+
             Button("Zoom Out") {
                 zoomOut()
             }
             .keyboardShortcut("-", modifiers: [.command])
-            
+
             Button("Reset Zoom") {
                 zoomReset()
             }
             .keyboardShortcut("0", modifiers: [.command])
         }
-        
+
         CommandMenu("Export") {
             Button("Export as PDF") {
                 exportPDF()
             }
             .keyboardShortcut("p", modifiers: [.command, .shift])
-            
+
             Button("Export Current Section") {
                 exportCurrentSection()
             }
             .keyboardShortcut("e", modifiers: [.command])
-            
+
             Divider()
-            
+
             Button("Copy Citation") {
                 copyCitation()
             }
             .keyboardShortcut("c", modifiers: [.command, .option])
         }
-        
+
         CommandMenu("Help") {
             Button("APGI Help Guide") {
                 openHelpGuide()
             }
             .keyboardShortcut("?", modifiers: [.command])
-            
+
             Button("Online Documentation") {
                 openOnlineHelp()
             }
-            
+
             Divider()
-            
+
             Button("Check for Updates") {
                 checkForUpdates()
             }
-            
+
             Divider()
-            
+
             Button("Report Issue") {
                 reportIssue()
             }
         }
-        
+
         CommandGroup(replacing: .help) {
             Button("APGI Help Guide") {
                 openHelpGuide()
             }
             .keyboardShortcut("?", modifiers: [.command])
         }
-        
+
         CommandGroup(after: .help) {
-            Button("APGI Framework Guide") { 
+            Button("APGI Framework Guide") {
                 openHelpGuide()
             }
             .keyboardShortcut("?", modifiers: [.command])
         }
     }
-    
+
     // MARK: - Window Management Actions
-    
+
     private func openTimelineWindow() {
         openWindow(id: "timeline")
     }
@@ -168,11 +168,11 @@ struct APGICommands: Commands {
     private func openGlossaryWindow() {
         openWindow(id: "glossary")
     }
-    
+
     private func openSimulatorWindow() {
         openWindow(id: "simulator")
     }
-    
+
     private func focusSearch() {
         NotificationCenter.default.post(name: .focusSearch, object: nil)
     }
@@ -180,81 +180,81 @@ struct APGICommands: Commands {
     private func navigateToTab(_ tab: Tab) {
         NotificationCenter.default.post(name: .navigateToTab, object: tab)
     }
-    
+
     // MARK: - Navigation Actions
-    
+
     private func navigateToBiological() {
         NotificationCenter.default.post(name: .navigateToSection, object: "biological")
     }
-    
+
     private func navigateToNeuromodulators() {
         NotificationCenter.default.post(name: .navigateToSection, object: "neuromodulators")
     }
-    
+
     private func navigateToClinical() {
         NotificationCenter.default.post(name: .navigateToSection, object: "clinical")
     }
-    
+
     private func navigateToNext() {
         NotificationCenter.default.post(name: .navigateNext, object: nil)
     }
-    
+
     private func navigateToPrevious() {
         NotificationCenter.default.post(name: .navigatePrevious, object: nil)
     }
-    
+
     // MARK: - View Actions
-    
+
     private func toggleSidebar() {
         NotificationCenter.default.post(name: .toggleSidebar, object: nil)
     }
-    
+
     private func toggleInspector() {
         NotificationCenter.default.post(name: .toggleInspector, object: nil)
     }
-    
+
     private func zoomIn() {
         NotificationCenter.default.post(name: .zoomIn, object: nil)
     }
-    
+
     private func zoomOut() {
         NotificationCenter.default.post(name: .zoomOut, object: nil)
     }
-    
+
     private func zoomReset() {
         NotificationCenter.default.post(name: .zoomReset, object: nil)
     }
-    
+
     // MARK: - Export Actions
-    
+
     private func exportPDF() {
         NotificationCenter.default.post(name: .exportPDF, object: nil)
     }
-    
+
     private func exportCurrentSection() {
         NotificationCenter.default.post(name: .exportCurrentSection, object: nil)
     }
-    
+
     private func copyCitation() {
         NotificationCenter.default.post(name: .copyCitation, object: nil)
     }
-    
+
     // MARK: - Help Actions
-    
+
     private func openHelpGuide() {
         NotificationCenter.default.post(name: .openHelpGuide, object: nil)
     }
-    
+
     private func openOnlineHelp() {
         if let url = URL(string: "https://docs.apgi-framework.org") {
             NSWorkspace.shared.open(url)
         }
     }
-    
+
     private func checkForUpdates() {
         NotificationCenter.default.post(name: .checkForUpdates, object: nil)
     }
-    
+
     private func reportIssue() {
         if let url = URL(string: "https://github.com/apgi/framework/issues") {
             NSWorkspace.shared.open(url)

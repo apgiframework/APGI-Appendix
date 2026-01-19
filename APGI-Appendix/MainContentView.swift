@@ -25,11 +25,11 @@ struct MainContentView: View {
         } detail: {
             detailView
         }
-        
+
         let configuredView = navSplitView
             .frame(minWidth: 1000, minHeight: 700)
             .environmentObject(bookmarkManager)
-        
+
         let withCategoryChanges = configuredView
             .onChange(of: selectedCategory) { _, newValue in
                 guard let newValue = newValue else {
@@ -40,7 +40,7 @@ struct MainContentView: View {
                     selectedSection = firstSection
                 }
             }
-        
+
         let withNavigation = withCategoryChanges
             .onReceive(NotificationCenter.default.publisher(for: .navigateNext)) { _ in
                 navigateToNext()
@@ -51,7 +51,7 @@ struct MainContentView: View {
             .onReceive(NotificationCenter.default.publisher(for: .toggleSidebar)) { _ in
                 themeManager.sidebarVisible.toggle()
             }
-        
+
         let withZoom = withNavigation
             .onReceive(NotificationCenter.default.publisher(for: .zoomIn)) { _ in
                 fontSize = min(24, fontSize + 2)
@@ -62,7 +62,7 @@ struct MainContentView: View {
             .onReceive(NotificationCenter.default.publisher(for: .zoomReset)) { _ in
                 fontSize = 15.0
             }
-        
+
         let withSearch = withZoom
             .onReceive(NotificationCenter.default.publisher(for: .focusSearch)) { _ in
                 searchPresented = true
@@ -72,7 +72,7 @@ struct MainContentView: View {
                     navigateToSection(section)
                 }
             }
-        
+
         let withExport = withSearch
             .onReceive(NotificationCenter.default.publisher(for: .exportPDF)) { _ in
                 let panel = NSSavePanel()
@@ -98,7 +98,7 @@ struct MainContentView: View {
                     }
                 }
             }
-        
+
         return withExport
             .onReceive(NotificationCenter.default.publisher(for: .openHelpGuide)) { _ in
                 showHelpGuide()
@@ -112,12 +112,12 @@ struct MainContentView: View {
                 pb.setString("APGI Framework (2024). \(selectedSection?.rawValue ?? "")", forType: .string)
             }
     }
-    
+
     private var sidebarView: some View {
         CategorySidebar(selection: $selectedCategory)
             .navigationSplitViewColumnWidth(min: 200, ideal: 250, max: 300)
     }
-    
+
     private var contentView: some View {
         Group {
             if let category = selectedCategory {
@@ -129,7 +129,7 @@ struct MainContentView: View {
             }
         }
     }
-    
+
     private var detailView: some View {
         ZStack {
             detailContentView
@@ -139,7 +139,7 @@ struct MainContentView: View {
         .toolbar {
             ToolbarItemGroup {
                 NetworkStatusView()
-                
+
                 if let section = selectedSection {
                     BookmarkButton(tab: section)
                 }
@@ -173,7 +173,7 @@ struct MainContentView: View {
 
                 FontSizeControl()
             }
-            
+
             ToolbarItem(placement: .automatic) {
                 Button(action: { showInspector.toggle() }) {
                     Label("Toggle Inspector", systemImage: "sidebar.right")
@@ -181,14 +181,14 @@ struct MainContentView: View {
             }
         }
     }
-    
+
     @ViewBuilder
     private var detailContentView: some View {
         if let section = selectedSection {
             HStack(spacing: 0) {
                 DetailContentView(section: section, focusModeEnabled: $themeManager.focusModeEnabled)
                     .environmentObject(bookmarkManager)
-                
+
                 if showInspector {
                     InspectorView(section: section)
                         .frame(width: 280)
@@ -199,7 +199,7 @@ struct MainContentView: View {
             WelcomeView()
         }
     }
-    
+
     @ViewBuilder
     private var focusModeOverlay: some View {
         if themeManager.focusModeEnabled, let section = selectedSection {
@@ -210,7 +210,7 @@ struct MainContentView: View {
             )
         }
     }
-    
+
     @ViewBuilder
     private var searchOverlay: some View {
         if searchPresented {
@@ -220,26 +220,26 @@ struct MainContentView: View {
             }
         }
     }
-    
+
     // MARK: - Deep Link Handling
-    
+
     private func handleDeepLink(_ url: URL) {
         guard let components = URLComponents(url: url, resolvingAgainstBaseURL: false),
               let tabIdentifier = components.queryItems?.first(where: { $0.name == "tab" })?.value else {
             return
         }
-        
+
         if let tab = Tab.allCases.first(where: { $0.rawValue == tabIdentifier }) {
             selectedSection = tab
             selectedCategory = tab.category
         }
     }
-    
+
     // MARK: - Navigation Methods
-    
+
     private func navigateToSection(_ section: String) {
         guard !section.isEmpty else { return }
-        
+
         // Find the matching tab
         if let tab = Tab.allCases.first(where: { $0.rawValue.lowercased() == section.lowercased() }) {
             selectedCategory = tab.category
@@ -264,7 +264,7 @@ struct MainContentView: View {
             }
         }
     }
-    
+
     private func navigateToNext() {
         guard let current = selectedSection else { return }
         let allTabs = Tab.allCases
@@ -273,7 +273,7 @@ struct MainContentView: View {
             selectedCategory = selectedSection?.category
         }
     }
-    
+
     private func navigateToPrevious() {
         guard let current = selectedSection else { return }
         let allTabs = Tab.allCases
@@ -282,7 +282,7 @@ struct MainContentView: View {
             selectedCategory = selectedSection?.category
         }
     }
-    
+
     private func exportCurrentViewToPDF(url: URL) {
         // Get the current window's content view
         guard let window = NSApp.keyWindow,
@@ -290,7 +290,7 @@ struct MainContentView: View {
             print("Error: Could not access window content view")
             return
         }
-        
+
         // Create a print info for PDF export
         let printInfo = NSPrintInfo.shared
         printInfo.horizontalPagination = .fit
@@ -300,20 +300,20 @@ struct MainContentView: View {
         printInfo.rightMargin = 0.5
         printInfo.topMargin = 0.5
         printInfo.bottomMargin = 0.5
-        
+
         // Create print operation
         let printOperation = NSPrintOperation(view: contentView, printInfo: printInfo)
         printOperation.showsPrintPanel = false
         printOperation.showsProgressPanel = true
-        
+
         // Set the output to PDF
         if let printOperationView = printOperation.view {
             let pdfData = printOperationView.dataWithPDF(inside: printOperationView.bounds)
-            
+
             do {
                 try pdfData.write(to: url)
                 print("Successfully exported PDF to: \(url.path)")
-                
+
                 // Show success notification
                 let alert = NSAlert()
                 alert.messageText = "PDF Export Successful"
@@ -321,14 +321,14 @@ struct MainContentView: View {
                 alert.alertStyle = .informational
                 alert.addButton(withTitle: "OK")
                 alert.addButton(withTitle: "Show in Finder")
-                
+
                 let response = alert.runModal()
                 if response == .alertSecondButtonReturn {
                     NSWorkspace.shared.selectFile(url.path, inFileViewerRootedAtPath: url.deletingLastPathComponent().path)
                 }
             } catch {
                 print("Error exporting PDF: \(error)")
-                
+
                 // Show error notification
                 let alert = NSAlert()
                 alert.messageText = "PDF Export Failed"
@@ -339,7 +339,7 @@ struct MainContentView: View {
             }
         } else {
             print("Error: Could not get print operation view")
-            
+
             // Show error notification
             let alert = NSAlert()
             alert.messageText = "PDF Export Failed"
@@ -349,37 +349,37 @@ struct MainContentView: View {
             alert.runModal()
         }
     }
-    
+
     private func showHelpGuide() {
         // Show help guide in a sheet or window
         let helpView = HelpView()
         let hostingController = NSHostingController(rootView: helpView)
-        
+
         let window = NSWindow(
             contentRect: NSRect(x: 0, y: 0, width: 800, height: 600),
             styleMask: [.titled, .closable, .resizable, .miniaturizable],
             backing: .buffered,
             defer: false
         )
-        
+
         window.title = "APGI Framework Help"
         window.contentViewController = hostingController
         window.center()
         window.makeKeyAndOrderFront(nil)
     }
-    
+
     private func checkForUpdates() {
         // Show update check in a sheet
         let updateView = UpdateCheckView()
         let hostingController = NSHostingController(rootView: updateView)
-        
+
         let window = NSWindow(
             contentRect: NSRect(x: 0, y: 0, width: 500, height: 300),
             styleMask: [.titled, .closable],
             backing: .buffered,
             defer: false
         )
-        
+
         window.title = "Check for Updates"
         window.contentViewController = hostingController
         window.center()

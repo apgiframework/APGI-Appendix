@@ -7,7 +7,7 @@ The Allostatic Precision-Gated Ignition Framework provides a quantitative framew
 State Variables
 The model employs three central state variables to represent the system's real-time state:
 
-* Precision-Weighted Surprise (Sₜ): This variable continuously accumulates incoming information, weighting prediction errors by their perceived reliability. It reflects the urgency and importance of sensory and interoceptive signals, determining whether they warrant conscious attention. Sₜ is a latent computational variable that must be inferred from neural and behavioral data (e.g. parietal ramping, pupil dilation, reaction times), not directly observed. 
+* Precision-Weighted Surprise (Sₜ): This variable continuously accumulates incoming information, weighting prediction errors by their perceived reliability. It reflects the urgency and importance of sensory and interoceptive signals, determining whether they warrant conscious attention. Sₜ is a latent computational variable that must be inferred from neural and behavioral data (e.g. parietal ramping, pupil dilation, reaction times), not directly observed.
 
 * Dynamic Ignition Threshold (θₜ): A flexible threshold that adapts over time. For conscious access to occur, the accumulated surprise (Sₜ) must exceed this threshold which itself evolves based on recent activity and neurochemical modulation.
 

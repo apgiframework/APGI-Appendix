@@ -9,11 +9,11 @@ final class UpdateManager: ObservableObject {
     @Published var isCheckingForUpdates = false
     @Published var lastError: NetworkError?
     @Published var lastCheckDate: Date?
-    
+
     private let networkManager = NetworkManager.shared
     private let currentVersion = "1.0.0"
     private let currentBuild = "2024.1"
-    
+
     struct UpdateInfo: Codable {
         let version: String
         let build: String
@@ -22,52 +22,52 @@ final class UpdateManager: ObservableObject {
         let required: Bool
         let releaseDate: String
     }
-    
+
     func checkForUpdates() async {
         guard let url = networkManager.validateURL("https://api.apgi-framework.org/updates.json") else {
             lastError = .invalidURL
             return
         }
-        
+
         isCheckingForUpdates = true
         lastError = nil
-        
+
         do {
             let data = try await networkManager.fetchExternalResourceWithFallback(
                 primaryURL: url,
                 fallbackURL: networkManager.validateURL("https://raw.githubusercontent.com/apgi/framework/main/updates.json")
             )
-            
+
             let decoder = JSONDecoder()
             let updates = try decoder.decode([UpdateInfo].self, from: data)
-            
+
             if let latestUpdate = updates.first {
                 hasUpdate = isNewerVersion(latestUpdate)
                 updateInfo = latestUpdate
             }
-            
+
             lastCheckDate = Date()
-            
+
         } catch let error as NetworkError {
             lastError = error
         } catch {
             lastError = .unknown(error)
         }
-        
+
         isCheckingForUpdates = false
     }
-    
+
     private func isNewerVersion(_ update: UpdateInfo) -> Bool {
         // Simple version comparison (ignores build for now)
         return update.version > currentVersion
     }
-    
+
     func downloadUpdate() {
         guard let updateInfo = updateInfo,
               let url = URL(string: updateInfo.downloadURL) else {
             return
         }
-        
+
         NSWorkspace.shared.open(url)
     }
 }
@@ -75,7 +75,7 @@ final class UpdateManager: ObservableObject {
 struct UpdateCheckView: View {
     @StateObject private var updateManager = UpdateManager()
     @State private var showUpdateSheet = false
-    
+
     var body: some View {
         VStack(spacing: 16) {
             if updateManager.isCheckingForUpdates {
@@ -86,7 +86,7 @@ struct UpdateCheckView: View {
                         Image(systemName: "arrow.down.circle.fill")
                             .foregroundStyle(.blue)
                             .font(.title2)
-                        
+
                         VStack(alignment: .leading) {
                             Text("Update Available")
                                 .font(.headline)
@@ -94,22 +94,22 @@ struct UpdateCheckView: View {
                                 .font(.caption)
                                 .foregroundStyle(.secondary)
                         }
-                        
+
                         Spacer()
                     }
-                    
+
                     if updateInfo.required {
                         Text("This update is required")
                             .font(.caption)
                             .foregroundStyle(.red)
                     }
-                    
+
                     HStack {
                         Button("Download Update") {
                             updateManager.downloadUpdate()
                         }
                         .buttonStyle(.borderedProminent)
-                        
+
                         Button("Release Notes") {
                             showUpdateSheet = true
                         }
@@ -136,7 +136,7 @@ struct UpdateCheckView: View {
                         .foregroundStyle(.secondary)
                 }
             }
-            
+
             Button("Check for Updates") {
                 Task {
                     await updateManager.checkForUpdates()
@@ -158,7 +158,7 @@ struct UpdateCheckView: View {
 struct UpdateDetailsView: View {
     let updateInfo: UpdateManager.UpdateInfo
     @Environment(\.dismiss) private var dismiss
-    
+
     var body: some View {
         NavigationStack {
             ScrollView {
@@ -173,23 +173,23 @@ struct UpdateDetailsView: View {
                             .font(.caption)
                             .foregroundStyle(.secondary)
                     }
-                    
+
                     if updateInfo.required {
                         Label("Required Update", systemImage: "exclamationmark.triangle.fill")
                             .foregroundStyle(.red)
                             .font(.caption)
                     }
-                    
+
                     Divider()
-                    
+
                     VStack(alignment: .leading, spacing: 12) {
                         Text("Release Notes")
                             .font(.headline)
-                        
+
                         Text(updateInfo.releaseNotes)
                             .font(.body)
                     }
-                    
+
                     Spacer()
                 }
                 .padding()
@@ -201,7 +201,7 @@ struct UpdateDetailsView: View {
                         dismiss()
                     }
                 }
-                
+
                 ToolbarItem(placement: .principal) {
                     Button("Download") {
                         if let url = URL(string: updateInfo.downloadURL) {

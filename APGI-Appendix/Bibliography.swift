@@ -3,79 +3,17 @@ import Combine
 import AppKit
 import UniformTypeIdentifiers
 
-@MainActor
-final class BibliographyManager: ObservableObject {
-    @Published var remoteBibliography: String = ""
-    @Published var isLoading = false
-    @Published var lastError: NetworkError?
-    @Published var showRemoteOnly = false
-    
-    private let networkManager = NetworkManager.shared
-    
-    func fetchRemoteBibliography() async {
-        guard let url = networkManager.validateURL("https://api.apgi-framework.org/bibliography.txt") else {
-            lastError = .invalidURL
-            return
-        }
-        
-        isLoading = true
-        lastError = nil
-        
-        do {
-            let data = try await networkManager.fetchExternalResourceWithFallback(
-                primaryURL: url,
-                fallbackURL: networkManager.validateURL("https://raw.githubusercontent.com/apgi/framework/main/bibliography.txt")
-            )
-            
-            remoteBibliography = String(data: data, encoding: .utf8) ?? ""
-            
-        } catch let error as NetworkError {
-            lastError = error
-        } catch {
-            lastError = .unknown(error)
-        }
-        
-        isLoading = false
-    }
-    
-    func getCombinedBibliography() -> String {
-        if showRemoteOnly && !remoteBibliography.isEmpty {
-            return remoteBibliography
-        }
-        
-        let localBibliography = """
-Baars, B. J. (1988). A cognitive theory of consciousness. Cambridge University Press.
-
-Barrett, L. F., & Seth, A. K. (2011). Interoceptive inference in the brain. Nature Reviews Neuroscience, 12(10), 665-679.
-
-Clark, A. (2013). Whatever next? Predictive brains, situated agents, and the future of cognitive science. Behavioral and Brain Sciences, 36(3), 181-204.
-
-Friston, K. (2010). The free-energy principle: a unified brain theory? Nature Reviews Neuroscience, 11(2), 127-138.
-
-Hohwy, J. (2013). The predictive mind. Oxford University Press.
-
-Seth, A. K. (2013). Interoceptive inference, emotion, and the embodied self. Trends in Cognitive Sciences, 17(11), 565-573.
-
-"""
-        
-        if !remoteBibliography.isEmpty {
-            return localBibliography + "\n\n--- Remote Bibliography ---\n\n" + remoteBibliography
-        }
-        
-        return localBibliography
-    }
-}
+// BibliographyManager simplified to remove remote functionality
+// All bibliography data is now sourced locally
 
 struct BibliographyView: View {
-    @StateObject private var bibliographyManager = BibliographyManager()
-    
     private let bibliographyBody = """
 
 Baars, B. J. (1988). A cognitive theory of consciousness. Cambridge University Press.
 
 Baars, B. J. (1997). In the theater of consciousness: Global workspace theory, a rigorous scientific theory of consciousness. Journal of Consciousness Studies, 4(4), 292–309.
 
-Block, N. (1995). On a confusion about a function of consciousness. Behavioral and Brain Sciences, 18(2), 227–247. 
+Block, N. (1995). On a confusion about a function of consciousness. Behavioral and Brain Sciences, 18(2), 227–247.
 
 Brown, R., Lau, H., & LeDoux, J. E. (2019). Understanding the higher-order approach to consciousness. Trends in Cognitive Sciences, 23(9), 754–768.
 
@@ -87,7 +25,7 @@ Dehaene, S. (2009). Reading in the brain: The new science of how we read. Pengui
 
 Dehaene, S., & Changeux, J. P. (2011). Experimental and theoretical approaches to conscious processing. Neuron, 70(2), 200–227.
 
-Dehaene, S., Changeux, J. P., & Nadal, J. P. (1987). Neural networks that learn temporal sequences by selection. Proceedings of the National Academy of Sciences, 84(9), 2727–2731. 
+Dehaene, S., Changeux, J. P., & Nadal, J. P. (1987). Neural networks that learn temporal sequences by selection. Proceedings of the National Academy of Sciences, 84(9), 2727–2731.
 
 Dehaene, S., Kerszberg, M., & Changeux, J. P. (1998). A neuronal model of a global workspace in effortful cognitive tasks. Proceedings of the National Academy of Sciences, 95(24), 14529–14534.
 
@@ -227,68 +165,6 @@ Singer, W. (2000). Consciousness and the binding problem. In: The New Cognitive 
 
 Velmans, M. (1991). Is consciousness a grand illusion? Psychonomic Bulletin & Review, 109(2), 242–254.
 
-Baars, B. J., & Franklin, S. (2003). How conscious experience and working memory interact. Trends in Cognitive Sciences, 7(4), 166–170.
-
-Changeux, J. P., & Dehaene, S. (2009). Neuronal models of consciousness. In: The Oxford Handbook of Consciousness (pp. 1–28). Oxford University Press.
-
-Cleeremans, A. (2003). The nature of phenomenal consciousness. Philosophical Psychology, 20(4), 333–352.
-
-Dennett, D. C. (1992). Consciousness explained in terms of brain function. Behavioral and Brain Sciences, 15(2), 183–247.
-
-Edelman, G. M., Tononi, G., & Sporns, O. (2011). From neuronal groups to the conscious brain. PNAS, 108(Supplement 3), 15577–15584.
-
-Hohwy, J., Roepstorff, A., & Friston, K. (2008). Predictive coding explains binocular rivalry: An epistemological review. Cognition, 108(3), 687–701.
-
-Koch, C., & Tsuchiya, N. (2007). Attention and consciousness: Two distinct brain processes. Trends in Cognitive Sciences, 11(1), 16–22.
-
-Lamme, V. A. (2010). Why visual attention and awareness are different. Trends in Cognitive Sciences, 14(1), 8–12.
-
-Mack, A. (2003). Inattentional blindness: Perception without attention. In: The Oxford Handbook of Attention (pp. 114–130). Oxford University Press.
-
-Metzinger, T. (2003). Being no one: The self-model theory of subjectivity. MIT Press.
-
-Revonsuo, A. (2006). Inner presence: Consciousness as a biological phenomenon. Behavioral and Brain Sciences, 29(9), 1003–1009.
-
-Seth, A. K., Baars, B. J., & Edelman, D. B. (2005). Theories of consciousness. Nature Reviews Neuroscience, 6(4), 265–276.
-
-Tononi, G., & Edelman, G. M. (1998). Consciousness and complexity. Science, 282(5395), 1846–1851.
-
-Van Boxtel, J. J., & Tsuchiya, N. (2020). The attentional blink: A review of recent findings and theoretical accounts. Frontiers in Psychology, 11, 591.
-
-Block, N. (2005). Two neural mechanisms of consciousness: Evidence from perception and action. Behavioral and Brain Sciences, 28(5), 855–864.
-
-Chella, A., & Gallese, V. (2022). Embodied cognition and consciousness: A review of recent evidence. Frontiers in Human Neuroscience, 16, 1090174.
-
-Crick, F., & Koch, C. (2003). A framework for consciousness. Nature Neuroscience, 6(2), 119–126.
-
-Dennett, D. C. (2005). Sweet dreams: Philosophical obstacles to a science of consciousness. MIT Press.
-
-Edelman, G. M. (2003). Naturalizing consciousness: A theoretical framework. Proceedings of the National Academy of Sciences, 100(9), 5523–5529.
-
-Gazzaniga, M. (2011). Who's in charge? Free will and the science of the brain. Ecco.
-
-James, W. (1912). The stream of consciousness. Psychological Review, 19(1), 1–16.
-
-Kihlstrom, J. F. (1996). The cognitive unconscious. Science, 273(5281), 1524–1526.
-
-Koch, C. (2012). Consciousness: Confession of a romantic reductionist. MIT Press.
-
-Lashley, K. S. (1956). Cerebral mechanisms and behavior. In: The Neurosciences: A Study Program (pp. 517–540). Rockefeller Institute Press.
-
-Libet, B. (1999). Do we have free will? Journal of Consciousness Studies, 6(2), 47–57.
-
-Mackintosh, N. J. (1975). A theory of attention: Variations in the associability of stimuli with response. Psychological Review, 82(4), 527–552.
-
-Nagel, T. (1979). What is it like to be a bat? Philosophical Review, 88(4), 391–430.
-
-Penrose, R. (1994). Shadows of the mind: A search for the missing science of consciousness. Oxford University Press.
-
-Searle, J. R. (1980). Minds, brains, and programs. Behavioral and Brain Sciences, 3(3), 417–457.
-
-Singer, W. (2000). Consciousness and the binding problem. In: The New Cognitive Neurosciences (pp. 123–146). MIT Press.
-
-Velmans, M. (1991). Is consciousness a grand illusion? Psychonomic Bulletin & Review, 109(2), 242–254.
-
 Poldrack, R. A. (2011). Inferring mental states from neuroimaging data: From reverse inference to large-scale decoding. Neuron, 72(5), 692–697.
 
 Border, R., Johnson, E. C., Evans, L. M., Smoller, J. W., Berrettini, W. H., ..., & Keller, M. C. (2019). No support for historical candidate gene or candidate gene-by-interaction hypotheses for major depression across multiple large samples. American Journal of Psychiatry, 176(5), 376–387.
@@ -300,62 +176,27 @@ Khoury, D. S., Daza-Cajigal, V., Bailly-Bechet, M., & Lancaster, K. Z. (2019). S
 Open Science Collaboration. (2015). Estimating the reproducibility of psychological science. Science, 349(6251), aac4716.
 
 Simmons, J. P., Nelson, L. D., & Simonsohn, U. (2011). False-positive psychology: Undisclosed flexibility in data collection and analysis allows presenting anything as significant. Psychological Science, 22(11), 1359–1366.
+
 """
+    
     var body: some View {
         VStack(spacing: 0) {
             HStack {
                 Text("Bibliography")
                     .font(.title.bold())
-                
+
                 Spacer()
-                
-                Toggle("Remote Only", isOn: $bibliographyManager.showRemoteOnly)
-                    .toggleStyle(.switch)
-                    .disabled(bibliographyManager.remoteBibliography.isEmpty)
-                
-                Button("Refresh") {
-                    Task {
-                        await bibliographyManager.fetchRemoteBibliography()
-                    }
-                }
-                .disabled(bibliographyManager.isLoading)
             }
             .padding()
             .background(.thinMaterial)
-            
-            if bibliographyManager.isLoading && bibliographyManager.showRemoteOnly {
-                ProgressView("Loading remote bibliography...")
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-            } else if let error = bibliographyManager.lastError, bibliographyManager.showRemoteOnly {
-                VStack(spacing: APGISimulatorConstants.standardVStackSpacing) {
-                    Text("Network Error")
-                        .font(.headline)
-                    Text(error.localizedDescription)
-                        .foregroundStyle(.secondary)
-                        .multilineTextAlignment(.center)
-                    Button("Retry") {
-                        Task {
-                            await bibliographyManager.fetchRemoteBibliography()
-                        }
-                    }
-                    .buttonStyle(.borderedProminent)
-                }
-                .padding()
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-            } else {
-                EnhancedContentCard(
-                    title: bibliographyManager.showRemoteOnly ? "Remote Bibliography" : "Bibliography",
-                    content: bibliographyManager.getCombinedBibliography(),
-                    category: SectionCategory.reference,
-                    hasDataTable: false
-                )
-                .padding()
-            }
-        }
-        .task {
-            if !bibliographyManager.remoteBibliography.isEmpty {
-                await bibliographyManager.fetchRemoteBibliography()
-            }
+
+            EnhancedContentCard(
+                title: "Bibliography",
+                content: bibliographyBody,
+                category: SectionCategory.reference,
+                hasDataTable: false
+            )
+            .padding()
         }
     }
 }

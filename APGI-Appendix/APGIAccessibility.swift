@@ -6,7 +6,7 @@ struct AccessibilityPreferences {
     let highContrastEnabled: Bool
     let reducedMotionEnabled: Bool
     let hapticFeedbackEnabled: Bool
-    
+
     static let `default` = AccessibilityPreferences(
         colorBlindMode: .none,
         highContrastEnabled: false,
@@ -36,7 +36,7 @@ extension View {
             .accessibilityValue(value.map(Text.init) ?? Text(""))
             .accessibilityAddTraits(traits)
     }
-    
+
     func enhancedAccessibility<T: Equatable>(
         dynamicLabel: String,
         currentValue: String? = nil,
@@ -51,7 +51,7 @@ extension View {
             .accessibilityLabel(dynamicLabel)
             .accessibilityValue(currentValue ?? "")
             .accessibilityHint(contextualHint ?? "")
-            
+
             // Motor accessibility
             .applyIf(primaryAction != nil) { view in
                 view.accessibilityAction(.default) {
@@ -59,18 +59,18 @@ extension View {
                 }
             }
             .accessibilityInputLabels(["activate", "select", "choose"])
-            
+
             // Visual accessibility
             .dynamicTypeSize(...DynamicTypeSize.accessibility5)
             .colorBlind(mode: userPreferences.colorBlindMode)
             .highContrast(enabled: userPreferences.highContrastEnabled)
-            
+
             // Haptic feedback
             .applyIf(userPreferences.hapticFeedbackEnabled && significantEvent != nil) { view in
                 view.sensoryFeedback(.impact, trigger: significantEvent!)
             }
     }
-    
+
     func colorBlind(mode: ColorBlindMode) -> some View {
         Group {
             switch mode {
@@ -85,7 +85,7 @@ extension View {
             }
         }
     }
-    
+
     func highContrast(enabled: Bool) -> some View {
         Group {
             if enabled {

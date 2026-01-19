@@ -7,24 +7,24 @@ class PerformanceMonitor {
     private var fpsHistory: [Double] = []
     private var memoryUsageHistory: [Double] = []
     private let maxHistorySize = 100
-    
+
     private var measurementsQueue = DispatchQueue(label: "com.apgi.performance", qos: .utility)
-    
+
     var averageInferenceTime: TimeInterval {
         guard !inferenceTimes.isEmpty else { return 0.0 }
         return inferenceTimes.reduce(0, +) / Double(inferenceTimes.count)
     }
-    
+
     var currentFPS: Double {
         guard !fpsHistory.isEmpty else { return 0.0 }
         return fpsHistory.reduce(0, +) / Double(fpsHistory.count)
     }
-    
+
     var averageMemoryUsage: Double {
         guard !memoryUsageHistory.isEmpty else { return 0.0 }
         return memoryUsageHistory.reduce(0, +) / Double(memoryUsageHistory.count)
     }
-    
+
     func recordInference(duration: TimeInterval) {
         measurementsQueue.async { [weak self] in
             self?.inferenceTimes.append(duration)
@@ -33,7 +33,7 @@ class PerformanceMonitor {
             }
         }
     }
-    
+
     func recordFPS(_ fps: Double) {
         measurementsQueue.async { [weak self] in
             self?.fpsHistory.append(fps)
@@ -42,7 +42,7 @@ class PerformanceMonitor {
             }
         }
     }
-    
+
     func recordMemoryUsage(_ usage: Double) {
         measurementsQueue.async { [weak self] in
             self?.memoryUsageHistory.append(usage)
@@ -51,7 +51,7 @@ class PerformanceMonitor {
             }
         }
     }
-    
+
     func clearCaches() {
         measurementsQueue.async { [weak self] in
             self?.inferenceTimes.removeAll()
@@ -59,11 +59,11 @@ class PerformanceMonitor {
             self?.memoryUsageHistory.removeAll()
         }
     }
-    
+
     func reset() {
         clearCaches()
     }
-    
+
     func getStatistics() -> PerformanceStats {
         guard !inferenceTimes.isEmpty else {
             return PerformanceStats(meanLatency: 0.0, p50Latency: 0.0, p95Latency: 0.0, throughput: 0.0)
@@ -83,7 +83,7 @@ class PerformanceMonitor {
             throughput: throughput
         )
     }
-    
+
     func getPerformanceReport() -> PerformanceReport {
         return PerformanceReport(
             averageInferenceTime: averageInferenceTime,
@@ -93,7 +93,7 @@ class PerformanceMonitor {
             isPerformanceOptimal: isPerformanceOptimal()
         )
     }
-    
+
     private func isPerformanceOptimal() -> Bool {
         return averageInferenceTime < 0.1 && currentFPS > 30 && averageMemoryUsage < 100
     }
@@ -105,7 +105,7 @@ struct PerformanceReport {
     let averageMemoryUsage: Double
     let totalInferences: Int
     let isPerformanceOptimal: Bool
-    
+
     var formattedReport: String {
         return """
         Performance Report:

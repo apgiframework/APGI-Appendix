@@ -166,7 +166,9 @@ struct NavigationSectionView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: APGISpacing.xs) {
-            Button(action: onToggle) {
+            Button {
+                onToggle()
+            } label: {
                 HStack {
                     Image(systemName: section.icon)
                         .font(.body)
@@ -218,7 +220,9 @@ struct NavigationItemRow: View {
     @State private var isHovered = false
 
     var body: some View {
-        Button(action: onSelect) {
+        Button {
+            onSelect()
+        } label: {
             HStack(spacing: APGISpacing.sm) {
                 Circle()
                     .fill(isSelected ? item.category.color : .secondary.opacity(0.3))

@@ -4,35 +4,35 @@ import AppKit
 
 class CoreMLMemoryManager {
     public static let shared = CoreMLMemoryManager()
-    
+
     private var isUnderMemoryPressure = false
     private var memoryOptimizationLevel: MemoryOptimizationLevel = .normal
-    
+
     public init() {
         setupMemoryMonitoring()
     }
-    
+
     private func setupMemoryMonitoring() {
         // Monitor memory warnings - macOS doesn't have the same notification as iOS
         // We'll use a different approach for macOS
     }
-    
+
     @objc private func handleMemoryWarning() {
         isUnderMemoryPressure = true
         memoryOptimizationLevel = .aggressive
-        
+
         // Reset after 30 seconds
         DispatchQueue.main.asyncAfter(deadline: .now() + 30) {
             self.isUnderMemoryPressure = false
             self.memoryOptimizationLevel = .normal
         }
     }
-    
+
     func optimizeForMemoryPressure() {
         isUnderMemoryPressure = true
         memoryOptimizationLevel = .aggressive
     }
-    
+
     func getOptimizedConfiguration(for baseConfig: APGIConfiguration) -> APGIConfiguration {
         switch memoryOptimizationLevel {
         case .normal:
@@ -113,11 +113,11 @@ class CoreMLMemoryManager {
             )
         }
     }
-    
+
     func shouldBatchInferences() -> Bool {
         return isUnderMemoryPressure
     }
-    
+
     func getInferenceBatchSize() -> Int {
         switch memoryOptimizationLevel {
         case .normal: return 1
@@ -125,16 +125,16 @@ class CoreMLMemoryManager {
         case .aggressive: return 4
         }
     }
-    
+
     func getMemoryFootprintEstimate(for config: APGIConfiguration) -> Int64 {
         // Estimate memory usage in bytes
         let stateSize = config.hiddenSize * config.numLevels * 8 // Float64 per element
         let historySize = config.historyLength * config.inputSize * 8
         let precisionHistorySize = config.precisionHistoryMax * 8
-        
+
         return Int64(stateSize + historySize + precisionHistorySize)
     }
-    
+
     func shouldReduceModelComplexity() -> Bool {
         return memoryOptimizationLevel == .aggressive
     }
@@ -153,18 +153,18 @@ extension MLMultiArray {
         let optimizedShape = self.shape.map { NSNumber(value: Int(truncating: $0) / 2) }
         return try MLMultiArray(shape: optimizedShape, dataType: self.dataType)
     }
-    
+
     func reducePrecision() throws -> MLMultiArray {
         // Convert from Float64 to Float32 to save memory
         guard self.dataType == .double else { return self }
-        
+
         let newArray = try MLMultiArray(shape: self.shape, dataType: .float32)
-        
-        for i in 0..<self.count {
-            let value = self[i].doubleValue
-            newArray[i] = NSNumber(value: Float(value))
+
+        for index in 0..<self.count {
+            let value = self[index].doubleValue
+            newArray[index] = NSNumber(value: Float(value))
         }
-        
+
         return newArray
     }
 }
@@ -175,24 +175,24 @@ class MLMultiArrayPool {
     static let shared = MLMultiArrayPool()
     private var availableArrays: [String: [MLMultiArray]] = [:]
     private let maxPoolSize = 10
-    
+
     private init() {}
-    
+
     func getArray(shape: [NSNumber], dataType: MLMultiArrayDataType) -> MLMultiArray {
         let key = arrayKey(shape: shape, dataType: dataType)
-        
+
         if var pool = availableArrays[key], !pool.isEmpty {
             let array = pool.removeLast()
             availableArrays[key] = pool
             return array
         }
-        
-        return try! MLMultiArray(shape: shape, dataType: dataType)
+
+        return (try? MLMultiArray(shape: shape, dataType: dataType)) ?? MLMultiArray()
     }
-    
+
     func returnArray(_ array: MLMultiArray) {
         let key = arrayKey(shape: array.shape, dataType: array.dataType)
-        
+
         if var pool = availableArrays[key] {
             if pool.count < maxPoolSize {
                 pool.append(array)
@@ -202,12 +202,12 @@ class MLMultiArrayPool {
             availableArrays[key] = [array]
         }
     }
-    
+
     private func arrayKey(shape: [NSNumber], dataType: MLMultiArrayDataType) -> String {
         let shapeString = shape.map { "\($0)" }.joined(separator: "x")
         return "\(shapeString)_\(dataType.rawValue)"
     }
-    
+
     func clearPool() {
         availableArrays.removeAll()
     }

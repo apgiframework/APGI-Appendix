@@ -7,7 +7,7 @@ struct TabContentView: View {
     @State private var errorMessage: String?
     @State private var contentLoadAttempted = false
     @StateObject private var performanceManager = PerformanceManager.shared
-    
+
     var body: some View {
         Group {
             if isLoading {
@@ -25,7 +25,7 @@ struct TabContentView: View {
             loadContentIfNeeded()
         }
     }
-    
+
     private var loadingView: some View {
         VStack(spacing: 16) {
             ProgressView()
@@ -37,27 +37,27 @@ struct TabContentView: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .transition(.opacity.combined(with: .scale))
     }
-    
+
     private func errorView(_ message: String) -> some View {
         VStack(spacing: 16) {
             Image(systemName: "exclamationmark.triangle")
                 .font(.system(size: 48))
                 .foregroundStyle(.orange)
-            
+
             Text("Content Load Error")
                 .font(.headline)
-            
+
             Text(message)
                 .font(.body)
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
                 .padding(.horizontal)
-            
+
             Button("Retry") {
                 loadContentIfNeeded()
             }
             .buttonStyle(.borderedProminent)
-            
+
             Button("Show Fallback") {
                 showFallbackContent()
             }
@@ -66,7 +66,7 @@ struct TabContentView: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .padding()
     }
-    
+
     private var contentView: some View {
         Group {
             switch tab {
@@ -124,41 +124,41 @@ struct TabContentView: View {
         ))
         .animation(.easeInOut(duration: 0.3), value: tab)
     }
-    
+
     private func loadContentIfNeeded() {
         guard !contentLoadAttempted else { return }
-        
+
         contentLoadAttempted = true
         isLoading = true
         errorMessage = nil
-        
+
         Task {
             do {
                 // Check cache first
                 let cacheKey = "content_\(tab.rawValue)"
-                if let _ = performanceManager.getCachedContent(for: cacheKey) {
+                if performanceManager.getCachedContent(for: cacheKey) != nil {
                     await MainActor.run {
                         isLoading = false
                         errorMessage = nil
                     }
                     return
                 }
-                
+
                 // Determine content type and loading delay
                 let contentType = getContentType(tab)
                 let loadingDelay = performanceManager.getOptimizedLoadingDelay(for: contentType)
-                
+
                 try await Task.sleep(nanoseconds: UInt64(loadingDelay * 1_000_000_000))
-                
+
                 // Validate content availability
                 guard !tab.content.isEmpty else {
                     throw ContentLoadError.emptyContent
                 }
-                
+
                 // Cache the content
                 let cachedContent = CachedContent(content: tab.content, cost: getContentCost(tab))
                 performanceManager.setCachedContent(cachedContent, for: cacheKey)
-                
+
                 await MainActor.run {
                     isLoading = false
                     errorMessage = nil
@@ -171,7 +171,7 @@ struct TabContentView: View {
             }
         }
     }
-    
+
     private func getContentType(_ tab: Tab) -> ContentType {
         switch tab {
         case .methodology, .apgiStatement:
@@ -186,7 +186,7 @@ struct TabContentView: View {
             return .medium
         }
     }
-    
+
     private func getContentCost(_ tab: Tab) -> Int {
         switch getContentType(tab) {
         case .light: return 1
@@ -195,7 +195,7 @@ struct TabContentView: View {
         case .critical: return 10
         }
     }
-    
+
     private func showFallbackContent() {
         errorMessage = nil
         // Fallback content will be shown through the default case
@@ -206,7 +206,7 @@ enum ContentLoadError: LocalizedError {
     case emptyContent
     case contentUnavailable
     case loadingTimeout
-    
+
     var errorDescription: String? {
         switch self {
         case .emptyContent:

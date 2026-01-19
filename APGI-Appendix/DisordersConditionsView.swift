@@ -67,7 +67,7 @@ APGI Parameter Table — Disorders & Conditions
 | Major Neurocognitive Disorder | Global −4–6 | All ↓ | +30–60 | 1.0 |
 | Mild Neurocognitive Disorder | Global −2–3 | Executive ↓ | +15–30 | 1.0 |
 """
- 
+
     var body: some View {
         ScrollView {
             LazyVStack(alignment: .leading, spacing: 20) {
