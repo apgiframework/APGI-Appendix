@@ -255,7 +255,7 @@ struct SearchView: View {
             case .references:
                 return [.bibliography]
             case .glossary:
-                return []
+                return [.glossary]
             default:
                 return Tab.allCases
             }

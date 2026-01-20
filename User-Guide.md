@@ -521,7 +521,56 @@ For technical support or feature requests:
 
 ---
 
-## 13. Getting Help
+## 15. Getting Help
 
 - **In-App Content**
   - Each section includes contextual help and descriptions
+
+## 16. Screenshot Automation Usage Instructions
+
+### 16.1 Debug Mode (Full Capabilities)
+
+#### Method 1: Build and Run with Command Line
+
+```bash
+# Build the app in Release configuration
+xcodebuild -scheme APGI-Appendix -configuration Release build
+
+# Run with screenshot mode argument (uses Xcode DerivedData path)
+"/Users/lesoto/Library/Developer/Xcode/DerivedData/APGI-Appendix-djogaeumbvnvklfrzlmmubxcbypl/Build/Products/Release/APGI-Appendix.app/Contents/MacOS/APGI-Appendix" --screenshot-mode
+```
+
+**Important Note**: Screenshot automation requires the app to run with a GUI window. The command-line approach above will start the automation but needs an active window to capture screenshots. For best results, use Method 2 (Xcode) or ensure the app has a visible window when running via command line.
+
+#### Method 2: Using Xcode directly
+
+```bash
+# Open in Xcode and run from there with arguments set in scheme settings
+open APGI-Appendix.xcodeproj
+```
+
+### 16.2 Production Mode (With Safety Controls)
+
+#### Method 1: Build and Run
+
+```bash
+# Set authentication token
+export SCREENSHOT_AUTH_TOKEN=APGI-Screenshot-2024
+
+# Build the app
+xcodebuild -scheme APGI-Appendix build
+
+# Run with screenshot mode argument
+./build/Build/Products/Release/APGI-Appendix.app/Contents/MacOS/APGI-Appendix --screenshot-mode
+```
+
+#### Method 2: Using the built app directly
+
+```bash
+# Find the built app
+find ~/Library/Developer/Xcode/DerivedData -name "APGI-Appendix.app" -type d
+
+# Run with arguments (replace path with actual location)
+export SCREENSHOT_AUTH_TOKEN=APGI-Screenshot-2024
+/path/to/APGI-Appendix.app/Contents/MacOS/APGI-Appendix --screenshot-mode
+```

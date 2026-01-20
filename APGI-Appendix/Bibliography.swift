@@ -167,18 +167,30 @@ Velmans, M. (1991). Is consciousness a grand illusion? Psychonomic Bulletin & Re
 
 Poldrack, R. A. (2011). Inferring mental states from neuroimaging data: From reverse inference to large-scale decoding. Neuron, 72(5), 692–697.
 
-Border, R., Johnson, E. C., Evans, L. M., Smoller, J. W., Berrettini, W. H., ..., & Keller, M. C. (2019). No support for historical candidate gene or candidate gene-by-interaction hypotheses for major depression across multiple large samples. American Journal of Psychiatry, 176(5), 376–387.
+Border, R., Johnson, E. C., Evans, L. M., Smoller, J. W., Berrettini, W. H., ..., " +
+                "& Keller, M. C. (2019). No support for historical candidate gene " +
+                "or candidate gene-by-interaction hypotheses for major depression " +
+                "across multiple large samples. American Journal of Psychiatry, " +
+                "176(5), 376–387.
 
-Button, K. S., Ioannidis, J. P., Mokrysz, C., Nosek, B. A., Flint, J., Robinson, E. S., & Munafò, M. R. (2013). Power failure: Why small sample size undermines the reliability of neuroscience. Nature Reviews Neuroscience, 14(5), 365–376.
+Button, K. S., Ioannidis, J. P., Mokrysz, C., Nosek, B. A., Flint, J., Robinson, E. S., " +
+                "& Munafò, M. R. (2013). Power failure: Why small sample size " +
+                "undermines the reliability of neuroscience. " +
+                "Nature Reviews Neuroscience, 14(5), 365–376.
 
-Khoury, D. S., Daza-Cajigal, V., Bailly-Bechet, M., & Lancaster, K. Z. (2019). Sample size for replication studies: Lessons from candidate gene studies. Molecular Psychiatry, 24, 1143–1144.
+Khoury, D. S., Daza-Cajigal, V., Bailly-Bechet, M., & Lancaster, K. Z. (2019). " +
+                "Sample size for replication studies: Lessons from candidate gene studies. " +
+                "Molecular Psychiatry, 24, 1143–1144.
 
 Open Science Collaboration. (2015). Estimating the reproducibility of psychological science. Science, 349(6251), aac4716.
 
-Simmons, J. P., Nelson, L. D., & Simonsohn, U. (2011). False-positive psychology: Undisclosed flexibility in data collection and analysis allows presenting anything as significant. Psychological Science, 22(11), 1359–1366.
+Simmons, J. P., Nelson, L. D., & Simonsohn, U. (2011). " +
+                "False-positive psychology: Undisclosed flexibility in data collection " +
+                "and analysis allows presenting anything as significant. " +
+                "Psychological Science, 22(11), 1359–1366.
 
 """
-    
+
     var body: some View {
         VStack(spacing: 0) {
             HStack {

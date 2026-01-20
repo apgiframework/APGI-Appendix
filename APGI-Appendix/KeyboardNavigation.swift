@@ -338,7 +338,7 @@ struct EnhancedSidebarView: View {
             // Navigation items
             ScrollView {
                 LazyVStack(alignment: .leading, spacing: 4) {
-                    ForEach(filteredSections) { section in
+                    ForEach(filteredSections) { (section: SidebarSection) in
                         NavigationSectionView(
                             section: section,
                             selection: $selectedTab,

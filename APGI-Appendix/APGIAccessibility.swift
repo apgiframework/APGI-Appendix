@@ -46,13 +46,11 @@ extension View {
         significantEvent: T? = nil
     ) -> some View {
         self
-            // Screen reader optimization
             .accessibilityElement(children: .combine)
             .accessibilityLabel(dynamicLabel)
             .accessibilityValue(currentValue ?? "")
             .accessibilityHint(contextualHint ?? "")
 
-            // Motor accessibility
             .applyIf(primaryAction != nil) { view in
                 view.accessibilityAction(.default) {
                     primaryAction!()
@@ -60,12 +58,10 @@ extension View {
             }
             .accessibilityInputLabels(["activate", "select", "choose"])
 
-            // Visual accessibility
             .dynamicTypeSize(...DynamicTypeSize.accessibility5)
             .colorBlind(mode: userPreferences.colorBlindMode)
             .highContrast(enabled: userPreferences.highContrastEnabled)
 
-            // Haptic feedback
             .applyIf(userPreferences.hapticFeedbackEnabled && significantEvent != nil) { view in
                 view.sensoryFeedback(.impact, trigger: significantEvent!)
             }

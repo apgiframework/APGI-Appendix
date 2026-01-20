@@ -8,15 +8,27 @@ APGI parameter table for psychological states
 
 APGI parameters
 
-Prediction Error (ε) → Magnitude of dominant prediction mismatch, expressed in normalized standard deviation units (σ) relative to the individual baseline
+Prediction Error (ε) → Magnitude of dominant prediction mismatch, " +
+                "expressed in normalized standard deviation units (σ) " +
+                "relative to the individual baseline
 
-Precision (π) → Channel-specific precision weighting; the relative gain applied to prediction errors in particular domains (e.g., threat, social, interoceptive), reflecting inverse variance (confidence)
+Precision (π) → Channel-specific precision weighting; " +
+                "the relative gain applied to prediction errors in particular domains " +
+                "(e.g., threat, social, interoceptive), reflecting inverse variance (confidence)
 
-Threshold (θₜ) → Dynamic ignition barrier; expressed as percentage deviation from an individual’s baseline ignition threshold (baseline = 0%). Negative values: lowered threshold (easier ignition). Positive values: elevated threshold (harder ignition)
+Threshold (θₜ) → Dynamic ignition barrier; " +
+                "expressed as percentage deviation from an individual's baseline ignition threshold " +
+                "(baseline = 0%). Negative values: lowered threshold (easier ignition). " +
+                "Positive values: elevated threshold (harder ignition)
 
-Threshold (θₜ) → Dynamic ignition barrier; expressed as percentage deviation from an individual’s baseline ignition threshold (baseline = 0%). Negative values: lowered threshold (easier ignition). Positive values: elevated threshold (harder ignition)
+Threshold (θₜ) → Dynamic ignition barrier; " +
+                "expressed as percentage deviation from an individual's baseline ignition threshold " +
+                "(baseline = 0%). Negative values: lowered threshold (easier ignition). " +
+                "Positive values: elevated threshold (harder ignition)
 
-Somatic Bias (β) → Ratio of interoceptive (inward, bodily/self-referential) to exteroceptive (outward, environmental/social) attentional orientation. β > 1: inward bias, β < 1: outward bias
+Somatic Bias (β) → Ratio of interoceptive (inward, bodily/self-referential) " +
+                "to exteroceptive (outward, environmental/social) attentional orientation. " +
+                "β > 1: inward bias, β < 1: outward bias
 
 
 State

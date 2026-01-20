@@ -7,14 +7,14 @@ struct LazyLoadingContainer<Content: View, Placeholder: View, Loading: View>: Vi
     let placeholder: () -> Placeholder
     let loadingView: () -> Loading
     let contentType: ContentType
-    
+
     @State private var isVisible = false
     @State private var hasLoaded = false
     @State private var isLoading = false
-    
+
     enum ContentType {
         case light, medium, heavy, critical
-        
+
         var loadDelay: TimeInterval {
             switch self {
             case .light: return 0.0
@@ -23,7 +23,7 @@ struct LazyLoadingContainer<Content: View, Placeholder: View, Loading: View>: Vi
             case .critical: return 0.3
             }
         }
-        
+
         var preloadThreshold: Double {
             switch self {
             case .light: return 0.0
@@ -33,7 +33,7 @@ struct LazyLoadingContainer<Content: View, Placeholder: View, Loading: View>: Vi
             }
         }
     }
-    
+
     var body: some View {
         GeometryReader { proxy in
             let isVisible = proxy.frame(in: .global).intersects(
@@ -42,7 +42,7 @@ struct LazyLoadingContainer<Content: View, Placeholder: View, Loading: View>: Vi
                       width: proxy.size.width * (1 + 2 * contentType.preloadThreshold),
                       height: proxy.size.height * (1 + 2 * contentType.preloadThreshold))
             )
-            
+
             Group {
                 if hasLoaded {
                     content()
@@ -69,18 +69,18 @@ struct LazyLoadingContainer<Content: View, Placeholder: View, Loading: View>: Vi
             }
         }
     }
-    
+
     private func loadContentWithDelay() {
         guard !isLoading else { return }
-        
+
         isLoading = true
-        
+
         // Add delay for heavy content to improve perceived performance
         DispatchQueue.main.asyncAfter(deadline: .now() + contentType.loadDelay) {
             loadContent()
         }
     }
-    
+
     private func loadContent() {
         Task {
             await MainActor.run {

@@ -51,7 +51,7 @@ struct SidebarView: View {
 
             ScrollView {
                 LazyVStack(alignment: .leading, spacing: APGISpacing.xs) {
-                    ForEach(filteredSections) { section in
+                    ForEach(filteredSections) { (section: SidebarSection) in
                         NavigationSectionView(
                             section: section,
                             selection: $selectedTab,

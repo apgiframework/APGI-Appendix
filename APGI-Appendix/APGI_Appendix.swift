@@ -13,11 +13,7 @@ struct APGIAppendixApp: App {
 
     var body: some Scene {
         WindowGroup("APGI Framework") {
-            OnboardingContainer {
-                TourContainer {
-                    MainContentView()
-                }
-            }
+            OnboardingTourView()
             .applyTheme()
             .environmentObject(themeManager)
             .environmentObject(onboardingManager)
@@ -26,7 +22,6 @@ struct APGIAppendixApp: App {
         .commands {
             APGICommands()
 
-            // Help menu additions
             CommandGroup(replacing: .help) {
                 Button("APGI Help") {
                     showHelp()
@@ -36,7 +31,7 @@ struct APGIAppendixApp: App {
                 Divider()
 
                 Button("Take a Tour") {
-                    onboardingManager.startTour()
+                    onboardingManager.startOnboarding()
                 }
 
                 Button("What's New") {
@@ -122,8 +117,10 @@ struct APGIAppendixApp: App {
 
 class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationDidFinishLaunching(_ notification: Notification) {
-        // Setup any initial configurations
         setupAppearance()
+        
+        // Initialize screenshot automation if running in screenshot mode
+        ScreenshotAutomationRunner.run()
     }
 
     func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {
@@ -131,7 +128,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     private func setupAppearance() {
-        // Apply saved theme
         ThemeManager.shared.applyTheme()
     }
 }

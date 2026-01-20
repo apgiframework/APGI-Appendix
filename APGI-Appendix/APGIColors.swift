@@ -60,17 +60,20 @@ enum APGITypography {
 
 enum APGISpacing {
     static let xxs: CGFloat = 2
-    static let xs: CGFloat = 4
     static let extraSmall: CGFloat = 4
-    static let sm: CGFloat = 6
-    static let small: CGFloat = 8
-    static let md: CGFloat = 10
-    static let medium: CGFloat = 12
-    static let lg: CGFloat = 14
-    static let large: CGFloat = 16
+    static let small: CGFloat = 6
+    static let medium: CGFloat = 10
+    static let large: CGFloat = 14
+    static let extraLarge: CGFloat = 16
     static let xl: CGFloat = 24
     static let xxl: CGFloat = 32
     static let xxxl: CGFloat = 48
+    
+    // Additional spacing properties for compatibility
+    static let xs: CGFloat = 4
+    static let sm: CGFloat = 6
+    static let md: CGFloat = 10
+    static let lg: CGFloat = 14
 
     // Contextual Spacing
     static let cardPadding: CGFloat = 20

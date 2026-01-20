@@ -6,7 +6,7 @@ struct BookmarkButton: View {
     @StateObject private var bookmarkManager = BookmarkManager()
     @State private var showFeedback = false
     @State private var feedbackMessage = ""
-    
+
     private var isBookmarked: Bool {
         bookmarkManager.isBookmarked(tab)
     }
@@ -44,20 +44,20 @@ struct BookmarkButton: View {
             traits: .isButton
         )
     }
-    
+
     private func toggleBookmark() {
         if isBookmarked {
             bookmarkManager.removeBookmark(tab)
         } else {
             bookmarkManager.addBookmark(tab)
         }
-        
+
         // Show feedback animation
         withAnimation(.easeInOut(duration: 0.3)) {
             showFeedback = true
             feedbackMessage = bookmarkManager.lastAction?.message ?? ""
         }
-        
+
         // Hide feedback after delay
         DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
             withAnimation(.easeInOut(duration: 0.3)) {
