@@ -198,33 +198,15 @@ Similar parametric structure to hunger—interoceptive precision Π_i elevated 2
                         }
                     }
 
-                    ForEach(parsedContent.sections) { section in
-                        VStack(alignment: .leading, spacing: 12) {
-                            Text(section.headerLine)
-                                .font(.system(size: 20, weight: .bold, design: .rounded))
-                                .foregroundStyle(.primary)
-                                .kerning(0.6)
-                                .frame(maxWidth: .infinity, alignment: .leading)
-
-                            LazyGlossaryHighlightedContent(text: section.body)
-                                .font(.system(size: fontSize, design: .default))
-                                .lineSpacing(6)
-                                .foregroundStyle(.primary)
-                                .frame(maxWidth: .infinity, alignment: .leading)
-                                .textSelection(.enabled)
+                    // Use SmartContentView for progressive loading
+                    SmartContentView(
+                        sections: parsedContent.sections.map { section in
+                            ContentSection(
+                                title: section.headerLine,
+                                content: section.body
+                            )
                         }
-                        .id(section.id)
-                        .padding(APGISpacing.cardPadding)
-                        .background {
-                            RoundedRectangle(cornerRadius: APGIRadius.lg, style: .continuous)
-                                .fill(.background)
-                                .shadow(color: Color.apgiPurple.opacity(0.06), radius: 10, y: 4)
-                        }
-                        .overlay {
-                            RoundedRectangle(cornerRadius: APGIRadius.lg, style: .continuous)
-                                .strokeBorder(Color.apgiPurple.opacity(0.16), lineWidth: 1)
-                        }
-                    }
+                    )
                 }
                 .padding(APGISpacing.screenMargin)
             }

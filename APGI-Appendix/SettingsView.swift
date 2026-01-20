@@ -111,6 +111,24 @@ struct SettingsView: View {
                 Label("Bookmarks", systemImage: "bookmark")
             }
 
+            // Network
+            NetworkSettingsView()
+                .tabItem {
+                    Label("Network", systemImage: "wifi")
+                }
+
+            // Error Logs
+            ErrorLoggerView()
+                .tabItem {
+                    Label("Logs", systemImage: "doc.text")
+                }
+
+            // Validation
+            UserDefaultsValidationView()
+                .tabItem {
+                    Label("Validation", systemImage: "checkmark.shield")
+                }
+
             // About
             VStack(alignment: .leading, spacing: 20) {
                 Text("About APGI Framework")
@@ -118,9 +136,7 @@ struct SettingsView: View {
                     .padding(.bottom)
 
                 VStack(alignment: .leading, spacing: 8) {
-                    Text("Version: 1.0.0")
-                    Text("Build: 2024.1")
-                    Text("© 2024 APGI Research Team")
+                    VersionInfoView()
                 }
 
                 Divider()

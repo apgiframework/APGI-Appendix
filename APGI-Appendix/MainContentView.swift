@@ -144,6 +144,8 @@ struct MainContentView: View {
         }
         .toolbar {
             ToolbarItemGroup {
+                NetworkStatusView()
+                
                 if let section = selectedSection {
                     BookmarkButton(tab: section)
                 }

@@ -1,3 +1,4 @@
+#if DEBUG
 import Foundation
 import AppKit
 import CoreGraphics
@@ -2288,4 +2289,6 @@ class ScreenshotAutomationRunner {
         return isValidToken
     }
 }
+
+#endif
 

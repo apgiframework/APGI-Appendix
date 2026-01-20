@@ -95,11 +95,75 @@ struct WhatsNewView: View {
                 .foregroundColor(.secondary)
 
             HStack(spacing: 24) {
-                Link("Online Documentation", destination: URL(string: "https://docs.apgi-framework.org")!)
-                Link("Report Issues", destination: URL(string: "https://github.com/apgi/framework/issues")!)
+                SafeLink(
+                    title: "Online Documentation",
+                    urlString: "https://docs.apgi-framework.org",
+                    fallbackTitle: "Local Documentation"
+                ) {
+                    showLocalDocumentation()
+                }
+                
+                SafeLink(
+                    title: "Report Issues",
+                    urlString: "https://github.com/apgi/framework/issues",
+                    fallbackTitle: "Local Support"
+                ) {
+                    showLocalSupport()
+                }
             }
             .font(.caption)
         }
+    }
+    
+    private func showLocalDocumentation() {
+        let docContent = URLValidator.shared.getLocalHelpContent()
+        
+        let docWindow = NSWindow(
+            contentRect: NSRect(x: 0, y: 0, width: 600, height: 700),
+            styleMask: [.titled, .closable, .resizable],
+            backing: .buffered,
+            defer: false
+        )
+        
+        docWindow.title = "APGI Documentation"
+        docWindow.center()
+        docWindow.setFrameAutosaveName("DocumentationWindow")
+        
+        let docView = ScrollView {
+            VStack(alignment: .leading, spacing: 16) {
+                Text(docContent)
+                    .font(.system(size: 14, design: .monospaced))
+                    .textSelection(.enabled)
+                    .padding()
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+        }
+        
+        docWindow.contentView = NSHostingView(rootView: docView)
+        docWindow.makeKeyAndOrderFront(nil)
+    }
+    
+    private func showLocalSupport() {
+        let alert = NSAlert()
+        alert.messageText = "APGI Appendix Support"
+        alert.informativeText = """
+        For support with APGI Appendix:
+        
+        1. Check the built-in help documentation (⌘?)
+        2. Use the search function to find specific topics
+        3. Explore the glossary for terminology
+        4. Try the interactive simulator for hands-on learning
+        
+        If you continue to experience issues, please:
+        - Restart the application
+        - Check for updates in Settings
+        - Contact your system administrator
+        
+        Note: External links are currently unavailable. All features are available locally within the application.
+        """
+        alert.alertStyle = .informational
+        alert.addButton(withTitle: "OK")
+        alert.runModal()
     }
 }
 

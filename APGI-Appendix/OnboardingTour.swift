@@ -224,9 +224,32 @@ class OnboardingManager: ObservableObject {
 // MARK: - Onboarding Tour View
 struct OnboardingTourView: View {
     @StateObject private var manager = OnboardingManager.shared
-    @Environment(\.dismiss) private var dismiss
+    @EnvironmentObject private var themeManager: ThemeManager
+    @EnvironmentObject private var onboardingManager: OnboardingManager
+    @EnvironmentObject private var navigationManager: KeyboardNavigationManager
 
     var body: some View {
+        Group {
+            if manager.hasCompletedOnboarding {
+                // Show main app content
+                MainContentView()
+                    .applyTheme()
+                    .environmentObject(themeManager)
+                    .environmentObject(onboardingManager)
+                    .environmentObject(navigationManager)
+            } else {
+                // Show onboarding
+                onboardingContent
+            }
+        }
+        .onAppear {
+            if !manager.hasCompletedOnboarding && !manager.isShowingTour {
+                manager.startOnboarding()
+            }
+        }
+    }
+
+    private var onboardingContent: some View {
         ZStack {
             // Background gradient
             LinearGradient(
@@ -254,11 +277,6 @@ struct OnboardingTourView: View {
             RoundedRectangle(cornerRadius: 20)
                 .strokeBorder(Color.white.opacity(0.1), lineWidth: 1)
         )
-        .onAppear {
-            if !manager.hasCompletedOnboarding {
-                manager.startOnboarding()
-            }
-        }
     }
 
     private var content: some View {
@@ -273,7 +291,6 @@ struct OnboardingTourView: View {
 
                 Button("Skip Tour") {
                     manager.completeOnboarding()
-                    dismiss()
                 }
                 .buttonStyle(.plain)
                 .foregroundColor(.white.opacity(0.7))
@@ -307,7 +324,6 @@ struct OnboardingTourView: View {
 
                         Button("Skip") {
                             manager.completeOnboarding()
-                            dismiss()
                         }
                         .buttonStyle(.bordered)
                         .controlSize(.large)

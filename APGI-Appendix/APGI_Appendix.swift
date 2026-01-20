@@ -56,14 +56,14 @@ struct APGIAppendixApp: App {
                 .applyTheme()
                 .environmentObject(themeManager)
         }
-        .defaultSize(width: 1200, height: 800)
+        .defaultSize(width: 1000, height: 800)
 
         Window("Glossary", id: "glossary") {
             GlossaryView()
                 .applyTheme()
                 .environmentObject(themeManager)
         }
-        .defaultSize(width: 600, height: 800)
+        .defaultSize(width: 1000, height: 800)
         .defaultPosition(.trailing)
 
         Window("APGI Simulator", id: "simulator") {
@@ -71,7 +71,7 @@ struct APGIAppendixApp: App {
                 .applyTheme()
                 .environmentObject(themeManager)
         }
-        .defaultSize(width: 1000, height: 850)
+        .defaultSize(width: 1000, height: 800)
 
         Settings {
             EnhancedSettingsView()
@@ -81,9 +81,38 @@ struct APGIAppendixApp: App {
     }
 
     private func showHelp() {
-        if let url = URL(string: "https://apgi-framework.com/help") {
-            NSWorkspace.shared.open(url)
+        URLValidator.shared.openSafely("https://apgi-framework.com/help") {
+            // Fallback: show local help content
+            showLocalHelp()
         }
+    }
+    
+    private func showLocalHelp() {
+        let helpContent = URLValidator.shared.getLocalHelpContent()
+        
+        let helpWindow = NSWindow(
+            contentRect: NSRect(x: 0, y: 0, width: 600, height: 700),
+            styleMask: [.titled, .closable, .resizable],
+            backing: .buffered,
+            defer: false
+        )
+        
+        helpWindow.title = "APGI Appendix Help"
+        helpWindow.center()
+        helpWindow.setFrameAutosaveName("HelpWindow")
+        
+        let helpView = ScrollView {
+            VStack(alignment: .leading, spacing: 16) {
+                Text(helpContent)
+                    .font(.system(size: 14, design: .monospaced))
+                    .textSelection(.enabled)
+                    .padding()
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+        }
+        
+        helpWindow.contentView = NSHostingView(rootView: helpView)
+        helpWindow.makeKeyAndOrderFront(nil)
     }
 
     private func showWhatsNew() {
@@ -120,7 +149,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         setupAppearance()
         
         // Initialize screenshot automation if running in screenshot mode
+        #if DEBUG
         ScreenshotAutomationRunner.run()
+        #endif
     }
 
     func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {
