@@ -160,9 +160,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         self.setupAppearance()
 
         // Initialize screenshot automation if running in screenshot mode
-        #if DEBUG
-            ScreenshotAutomationRunner.run()
-        #endif
+        ScreenshotAutomationRunner.run()
     }
 
     func applicationShouldTerminate(_: NSApplication) -> NSApplication.TerminateReply {

@@ -1,4 +1,4 @@
-#if DEBUG
+#if true
     import Accessibility
     import AppKit
     import CoreGraphics
@@ -166,6 +166,7 @@
         case wait(TimeInterval)
         case selectTab(String)
         case longPress(String)
+        case category(String)
     }
 
     // MARK: - Direction
@@ -253,6 +254,72 @@
                 requiresInteraction: false,
                 interactionType: nil,
                 waitTime: 1.5
+            ),
+            ScreenNavigation(
+                name: "Methodology",
+                identifier: "methodology",
+                navigationPath: [
+                    NavigationStep(type: .category("Foundations"), target: "Foundations", delay: 0.5),
+                    NavigationStep(type: .tab("Methodology"), target: "Methodology", delay: 0.5)
+                ],
+                requiresInteraction: false,
+                interactionType: nil,
+                waitTime: 2.0
+            ),
+            ScreenNavigation(
+                name: "Mathematical Model",
+                identifier: "mathematicalModel",
+                navigationPath: [
+                    NavigationStep(type: .category("Foundations"), target: "Foundations", delay: 0.5),
+                    NavigationStep(type: .tab("Mathematical Model"), target: "Mathematical Model", delay: 0.5)
+                ],
+                requiresInteraction: false,
+                interactionType: nil,
+                waitTime: 2.0
+            ),
+            ScreenNavigation(
+                name: "APGI Mapping",
+                identifier: "apgiMapping",
+                navigationPath: [
+                    NavigationStep(type: .category("Foundations"), target: "Foundations", delay: 0.5),
+                    NavigationStep(type: .tab("APGI Mapping"), target: "APGI Mapping", delay: 0.5)
+                ],
+                requiresInteraction: false,
+                interactionType: nil,
+                waitTime: 2.0
+            ),
+            ScreenNavigation(
+                name: "Parameter Identifiability",
+                identifier: "parameterIdentifiability",
+                navigationPath: [
+                    NavigationStep(type: .category("Foundations"), target: "Foundations", delay: 0.5),
+                    NavigationStep(type: .tab("Parameter Identifiability"), target: "Parameter Identifiability", delay: 0.5)
+                ],
+                requiresInteraction: false,
+                interactionType: nil,
+                waitTime: 2.0
+            ),
+            ScreenNavigation(
+                name: "Biological Implementation",
+                identifier: "biologicalImplementation",
+                navigationPath: [
+                    NavigationStep(type: .category("Neurobiology"), target: "Neurobiology", delay: 0.5),
+                    NavigationStep(type: .tab("Biological Implementation"), target: "Biological Implementation", delay: 0.5)
+                ],
+                requiresInteraction: false,
+                interactionType: nil,
+                waitTime: 2.0
+            ),
+            ScreenNavigation(
+                name: "Neuromodulator Effects",
+                identifier: "neuromodulatorEffects",
+                navigationPath: [
+                    NavigationStep(type: .category("Neurobiology"), target: "Neurobiology", delay: 0.5),
+                    NavigationStep(type: .tab("Neuromodulator Effects"), target: "Neuromodulator Effects", delay: 0.5)
+                ],
+                requiresInteraction: false,
+                interactionType: nil,
+                waitTime: 2.0
             ),
         ]
     }
@@ -423,9 +490,14 @@
             case let .selectTab(tabName):
                 return self.accessibilityManager.selectTab(named: tabName)
 
-            default:
-                self.logger.log("⚠️ Unsupported navigation step: \(step)")
-                return false
+            case let .category(categoryName):
+                return self.accessibilityManager.selectCategory(named: categoryName)
+
+            case let .tapElement(identifier):
+                return self.accessibilityManager.clickElement(withIdentifier: identifier)
+
+            case let .longPress(identifier):
+                return self.accessibilityManager.performLongPress(onElementWithIdentifier: identifier)
             }
         }
 
@@ -678,6 +750,31 @@
             }
 
             self.logger.log("⚠️ Tab not found: \(tabName)")
+            return false
+        }
+
+        /// Select a category by name
+        func selectCategory(named categoryName: String) -> Bool {
+            guard let app = getTargetApplication() else { return false }
+
+            var tabs: AnyObject?
+            let error = AXUIElementCopyAttributeValue(app, kAXTabsAttribute as CFString, &tabs)
+
+            guard error == .success, let tabGroup = tabs as? [AXUIElement], !tabGroup.isEmpty else {
+                self.logger.log("⚠️ No tabs found for category")
+                return false
+            }
+
+            for tab in tabGroup {
+                var title: AnyObject?
+                let titleError = AXUIElementCopyAttributeValue(tab, kAXTitleAttribute as CFString, &title)
+
+                if titleError == .success, let tabTitle = title as? String, tabTitle == categoryName {
+                    return self.performAction(kAXPressAction as String, on: tab)
+                }
+            }
+
+            self.logger.log("⚠️ Category not found: \(categoryName)")
             return false
         }
 
