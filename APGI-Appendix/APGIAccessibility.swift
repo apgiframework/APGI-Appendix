@@ -47,22 +47,28 @@ extension View {
         userPreferences: AccessibilityPreferences = .default,
         significantEvent: T? = nil
     ) -> some View {
-        self
+        let baseView = self
             .accessibilityElement(children: .combine)
             .accessibilityLabel(dynamicLabel)
             .accessibilityValue(currentValue ?? "")
             .accessibilityHint(contextualHint ?? "")
+            .accessibilityInputLabels(["activate", "select", "choose"])
+            .dynamicTypeSize(DynamicTypeSize.accessibility5)
+
+        let accessibilityView = baseView
             .applyIf(primaryAction != nil) { view in
                 view.accessibilityAction(.default) {
-                    primaryAction!()
+                    primaryAction?()
                 }
             }
-            .accessibilityInputLabels(["activate", "select", "choose"])
-            .dynamicTypeSize(...DynamicTypeSize.accessibility5)
+
+        let preferenceView = accessibilityView
             .colorBlind(mode: userPreferences.colorBlindMode)
             .highContrast(enabled: userPreferences.highContrastEnabled)
+
+        return preferenceView
             .applyIf(userPreferences.hapticFeedbackEnabled && significantEvent != nil) { view in
-                view.sensoryFeedback(.impact, trigger: significantEvent!)
+                view.sensoryFeedback(.impact, trigger: true)
             }
     }
 

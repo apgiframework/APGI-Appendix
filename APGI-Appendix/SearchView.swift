@@ -393,7 +393,12 @@ struct SearchView: View {
             let regex = try? NSRegularExpression(pattern: pattern, options: [])
             let matches = regex?.matches(in: content, options: [], range: NSRange(location: 0, length: content.utf16.count))
             if let matches = matches, !matches.isEmpty {
-                let formulaContent = matches.map { String(content[Range($0.range, in: content)!]) }.joined(separator: " ")
+                let formulaContent = matches.map { match in
+                    if let range = Range(match.range, in: content) {
+                        return String(content[range])
+                    }
+                    return ""
+                }.joined(separator: " ")
                 return formulaContent.lowercased().contains(query)
             }
         }
@@ -419,7 +424,12 @@ struct SearchView: View {
             let regex = try? NSRegularExpression(pattern: pattern, options: [.caseInsensitive])
             let matches = regex?.matches(in: content, options: [], range: NSRange(location: 0, length: content.utf16.count))
             if let matches = matches, !matches.isEmpty {
-                let referenceContent = matches.map { String(content[Range($0.range, in: content)!]) }.joined(separator: " ")
+                let referenceContent = matches.map { match in
+                    if let range = Range(match.range, in: content) {
+                        return String(content[range])
+                    }
+                    return ""
+                }.joined(separator: " ")
                 return referenceContent.lowercased().contains(query)
             }
         }

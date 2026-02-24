@@ -68,6 +68,7 @@ struct SidebarView: View {
 
             HStack(spacing: APGISpacing.md) {
                 Button(action: {
+                    NSApp.sendAction(Selector(("showSettingsWindow:")), to: nil, from: nil)
                 }) {
                     Label("Settings", systemImage: "gear")
                 }
@@ -76,6 +77,7 @@ struct SidebarView: View {
                 Spacer()
 
                 Button(action: {
+                    NSApp.sendAction(#selector(NSApplication.showHelp(_:)), to: nil, from: nil)
                 }) {
                     Label("Help", systemImage: "questionmark.circle")
                 }

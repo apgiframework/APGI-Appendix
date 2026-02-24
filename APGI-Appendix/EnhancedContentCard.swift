@@ -48,7 +48,7 @@ final class SimpleTableParser {
                     if let lastTextLine = currentTextLines.last?.trimmingCharacters(in: .whitespaces),
                        !lastTextLine.isEmpty,
                        !lastTextLine.contains("|"),
-                       currentTextLines.count > 0
+                       !currentTextLines.isEmpty
                     {
                         tableTitle = lastTextLine
                         currentTextLines.removeLast()

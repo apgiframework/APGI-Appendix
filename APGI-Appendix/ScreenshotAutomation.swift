@@ -4,6 +4,7 @@
     import CoreGraphics
     import Foundation
     import ImageIO
+    import os.log
     import ScreenCaptureKit
     import SwiftUI
     import UniformTypeIdentifiers
@@ -224,43 +225,11 @@
 
         static let allScreens: [ScreenNavigation] = [
             ScreenNavigation(
-                name: "Home",
-                identifier: "home",
-                navigationPath: [NavigationStep(type: .tab("home"), target: "home", delay: 0.5)],
-                requiresInteraction: false,
-                interactionType: nil,
-                waitTime: 2.0
-            ),
-            ScreenNavigation(
-                name: "Psychological States",
-                identifier: "states",
-                navigationPath: [NavigationStep(type: .tab("states"), target: "states", delay: 0.5)],
-                requiresInteraction: false,
-                interactionType: nil,
-                waitTime: 2.0
-            ),
-            ScreenNavigation(
-                name: "Profile Comparison",
-                identifier: "compare",
-                navigationPath: [NavigationStep(type: .tab("compare"), target: "compare", delay: 0.5)],
-                requiresInteraction: false,
-                interactionType: nil,
-                waitTime: 2.0
-            ),
-            ScreenNavigation(
-                name: "Settings",
-                identifier: "settings",
-                navigationPath: [NavigationStep(type: .tab("settings"), target: "settings", delay: 0.5)],
-                requiresInteraction: false,
-                interactionType: nil,
-                waitTime: 1.5
-            ),
-            ScreenNavigation(
                 name: "Methodology",
                 identifier: "methodology",
                 navigationPath: [
                     NavigationStep(type: .category("Foundations"), target: "Foundations", delay: 0.5),
-                    NavigationStep(type: .tab("Methodology"), target: "Methodology", delay: 0.5)
+                    NavigationStep(type: .tab("Methodology"), target: "Methodology", delay: 0.5),
                 ],
                 requiresInteraction: false,
                 interactionType: nil,
@@ -271,7 +240,7 @@
                 identifier: "mathematicalModel",
                 navigationPath: [
                     NavigationStep(type: .category("Foundations"), target: "Foundations", delay: 0.5),
-                    NavigationStep(type: .tab("Mathematical Model"), target: "Mathematical Model", delay: 0.5)
+                    NavigationStep(type: .tab("Mathematical Model"), target: "Mathematical Model", delay: 0.5),
                 ],
                 requiresInteraction: false,
                 interactionType: nil,
@@ -282,7 +251,7 @@
                 identifier: "apgiMapping",
                 navigationPath: [
                     NavigationStep(type: .category("Foundations"), target: "Foundations", delay: 0.5),
-                    NavigationStep(type: .tab("APGI Mapping"), target: "APGI Mapping", delay: 0.5)
+                    NavigationStep(type: .tab("APGI Mapping"), target: "APGI Mapping", delay: 0.5),
                 ],
                 requiresInteraction: false,
                 interactionType: nil,
@@ -293,7 +262,7 @@
                 identifier: "parameterIdentifiability",
                 navigationPath: [
                     NavigationStep(type: .category("Foundations"), target: "Foundations", delay: 0.5),
-                    NavigationStep(type: .tab("Parameter Identifiability"), target: "Parameter Identifiability", delay: 0.5)
+                    NavigationStep(type: .tab("Parameter Identifiability"), target: "Parameter Identifiability", delay: 0.5),
                 ],
                 requiresInteraction: false,
                 interactionType: nil,
@@ -304,7 +273,7 @@
                 identifier: "biologicalImplementation",
                 navigationPath: [
                     NavigationStep(type: .category("Neurobiology"), target: "Neurobiology", delay: 0.5),
-                    NavigationStep(type: .tab("Biological Implementation"), target: "Biological Implementation", delay: 0.5)
+                    NavigationStep(type: .tab("Biological Implementation"), target: "Biological Implementation", delay: 0.5),
                 ],
                 requiresInteraction: false,
                 interactionType: nil,
@@ -315,7 +284,7 @@
                 identifier: "neuromodulatorEffects",
                 navigationPath: [
                     NavigationStep(type: .category("Neurobiology"), target: "Neurobiology", delay: 0.5),
-                    NavigationStep(type: .tab("Neuromodulator Effects"), target: "Neuromodulator Effects", delay: 0.5)
+                    NavigationStep(type: .tab("Neuromodulator Effects"), target: "Neuromodulator Effects", delay: 0.5),
                 ],
                 requiresInteraction: false,
                 interactionType: nil,
@@ -838,26 +807,24 @@
             guard positionResult == .success, let positionValue = positionRef else { return false }
 
             var point = CGPoint.zero
-            if AXValueGetValue(positionValue as! AXValue, .cgPoint, &point) {
-                let source = CGEventSource(stateID: .hidSystemState)
+            guard AXValueGetValue(positionValue as! AXValue, .cgPoint, &point) else { return false }
 
-                // Mouse down
-                let mouseDown = CGEvent(mouseEventSource: source, mouseType: .leftMouseDown,
-                                        mouseCursorPosition: point, mouseButton: .left)
-                mouseDown?.post(tap: .cghidEventTap)
+            let source = CGEventSource(stateID: .hidSystemState)
 
-                // Hold for 1 second to simulate long press
-                Thread.sleep(forTimeInterval: 1.0)
+            // Mouse down
+            let mouseDown = CGEvent(mouseEventSource: source, mouseType: .leftMouseDown,
+                                    mouseCursorPosition: point, mouseButton: .left)
+            mouseDown?.post(tap: .cghidEventTap)
 
-                // Mouse up
-                let mouseUp = CGEvent(mouseEventSource: source, mouseType: .leftMouseUp,
-                                      mouseCursorPosition: point, mouseButton: .left)
-                mouseUp?.post(tap: .cghidEventTap)
+            // Hold for 1 second to simulate long press
+            Thread.sleep(forTimeInterval: 1.0)
 
-                return true
-            }
+            // Mouse up
+            let mouseUp = CGEvent(mouseEventSource: source, mouseType: .leftMouseUp,
+                                  mouseCursorPosition: point, mouseButton: .left)
+            mouseUp?.post(tap: .cghidEventTap)
 
-            return false
+            return true
         }
 
         /// Scroll an area by a certain amount
@@ -1065,92 +1032,92 @@
         }
 
         func run() {
-            print("🔥 engine.run() started!")
+            self.logger.log("🔥 engine.run() started!")
             self.logger.log("Starting screenshot automation...")
             self.logger.log("Configuration: \(self.config)")
 
-            print("🔍 About to check permissions...")
+            self.logger.log("🔍 About to check permissions...")
             // Check both legacy and ScreenCaptureKit permissions
             let hasLegacyPermission = ScreenRecordingPermission.hasPermission
-            print("🔍 Checked legacy permission: \(hasLegacyPermission)")
+            self.logger.log("🔍 Checked legacy permission: \(hasLegacyPermission)")
 
             let hasScreenCaptureKitPermission = ScreenRecordingPermission.hasScreenCaptureKitPermission
-            print("🔍 Checked ScreenCaptureKit permission: \(hasScreenCaptureKitPermission)")
+            self.logger.log("🔍 Checked ScreenCaptureKit permission: \(hasScreenCaptureKitPermission)")
 
             self.logger.log("Permission check - Legacy: \(hasLegacyPermission), ScreenCaptureKit: \(hasScreenCaptureKitPermission)")
 
             if hasLegacyPermission || hasScreenCaptureKitPermission {
                 self.logger.log("✅ Screen recording permission granted")
-                print("✅ Permissions granted, continuing...")
+                self.logger.log("✅ Permissions granted, continuing...")
             }
             else {
                 self.logger.log("ERROR: Screen recording permission not granted. Please grant permission in System Preferences > Security & Privacy > Privacy > Screen Recording")
-                print("❌ No permissions, requesting...")
+                self.logger.log("❌ No permissions, requesting...")
 
                 // Try to request permission
                 if !ScreenRecordingPermission.requestScreenCaptureKitPermission() {
                     self.logger.log("ERROR: Failed to obtain screen recording permission. Please manually grant permission in System Preferences.")
-                    print("❌ Failed to request permission, exiting")
+                    self.logger.log("❌ Failed to request permission, exiting")
                     return
                 }
 
-                print("⏳ Waiting for permission to take effect...")
+                self.logger.log("⏳ Waiting for permission to take effect...")
                 // Wait a moment for permission to take effect
                 Thread.sleep(forTimeInterval: 2.0)
 
                 // Re-check permission
                 guard ScreenRecordingPermission.hasPermission || ScreenRecordingPermission.hasScreenCaptureKitPermission else {
                     self.logger.log("ERROR: Permission still not granted after request. Exiting.")
-                    print("❌ Permission still not granted, exiting")
+                    self.logger.log("❌ Permission still not granted, exiting")
                     return
                 }
 
                 self.logger.log("✅ Screen recording permission granted after request")
-                print("✅ Permission granted after request")
+                self.logger.log("✅ Permission granted after request")
             }
 
-            print("🔍 About to wait for app to load...")
+            self.logger.log("🔍 About to wait for app to load...")
             // Skip launching app since we're already running inside it
             self.logger.log("App is already running, skipping launch...")
 
             // Wait for app to fully load
             self.logger.log("Waiting for app to fully load...")
             Thread.sleep(forTimeInterval: 3.0)
-            print("✅ App loading wait completed")
+            self.logger.log("✅ App loading wait completed")
 
-            print("🔍 About to discover screens...")
+            self.logger.log("🔍 About to discover screens...")
             // Discover all screens
             self.logger.log("Discovering all screens...")
             let allScreens = self.navigator.discoverAllScreens()
-            print("🔍 Discovered \(allScreens.count) screens")
+            self.logger.log("🔍 Discovered \(allScreens.count) screens")
             self.logger.log("Discovered \(allScreens.count) screens")
 
-            print("🔍 About to process appearance modes...")
+            self.logger.log("🔍 About to process appearance modes...")
             // Process each appearance mode
             for appearance in self.config.appearanceModes {
                 self.logger.log("Processing appearance mode: \(appearance.rawValue)")
-                print("🔍 Processing appearance mode: \(appearance.rawValue)")
+                self.logger.log("🔍 Processing appearance mode: \(appearance.rawValue)")
                 self.setAppearance(appearance.nsAppearance)
 
                 // Process each resolution
                 for resolution in self.config.resolutions {
                     self.logger.log("Processing resolution: \(resolution.rawValue)")
-                    print("🔍 Processing resolution: \(resolution.rawValue)")
+                    self.logger.log("🔍 Processing resolution: \(resolution.rawValue)")
                     self.setResolution(resolution)
 
                     // Navigate and capture all screens
                     self.logger.log("Starting navigation and capture...")
-                    print("🔍 About to navigate and capture screens...")
+                    self.logger.log("🔍 About to navigate and capture screens...")
                     self.navigateAndCaptureScreens(allScreens)
                     self.logger.log("Completed navigation and capture")
-                    print("✅ Navigation and capture completed")
+                    self.logger.log("✅ Navigation and capture completed")
                 }
             }
 
-            print("🔍 About to generate report...")
+            self.logger.log("🔍 About to generate report...")
             self.generateReport()
             self.logger.log("Screenshot automation completed. Total screenshots: \(self.screenshotCount)")
-            print("🔥 engine.run() completed!")
+            self.logger.log("🔥 engine.run() completed!")
         }
 
         private func launchApp() -> Bool {
@@ -1406,12 +1373,12 @@
         }
 
         private func captureScreenshot(screenName: String, suffix: String = "") {
-            print("📸 captureScreenshot called for: \(screenName)")
+            self.logger.log("📸 captureScreenshot called for: \(screenName)")
             let success = self.screenshotManager.captureScreen(screenName: screenName, suffix: suffix)
-            print("📸 captureScreenshot result: \(success)")
+            self.logger.log("📸 captureScreenshot result: \(success)")
             if success {
                 self.screenshotCount += 1
-                print("📸 Screenshot count incremented to: \(self.screenshotCount)")
+                self.logger.log("📸 Screenshot count incremented to: \(self.screenshotCount)")
             }
         }
 
@@ -1492,42 +1459,42 @@
         ///   - element: Optional AXUIElement to capture instead of the whole screen
         /// - Returns: Boolean indicating success or failure
         func captureScreen(screenName: String, suffix: String = "", element: AXUIElement? = nil) -> Bool {
-            print("📸 ScreenshotManager.captureScreen called for: \(screenName)")
+            self.logger.log("📸 ScreenshotManager.captureScreen called for: \(screenName)")
             var screenshot: NSImage?
             var success = false
 
             // Try multiple times if needed
             for attempt in 0 ..< self.config.maxRetries {
-                print("📸 Attempt \(attempt + 1) for \(screenName)")
+                self.logger.log("📸 Attempt \(attempt + 1) for \(screenName)")
                 if attempt > 0 {
                     self.logger.log("Retry \(attempt + 1) for \(screenName)")
                     Thread.sleep(forTimeInterval: 0.5)
                 }
 
                 if let element = element {
-                    print("📸 Capturing element...")
+                    self.logger.log("📸 Capturing element...")
                     screenshot = self.captureElement(element)
                 }
                 else {
-                    print("📸 Capturing full screen...")
+                    self.logger.log("📸 Capturing full screen...")
                     screenshot = self.captureFullScreen()
                 }
 
-                print("📸 Screenshot capture result: \(screenshot != nil)")
+                self.logger.log("📸 Screenshot capture result: \(screenshot != nil)")
                 if screenshot != nil {
-                    print("📸 About to save screenshot...")
+                    self.logger.log("📸 About to save screenshot...")
                     success = self.saveScreenshot(screenshot!, screenName: screenName, suffix: suffix)
-                    print("📸 Save result: \(success)")
+                    self.logger.log("📸 Save result: \(success)")
                     if success { break }
                 }
             }
 
             if !success {
                 self.logger.log("Failed to capture screen: \(screenName) after \(self.config.maxRetries) attempts")
-                print("❌ Failed to capture screen: \(screenName)")
+                self.logger.log("❌ Failed to capture screen: \(screenName)")
             }
 
-            print("📸 ScreenshotManager.captureScreen returning: \(success)")
+            self.logger.log("📸 ScreenshotManager.captureScreen returning: \(success)")
             return success
         }
 
@@ -1570,10 +1537,22 @@
             var position = CGPoint.zero
             var size = CGSize.zero
 
-            guard AXValueGetValue(positionValue as! AXValue, .cgPoint, &position),
-                  AXValueGetValue(sizeValue as! AXValue, .cgSize, &size)
+            // Safely bridge CFTypeRef to AXValue before extracting values
+            if CFGetTypeID(positionValue) == AXValueGetTypeID(),
+               CFGetTypeID(sizeValue) == AXValueGetTypeID()
+            {
+                let posAX: AXValue = unsafeBitCast(positionValue, to: AXValue.self)
+                let sizeAX: AXValue = unsafeBitCast(sizeValue, to: AXValue.self)
+
+                guard AXValueGetValue(posAX, .cgPoint, &position),
+                      AXValueGetValue(sizeAX, .cgSize, &size)
+                else {
+                    self.logger.log("Failed to extract position/size values")
+                    return nil
+                }
+            }
             else {
-                self.logger.log("Failed to extract position/size values")
+                self.logger.log("Position/size attributes are not AXValue types")
                 return nil
             }
 
@@ -1599,25 +1578,25 @@
 
         /// Capture a specific area of the screen
         private func captureArea(_ rect: CGRect) -> NSImage? {
-            print("📸 captureArea called for rect: \(rect)")
+            self.logger.log("📸 captureArea called for rect: \(rect)")
 
             // Use a simple approach with NSView-based screenshot
             // This avoids both the deprecated CGDisplayCreateImage and the async ScreenCaptureKit
 
             guard let window = NSApp.keyWindow else {
-                print("❌ No key window found")
+                self.logger.log("❌ No key window found")
                 return nil
             }
 
             // Capture the window's content view
             guard let contentView = window.contentView else {
-                print("❌ No content view found")
+                self.logger.log("❌ No content view found")
                 return nil
             }
 
             // Create a bitmap representation of the view
             guard let rep = contentView.bitmapImageRepForCachingDisplay(in: contentView.bounds) else {
-                print("❌ Failed to create bitmap representation")
+                self.logger.log("❌ Failed to create bitmap representation")
                 return nil
             }
 
@@ -1625,12 +1604,12 @@
 
             // Convert to CGImage
             guard let cgImage = rep.cgImage else {
-                print("❌ Failed to create CGImage from view")
+                self.logger.log("❌ Failed to create CGImage from view")
                 return nil
             }
 
             let nsImage = NSImage(cgImage: cgImage, size: contentView.bounds.size)
-            print("✅ Successfully captured window content")
+            self.logger.log("✅ Successfully captured window content")
             return nsImage
         }
 
@@ -1783,7 +1762,7 @@
             self.enabled = enabled
             if enabled {
                 guard let documentsPath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first else {
-                    print("Warning: Unable to access Documents directory for logging")
+                    os_log("Warning: Unable to access Documents directory for logging")
                     self.logFile = nil
                     return
                 }
@@ -1799,7 +1778,7 @@
             let logMessage = "[\(timestamp)] \(message)"
 
             if self.enabled {
-                print(logMessage)
+                os_log("%{public}@", logMessage)
 
                 if let logFile = logFile {
                     if let data = (logMessage + "\n").data(using: .utf8) {
@@ -2287,12 +2266,12 @@
 
     class ScreenshotAutomationRunner {
         static func run() {
-            print("🔍 ScreenshotAutomationRunner started")
-            print("🔧 Process arguments: \(ProcessInfo.processInfo.arguments)")
+            os_log("🔍 ScreenshotAutomationRunner started")
+            os_log("🔧 Process arguments: \(ProcessInfo.processInfo.arguments)")
 
             // Check if screenshot mode is enabled via arguments
             let isScreenshotMode = ProcessInfo.processInfo.arguments.contains("--screenshot-mode")
-            print("📸 Screenshot mode: \(isScreenshotMode ? "ENABLED" : "disabled")")
+            os_log("📸 Screenshot mode: \(isScreenshotMode ? "ENABLED" : "disabled")")
 
             if isScreenshotMode {
                 #if DEBUG
@@ -2304,63 +2283,63 @@
         }
 
         private static func runDebugMode() {
-            print("🐞 Running in DEBUG mode with full capabilities")
+            os_log("🐞 Running in DEBUG mode with full capabilities")
             let config = ScreenshotConfig.default
-            print("📁 Output directory: \(config.outputDirectory)")
+            os_log("📁 Output directory: \(config.outputDirectory)")
 
             // Create output directory if it doesn't exist
             let fileManager = FileManager.default
             let directoryURL = URL(fileURLWithPath: config.outputDirectory)
             let directoryPath = directoryURL.path
 
-            print("🔍 Checking if directory exists: \(directoryPath)")
+            os_log("🔍 Checking if directory exists: \(directoryPath)")
 
             if !fileManager.fileExists(atPath: directoryPath) {
-                print("📂 Creating output directory: \(directoryPath)")
+                os_log("📂 Creating output directory: \(directoryPath)")
                 do {
                     try fileManager.createDirectory(at: directoryURL, withIntermediateDirectories: true)
-                    print("✅ Successfully created directory")
+                    os_log("✅ Successfully created directory")
                 }
                 catch {
-                    print("❌ Failed to create output directory: \(error.localizedDescription)")
-                    print("Current working directory: \(fileManager.currentDirectoryPath)")
+                    os_log("❌ Failed to create output directory: \(error.localizedDescription)")
+                    os_log("Current working directory: \(fileManager.currentDirectoryPath)")
                     return
                 }
             }
             else {
-                print("📂 Output directory already exists")
+                os_log("📂 Output directory already exists")
             }
 
             // Request screen recording permission if needed
             if !ScreenRecordingPermission.hasPermission {
-                print("⚠️ Screen recording permission is required for screenshot automation")
+                os_log("⚠️ Screen recording permission is required for screenshot automation")
                 ScreenRecordingPermission.requestPermission()
                 // Wait a moment for permission dialog
                 Thread.sleep(forTimeInterval: 2.0)
             }
             else {
-                print("✅ Screen recording permission granted")
+                os_log("✅ Screen recording permission granted")
             }
 
-            print("🚀 Initializing ScreenshotAutomationEngine")
+            os_log("🚀 Initializing ScreenshotAutomationEngine")
             let engine = ScreenshotAutomationEngine(config: config)
 
             // Run the automation synchronously
-            print("📸 Starting screenshot capture...")
-            print("🔍 About to call engine.run()")
+            os_log("📸 Starting screenshot capture...")
+            os_log("🔍 About to call engine.run()")
             engine.run()
-            print("✅ engine.run() completed")
+            os_log("✅ engine.run() completed")
 
-            print("✅ Screenshot automation completed.")
-            print("📂 Check the directory: \(directoryPath)")
+            os_log("✅ Screenshot automation completed.")
+            os_log("📂 Check directory: \(directoryPath)")
 
             // List contents of the directory
             do {
                 let contents = try fileManager.contentsOfDirectory(atPath: directoryPath)
-                print("📋 Directory contents: \(contents)")
+                os_log("📋 Directory contents: \(contents)")
             }
             catch {
-                print("❌ Failed to list directory contents: \(error.localizedDescription)")
+                os_log("❌ Failed to list directory contents: \(error.localizedDescription)")
             }
 
             // Exit the app when done
@@ -2370,37 +2349,37 @@
         }
 
         private static func runProductionMode() {
-            print("🏭 Running in PRODUCTION mode with safety restrictions")
+            os_log("🏭 Running in PRODUCTION mode with safety restrictions")
 
             let config = ProductionScreenshotConfig.debug
 
             // Check if screenshot automation is enabled
             guard config.isEnabled else {
-                print("❌ Screenshot automation is disabled in production configuration")
-                print("💡 To enable, set ProductionScreenshotConfig.default.isEnabled = true")
+                os_log("❌ Screenshot automation is disabled in production configuration")
+                os_log("💡 To enable, set ProductionScreenshotConfig.default.isEnabled = true")
                 return
             }
 
             // Check authentication if required
             if config.requiresAuthentication {
-                print("🔐 Authentication required for screenshot automation in production")
+                os_log("🔐 Authentication required for screenshot automation in production")
                 guard self.authenticateUser() else {
-                    print("❌ Authentication failed - aborting screenshot automation")
+                    os_log("❌ Authentication failed - aborting screenshot automation")
                     return
                 }
             }
 
             // Request screen recording permission
             guard ScreenRecordingPermission.hasPermission else {
-                print("❌ Screen recording permission not granted")
+                os_log("❌ Screen recording permission not granted")
                 ScreenRecordingPermission.requestPermission()
-                print("💡 Please grant permission in System Preferences and try again")
+                os_log("💡 Please grant permission in System Preferences and try again")
                 return
             }
 
-            print("✅ Production screenshot automation starting with safety restrictions")
-            print("📸 Max screenshots per session: \(config.maxScreenshotsPerSession)")
-            print("📋 Allowed screens: \(config.allowedScreens)")
+            os_log("✅ Production screenshot automation starting with safety restrictions")
+            os_log("📸 Max screenshots per session: \(config.maxScreenshotsPerSession)")
+            os_log("📋 Allowed screens: \(config.allowedScreens)")
 
             // Create production-safe engine
             let engine = ProductionScreenshotAutomationEngine(config: config)
@@ -2418,8 +2397,8 @@
             let isValidToken = authToken == "APGI-Screenshot-2024"
 
             if !isValidToken {
-                print("🔐 Invalid or missing authentication token")
-                print("💡 Set environment variable SCREENSHOT_AUTH_TOKEN=APGI-Screenshot-2024")
+                os_log("🔐 Invalid or missing authentication token")
+                os_log("💡 Set environment variable SCREENSHOT_AUTH_TOKEN=APGI-Screenshot-2024")
             }
 
             return isValidToken

@@ -1,5 +1,6 @@
 import AppKit
 import Combine
+import PDFKit
 import SwiftUI
 import UniformTypeIdentifiers
 
@@ -14,16 +15,14 @@ struct MainContentView: View {
     @State private var searchPresented: Bool = false
     @AppStorage("contentFontSize") private var fontSize: Double = 15.0
     @StateObject private var bookmarkManager = BookmarkManager()
-    @StateObject private var navigationManager = KeyboardNavigationManager.shared
+    @EnvironmentObject private var navigationManager: KeyboardNavigationManager
     @EnvironmentObject private var themeManager: ThemeManager
 
     var body: some View {
         let navSplitView = NavigationSplitView(columnVisibility: $columnVisibility) {
             self.sidebarView
-        } content: {
-            self.contentView
         } detail: {
-            self.detailView
+            self.detailContentView
         }
 
         let configuredView = navSplitView
@@ -31,16 +30,10 @@ struct MainContentView: View {
             .environmentObject(self.bookmarkManager)
 
         let withCategoryChanges = configuredView
-            .onChange(of: self.selectedCategory) { _, newValue in
-                guard let newValue = newValue else {
-                    self.selectedSection = nil
-                    return
-                }
-                if let firstSection = newValue.sections.first {
-                    self.selectedSection = firstSection
-                }
-            }
-            .onChange(of: self.selectedSection) { _, _ in
+            .onChange(of: self.selectedSection) { _, newValue in
+                guard let newValue = newValue else { return }
+                // Update category when section changes
+                self.selectedCategory = newValue.category
                 // Update Handoff activity when section changes
                 self.updateUserActivity()
             }
@@ -125,21 +118,11 @@ struct MainContentView: View {
     }
 
     private var sidebarView: some View {
-        CategorySidebar(selection: self.$selectedCategory)
-            .navigationSplitViewColumnWidth(min: 200, ideal: 250, max: 300)
-    }
-
-    private var contentView: some View {
-        Group {
-            if let category = selectedCategory {
-                SectionList(category: category, selection: self.$selectedSection)
-                    .navigationSplitViewColumnWidth(min: 250, ideal: 350, max: 450)
-            }
-            else {
-                Text("Select a category")
-                    .foregroundStyle(.secondary)
-            }
-        }
+        SidebarView(selectedTab: Binding(
+            get: { self.selectedSection ?? .methodology },
+            set: { self.selectedSection = $0 }
+        ))
+        .navigationSplitViewColumnWidth(min: 240, ideal: 280, max: 350)
     }
 
     private var detailView: some View {
@@ -278,11 +261,9 @@ struct MainContentView: View {
         activity.isEligibleForSearch = true
         activity.isEligibleForPublicIndexing = false
 
-        // Set webpage URL for deep linking
-        if let deepLinkURL = createDeepLinkURL(for: section) {
-            activity.webpageURL = deepLinkURL
-            activity.isEligibleForHandoff = true
-        }
+        // Set webpage URL for deep linking (only for valid HTTP/HTTPS URLs)
+        // Note: Custom scheme URLs are not valid for webpageURL property
+        // The deep link functionality is handled through the activity itself
 
         activity.becomeCurrent()
         self.userActivity = activity
@@ -386,9 +367,47 @@ struct MainContentView: View {
     // MARK: - Export Methods
 
     private func exportCurrentViewToPDF(url: URL) {
-        // Implementation for PDF export
-        // This would need to capture the current view and save as PDF
-        print("Exporting current view to PDF: \(url)")
+        guard let selectedSection = selectedSection else {
+            self.showExportError(message: "No section selected for export")
+            return
+        }
+
+        // Create the content view for the selected section
+        let contentView = selectedSection.view
+        let hostingView = NSHostingView(rootView: contentView)
+
+        // Set up the hosting view with proper sizing
+        hostingView.frame = NSRect(x: 0, y: 0, width: 792, height: 612) // Standard US Letter size
+        hostingView.layoutSubtreeIfNeeded()
+
+        // Create PDF data
+        let pdfData = hostingView.dataWithPDF(inside: hostingView.bounds)
+
+        do {
+            try pdfData.write(to: url)
+            self.showExportSuccess(message: "PDF exported successfully to \(url.lastPathComponent)")
+        }
+        catch {
+            self.showExportError(message: "Failed to save PDF: \(error.localizedDescription)")
+        }
+    }
+
+    private func showExportSuccess(message: String) {
+        let alert = NSAlert()
+        alert.messageText = "Export Successful"
+        alert.informativeText = message
+        alert.alertStyle = .informational
+        alert.addButton(withTitle: "OK")
+        alert.runModal()
+    }
+
+    private func showExportError(message: String) {
+        let alert = NSAlert()
+        alert.messageText = "Export Failed"
+        alert.informativeText = message
+        alert.alertStyle = .critical
+        alert.addButton(withTitle: "OK")
+        alert.runModal()
     }
 
     private func exportToPDF() {
@@ -429,41 +448,6 @@ struct MainContentView: View {
     private func checkForUpdates() {
         // This would integrate with UpdateManager
         print("Checking for updates...")
-    }
-
-    private struct CategorySidebar: View {
-        @Binding var selection: SectionCategory?
-
-        var body: some View {
-            List(SectionCategory.allCases, id: \.self, selection: self.$selection) { category in
-                Label(category.rawValue, systemImage: category.icon)
-                    .foregroundStyle(category.color)
-                    .tag(Optional(category))
-            }
-            .navigationTitle("Categories")
-        }
-    }
-
-    private struct SectionList: View {
-        let category: SectionCategory
-        @Binding var selection: Tab?
-
-        private var tabs: [Tab] {
-            Tab.allCases.filter { $0.category == self.category }
-        }
-
-        var body: some View {
-            List(self.tabs, id: \.self, selection: self.$selection) { tab in
-                HStack(spacing: 10) {
-                    Image(systemName: tab.icon)
-                        .foregroundStyle(self.category.color)
-                    Text(tab.shortTitle)
-                    Spacer()
-                }
-                .tag(Optional(tab))
-            }
-            .navigationTitle(self.category.rawValue)
-        }
     }
 
     private struct DetailContentView: View {

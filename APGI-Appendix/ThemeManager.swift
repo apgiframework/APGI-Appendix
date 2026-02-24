@@ -48,9 +48,9 @@ class ThemeManager: ObservableObject {
     var backgroundColor: Color {
         switch self.selectedTheme {
         case .light:
-            return Color(NSColor.controlBackgroundColor)
+            return Color(NSColor.textBackgroundColor)
         case .dark:
-            return Color(NSColor.controlBackgroundColor)
+            return Color(NSColor.windowBackgroundColor)
         case .system:
             return Color.primary.opacity(0.05)
         }

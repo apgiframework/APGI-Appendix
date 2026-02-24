@@ -29,8 +29,8 @@ extension Color {
     static let gradientEnd = Color(red: 0.15, green: 0.18, blue: 0.25)
 
     // Surface Colors
-    static let surfacePrimary = Color(white: 0.98)
-    static let surfaceSecondary = Color(white: 0.95)
+    static let surfacePrimary = Color(NSColor.windowBackgroundColor)
+    static let surfaceSecondary = Color(NSColor.controlBackgroundColor)
 }
 
 enum APGITypography {

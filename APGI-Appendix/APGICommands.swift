@@ -144,18 +144,16 @@ struct APGICommands: Commands {
             }
         }
 
-        CommandGroup(replacing: .help) {
-            Button("APGI Help Guide") {
-                self.openHelpGuide()
-            }
-            .keyboardShortcut("?", modifiers: [.command])
-        }
-
         CommandGroup(after: .help) {
-            Button("APGI Framework Guide") {
-                self.openHelpGuide()
+            Button("Online Documentation") {
+                self.openOnlineHelp()
             }
-            .keyboardShortcut("?", modifiers: [.command])
+
+            Divider()
+
+            Button("Report Issue") {
+                self.reportIssue()
+            }
         }
     }
 

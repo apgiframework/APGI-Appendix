@@ -1,5 +1,6 @@
 import AppKit
 import Combine
+import Darwin
 import Foundation
 import SwiftUI
 
@@ -43,8 +44,48 @@ final class PerformanceManager: ObservableObject {
             }
             .store(in: &self.cancellables)
 
-        // Register for memory warnings - macOS doesn't have the same memory warning system as iOS
-        // For macOS, we'll monitor memory pressure through other means
+        // Monitor memory pressure on macOS
+        Timer.publish(every: 10.0, on: .main, in: .common)
+            .autoconnect()
+            .sink { [weak self] _ in
+                self?.checkMemoryPressure()
+            }
+            .store(in: &self.cancellables)
+    }
+
+    private func checkMemoryPressure() {
+        // Check if system is under memory pressure
+        let source = DispatchSource.makeMemoryPressureSource(eventMask: .warning, queue: .main)
+        source.setEventHandler { [weak self] in
+            self?.handleMemoryWarning()
+        }
+        source.resume()
+
+        // Also check available memory as a fallback
+        let availableMemory = self.getAvailableMemory()
+        let totalMemory = ProcessInfo.processInfo.physicalMemory
+        let memoryUsageRatio = Double(totalMemory - availableMemory) / Double(totalMemory)
+
+        // Trigger memory warning if usage exceeds 80%
+        if memoryUsageRatio > 0.8 {
+            self.handleMemoryWarning()
+        }
+    }
+
+    private func getAvailableMemory() -> UInt64 {
+        var info = mach_task_basic_info()
+        var count = mach_msg_type_number_t(MemoryLayout<mach_task_basic_info>.size) / 4
+
+        let kerr: kern_return_t = withUnsafeMutablePointer(to: &info) {
+            $0.withMemoryRebound(to: integer_t.self, capacity: 1) {
+                task_info(mach_task_self_,
+                          task_flavor_t(MACH_TASK_BASIC_INFO),
+                          $0,
+                          &count)
+            }
+        }
+
+        return kerr == KERN_SUCCESS ? UInt64(info.resident_size) : 0
     }
 
     private func handleMemoryWarning() {

@@ -36,6 +36,6 @@ extension SectionCategory {
     }
 
     var sections: [Tab] {
-        NavigationSection.allCases.first { $0.tabs.contains(where: { $0.category == self }) }?.tabs ?? []
+        Tab.allCases.filter { $0.category == self }
     }
 }

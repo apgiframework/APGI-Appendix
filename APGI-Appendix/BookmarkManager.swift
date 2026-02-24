@@ -35,9 +35,10 @@ class BookmarkManager: ObservableObject {
         self.lastAction = .added(tab.shortTitle)
 
         // Clear action after delay to prevent stale feedback
+        let actionAtScheduleTime = self.lastAction
         DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) { [weak self] in
             guard let self = self else { return }
-            if self.lastAction?.message == self.lastAction?.message {
+            if self.lastAction?.message == actionAtScheduleTime?.message {
                 self.lastAction = nil
             }
         }
@@ -51,9 +52,10 @@ class BookmarkManager: ObservableObject {
         self.lastAction = .removed(tab.shortTitle)
 
         // Clear action after delay
+        let actionAtScheduleTime = self.lastAction
         DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) { [weak self] in
             guard let self = self else { return }
-            if self.lastAction?.message == self.lastAction?.message {
+            if self.lastAction?.message == actionAtScheduleTime?.message {
                 self.lastAction = nil
             }
         }
