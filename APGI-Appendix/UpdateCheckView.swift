@@ -18,7 +18,7 @@ struct UpdateCheckView: View {
                 .font(.title2.weight(.bold))
                 .padding(.top)
 
-            if isCheckingForUpdates {
+            if self.isCheckingForUpdates {
                 VStack(spacing: 16) {
                     ProgressView()
                         .scaleEffect(1.2)
@@ -26,7 +26,8 @@ struct UpdateCheckView: View {
                         .foregroundStyle(.secondary)
                 }
                 .frame(height: 100)
-            } else if updateAvailable {
+            }
+            else if self.updateAvailable {
                 VStack(spacing: 16) {
                     Image(systemName: "arrow.down.circle.fill")
                         .font(.system(size: 48))
@@ -35,11 +36,11 @@ struct UpdateCheckView: View {
                     Text("Update Available")
                         .font(.headline.weight(.semibold))
 
-                    Text("Version \(latestVersion) is available")
+                    Text("Version \(self.latestVersion) is available")
                         .foregroundStyle(.secondary)
 
-                    if !updateNotes.isEmpty {
-                        Text(updateNotes)
+                    if !self.updateNotes.isEmpty {
+                        Text(self.updateNotes)
                             .font(.caption)
                             .foregroundStyle(.secondary)
                             .multilineTextAlignment(.center)
@@ -49,17 +50,18 @@ struct UpdateCheckView: View {
                     HStack(spacing: 12) {
                         Button("Download Update") {
                             // Handle download
-                            dismiss()
+                            self.dismiss()
                         }
                         .buttonStyle(.borderedProminent)
 
                         Button("Later") {
-                            dismiss()
+                            self.dismiss()
                         }
                         .buttonStyle(.bordered)
                     }
                 }
-            } else if !errorMessage.isEmpty {
+            }
+            else if !self.errorMessage.isEmpty {
                 VStack(spacing: 16) {
                     Image(systemName: "exclamationmark.triangle.fill")
                         .font(.system(size: 48))
@@ -68,17 +70,18 @@ struct UpdateCheckView: View {
                     Text("Update Check Failed")
                         .font(.headline.weight(.semibold))
 
-                    Text(errorMessage)
+                    Text(self.errorMessage)
                         .foregroundStyle(.secondary)
                         .multilineTextAlignment(.center)
                         .padding(.horizontal)
 
                     Button("Retry") {
-                        checkForUpdates()
+                        self.checkForUpdates()
                     }
                     .buttonStyle(.borderedProminent)
                 }
-            } else {
+            }
+            else {
                 VStack(spacing: 16) {
                     Image(systemName: "checkmark.circle.fill")
                         .font(.system(size: 48))
@@ -87,11 +90,11 @@ struct UpdateCheckView: View {
                     Text("You're up to date")
                         .font(.headline.weight(.semibold))
 
-                    Text("Version \(currentVersion)")
+                    Text("Version \(self.currentVersion)")
                         .foregroundStyle(.secondary)
 
                     Button("OK") {
-                        dismiss()
+                        self.dismiss()
                     }
                     .buttonStyle(.borderedProminent)
                 }
@@ -100,21 +103,21 @@ struct UpdateCheckView: View {
         .padding(30)
         .frame(width: 400, height: 300)
         .onAppear {
-            checkForUpdates()
+            self.checkForUpdates()
         }
     }
 
     private func checkForUpdates() {
-        isCheckingForUpdates = true
-        errorMessage = ""
+        self.isCheckingForUpdates = true
+        self.errorMessage = ""
 
         // Simulate update check
         DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
-            isCheckingForUpdates = false
+            self.isCheckingForUpdates = false
 
             // For now, assume no update is available
             // In a real app, this would check an API endpoint
-            updateAvailable = false
+            self.updateAvailable = false
         }
     }
 }

@@ -13,7 +13,7 @@ struct WhatsNewView: View {
                 "Remote glossary and bibliography fetching",
                 "Automatic content updates",
                 "Enhanced search capabilities",
-                "Network settings panel"
+                "Network settings panel",
             ]
         ),
         Update(
@@ -24,7 +24,7 @@ struct WhatsNewView: View {
                 "Dynamic table parsing from multiple formats",
                 "Markdown, CSV, TSV, and JSON support",
                 "Export capabilities for all table formats",
-                "Eliminated hardcoded table data"
+                "Eliminated hardcoded table data",
             ]
         ),
         Update(
@@ -35,9 +35,9 @@ struct WhatsNewView: View {
                 "Complete APGI framework reference",
                 "Interactive navigation system",
                 "Comprehensive search functionality",
-                "Accessibility features throughout"
+                "Accessibility features throughout",
             ]
-        )
+        ),
     ]
 
     var body: some View {
@@ -45,7 +45,7 @@ struct WhatsNewView: View {
             HStack {
                 Spacer()
                 Button("Done") {
-                    dismiss()
+                    self.dismiss()
                 }
                 .buttonStyle(.bordered)
             }
@@ -53,14 +53,14 @@ struct WhatsNewView: View {
 
             ScrollView {
                 VStack(alignment: .leading, spacing: 24) {
-                    header
+                    self.header
 
                     LazyVStack(spacing: 16) {
-                        ForEach(updates) { update in
+                        ForEach(self.updates) { update in
                             UpdateCard(update: update)
                         }
 
-                        footer
+                        self.footer
                     }
                     .padding()
                 }
@@ -100,35 +100,35 @@ struct WhatsNewView: View {
                     urlString: "https://docs.apgi-framework.org",
                     fallbackTitle: "Local Documentation"
                 ) {
-                    showLocalDocumentation()
+                    self.showLocalDocumentation()
                 }
-                
+
                 SafeLink(
                     title: "Report Issues",
                     urlString: "https://github.com/apgi/framework/issues",
                     fallbackTitle: "Local Support"
                 ) {
-                    showLocalSupport()
+                    self.showLocalSupport()
                 }
             }
             .font(.caption)
         }
     }
-    
+
     private func showLocalDocumentation() {
         let docContent = URLValidator.shared.getLocalHelpContent()
-        
+
         let docWindow = NSWindow(
             contentRect: NSRect(x: 0, y: 0, width: 600, height: 700),
             styleMask: [.titled, .closable, .resizable],
             backing: .buffered,
             defer: false
         )
-        
+
         docWindow.title = "APGI Documentation"
         docWindow.center()
         docWindow.setFrameAutosaveName("DocumentationWindow")
-        
+
         let docView = ScrollView {
             VStack(alignment: .leading, spacing: 16) {
                 Text(docContent)
@@ -138,27 +138,27 @@ struct WhatsNewView: View {
             }
             .frame(maxWidth: .infinity, alignment: .leading)
         }
-        
+
         docWindow.contentView = NSHostingView(rootView: docView)
         docWindow.makeKeyAndOrderFront(nil)
     }
-    
+
     private func showLocalSupport() {
         let alert = NSAlert()
         alert.messageText = "APGI Appendix Support"
         alert.informativeText = """
         For support with APGI Appendix:
-        
+
         1. Check the built-in help documentation (⌘?)
         2. Use the search function to find specific topics
         3. Explore the glossary for terminology
         4. Try the interactive simulator for hands-on learning
-        
+
         If you continue to experience issues, please:
         - Restart the application
         - Check for updates in Settings
         - Contact your system administrator
-        
+
         Note: External links are currently unavailable. All features are available locally within the application.
         """
         alert.alertStyle = .informational
@@ -174,17 +174,17 @@ struct UpdateCard: View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
                 VStack(alignment: .leading, spacing: 4) {
-                    Text(update.title)
+                    Text(self.update.title)
                         .font(.headline.bold())
 
-                    Text("Version \(update.version) • \(update.date)")
+                    Text("Version \(self.update.version) • \(self.update.date)")
                         .font(.subheadline)
                         .foregroundColor(.secondary)
                 }
 
                 Spacer()
 
-                Text(update.version)
+                Text(self.update.version)
                     .font(.caption)
                     .padding(.horizontal, 8)
                     .padding(.vertical, 4)
@@ -194,7 +194,7 @@ struct UpdateCard: View {
             }
 
             VStack(alignment: .leading, spacing: 6) {
-                ForEach(update.features, id: \.self) { feature in
+                ForEach(self.update.features, id: \.self) { feature in
                     HStack(alignment: .top, spacing: 8) {
                         Image(systemName: "checkmark.circle.fill")
                             .font(.caption)

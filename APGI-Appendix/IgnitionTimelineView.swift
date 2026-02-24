@@ -1,5 +1,5 @@
-import SwiftUI
 import Combine
+import SwiftUI
 
 struct InteractiveTimelineView: View {
     struct TimelineEvent: Identifiable {
@@ -32,7 +32,7 @@ struct InteractiveTimelineView: View {
         }
 
         var durationMs: Int {
-            max(0, timeRange.upperBound - timeRange.lowerBound)
+            max(0, self.timeRange.upperBound - self.timeRange.lowerBound)
         }
     }
 
@@ -42,65 +42,65 @@ struct InteractiveTimelineView: View {
 
     private let events: [TimelineEvent] = [
         .init(
-            timeRange: 0...50,
+            timeRange: 0 ... 50,
             title: "Trigger",
             description: "Matrix thalamus (pulvinar/MD) projects to L1 apical tufts; neuromodulatory gain disinhibits thalamus, initiating apical integration.",
             category: .trigger
         ),
         .init(
-            timeRange: 50...100,
+            timeRange: 50 ... 100,
             title: "Amplification",
             description: "NMDA-mediated Ca²⁺ spikes in L5 apical dendrites; somatic bursting begins if coincident with basal input; competition intensifies.",
             category: .amplification
         ),
         .init(
-            timeRange: 100...150,
+            timeRange: 100 ... 150,
             title: "Local Stabilization",
             description: "L5 burst output propagates to L2/3; recurrent excitation begins; local gamma (30–80 Hz) rises and horizontal integration starts.",
             category: .stabilization
         ),
         .init(
-            timeRange: 150...200,
+            timeRange: 150 ... 200,
             title: "Salience Broadcast",
             description: "Long-range gamma phase-locking initiates across frontal/parietal/insular regions; P3a (~200 ms) reflects salience detection.",
             category: .broadcast
         ),
         .init(
-            timeRange: 200...250,
+            timeRange: 200 ... 250,
             title: "Consolidation",
             description: "Sustained high-firing attractor consolidates; TRN re-engagement begins; pupillary dilation peaks (LC–NE burst) as metastability emerges.",
             category: .consolidation
         ),
         .init(
-            timeRange: 250...300,
+            timeRange: 250 ... 300,
             title: "Ignition Confirmation",
             description: "P3b (~300 ms) peaks; peak gamma synchrony across frontoparietal/temporal regions; global availability becomes reportable and memory-encodable.",
             category: .consolidation
         ),
         .init(
-            timeRange: 300...350,
+            timeRange: 300 ... 350,
             title: "Memory & Report",
             description: "Hippocampal sharp-wave ripples begin encoding; language areas engage if verbal report is required.",
             category: .memory
         ),
         .init(
-            timeRange: 350...400,
+            timeRange: 350 ... 400,
             title: "Refractory Initiation",
             description: "Threshold rises (post-ignition refractoriness); SOM⁺ interneurons enforce feedback inhibition, preparing for attentional blink.",
             category: .refractory
         ),
         .init(
-            timeRange: 400...450,
+            timeRange: 400 ... 450,
             title: "Stabilization / Decay",
             description: "Frontoparietal firing remains elevated but can decay without maintenance; alpha rebounds and inhibitory tone reinstates.",
             category: .stabilization
         ),
         .init(
-            timeRange: 450...500,
+            timeRange: 450 ... 500,
             title: "Temporal Integration",
             description: "Activity returns toward baseline in non-maintained trials; theta-phase binding may group ignition into a ~3-second narrative window.",
             category: .memory
-        )
+        ),
     ]
 
     @State private var selectedEventID: TimelineEvent.ID?
@@ -110,7 +110,7 @@ struct InteractiveTimelineView: View {
     private let timer: Publishers.Autoconnect<Timer.TimerPublisher>
 
     init() {
-        self.timer = Timer.publish(every: tickInterval, on: .main, in: .common).autoconnect()
+        self.timer = Timer.publish(every: self.tickInterval, on: .main, in: .common).autoconnect()
     }
 
     var body: some View {
@@ -123,16 +123,20 @@ struct InteractiveTimelineView: View {
 
                 HStack(spacing: 12) {
                     Button {
-                        isPlaying.toggle()
+                        self.isPlaying.toggle()
                     } label: {
-                        Image(systemName: isPlaying ? "pause.fill" : "play.fill")
+                        Image(systemName: self.isPlaying ? "pause.fill" : "play.fill")
                     }
+                    .accessibilityLabel(self.isPlaying ? "Pause timeline animation" : "Play timeline animation")
+                    .accessibilityHint("Controls the automatic progression through the ignition timeline")
 
                     Button {
-                        reset()
+                        self.reset()
                     } label: {
                         Image(systemName: "arrow.counterclockwise")
                     }
+                    .accessibilityLabel("Reset timeline")
+                    .accessibilityHint("Returns the timeline to the beginning")
                 }
                 .buttonStyle(.bordered)
             }
@@ -142,10 +146,13 @@ struct InteractiveTimelineView: View {
                     RoundedRectangle(cornerRadius: 8)
                         .fill(Color.primary.opacity(0.05))
                         .frame(height: 120)
+                        .accessibilityLabel("Ignition timeline scrubber")
+                        .accessibilityHint("Drag to scrub through the timeline or use arrow keys to navigate")
+                        .accessibilityValue("\(self.currentTime) milliseconds")
 
-                    ForEach(events) { event in
-                        let startX = CGFloat(event.timeRange.lowerBound) / CGFloat(maxTime) * geometry.size.width
-                        let width = CGFloat(event.durationMs) / CGFloat(maxTime) * geometry.size.width
+                    ForEach(self.events) { event in
+                        let startX = CGFloat(event.timeRange.lowerBound) / CGFloat(self.maxTime) * geometry.size.width
+                        let width = CGFloat(event.durationMs) / CGFloat(self.maxTime) * geometry.size.width
                         let isSelected = selectedEventID == event.id
 
                         VStack(alignment: .leading, spacing: 4) {
@@ -171,30 +178,54 @@ struct InteractiveTimelineView: View {
                             selectedEventID = event.id
                         }
                         .accessibilityLabel("\(event.title), \(event.timeRange.lowerBound) to \(event.timeRange.upperBound) milliseconds")
+                        .accessibilityHint("Tap to view details for this ignition phase")
+                        .accessibilityAddTraits(.isButton)
                     }
 
                     Rectangle()
                         .fill(Color.red)
                         .frame(width: 2, height: 120)
-                        .offset(x: CGFloat(currentTime) / CGFloat(maxTime) * geometry.size.width)
+                        .offset(x: CGFloat(self.currentTime) / CGFloat(self.maxTime) * geometry.size.width)
+                        .accessibilityHidden(true) // The timeline itself provides the value
                 }
                 .gesture(
                     DragGesture(minimumDistance: 0)
                         .onChanged { value in
-                            isPlaying = false
+                            self.isPlaying = false
                             let ratio = min(max(0, value.location.x / max(1, geometry.size.width)), 1)
-                            currentTime = Int((Double(ratio) * Double(maxTime)).rounded())
+                            self.currentTime = Int((Double(ratio) * Double(self.maxTime)).rounded())
                         }
                 )
+                .accessibilityAction(named: "Move to previous event") {
+                    if let currentEvent = events.first(where: { $0.timeRange.contains(currentTime) }),
+                       let currentIndex = events.firstIndex(where: { $0.id == currentEvent.id }),
+                       currentIndex > 0
+                    {
+                        let previousEvent = self.events[currentIndex - 1]
+                        self.currentTime = previousEvent.timeRange.lowerBound
+                        selectedEventID = previousEvent.id
+                    }
+                }
+                .accessibilityAction(named: "Move to next event") {
+                    if let currentEvent = events.first(where: { $0.timeRange.contains(currentTime) }),
+                       let currentIndex = events.firstIndex(where: { $0.id == currentEvent.id }),
+                       currentIndex < events.count - 1
+                    {
+                        let nextEvent = self.events[currentIndex + 1]
+                        self.currentTime = nextEvent.timeRange.lowerBound
+                        selectedEventID = nextEvent.id
+                    }
+                }
             }
             .frame(height: 120)
-            .onReceive(timer) { _ in
-                guard isPlaying else { return }
-                if currentTime < maxTime {
-                    currentTime = min(maxTime, currentTime + tickMs)
-                } else {
-                    isPlaying = false
-                    currentTime = 0
+            .onReceive(self.timer) { _ in
+                guard self.isPlaying else { return }
+                if self.currentTime < self.maxTime {
+                    self.currentTime = min(self.maxTime, self.currentTime + self.tickMs)
+                }
+                else {
+                    self.isPlaying = false
+                    self.currentTime = 0
                 }
             }
 
@@ -205,13 +236,14 @@ struct InteractiveTimelineView: View {
                         .foregroundStyle(.secondary)
                         .frame(
                             maxWidth: .infinity,
-                            alignment: time == 0 ? .leading : (time == maxTime ? .trailing : .center)
+                            alignment: time == 0 ? .leading : (time == self.maxTime ? .trailing : .center)
                         )
                 }
             }
 
             if let selectedEventID,
-               let event = events.first(where: { $0.id == selectedEventID }) {
+               let event = events.first(where: { $0.id == selectedEventID })
+            {
                 VStack(alignment: .leading, spacing: 8) {
                     HStack(alignment: .firstTextBaseline, spacing: 8) {
                         Circle()
@@ -237,15 +269,15 @@ struct InteractiveTimelineView: View {
         }
         .padding()
         .onAppear {
-            if selectedEventID == nil {
-                selectedEventID = events.first?.id
+            if self.selectedEventID == nil {
+                self.selectedEventID = self.events.first?.id
             }
         }
     }
 
     private func reset() {
-        currentTime = 0
-        isPlaying = false
+        self.currentTime = 0
+        self.isPlaying = false
     }
 }
 

@@ -8,51 +8,57 @@ struct FocusModeView: View {
     @AppStorage("contentFontSize") private var fontSize: Double = 15.0
 
     var body: some View {
-        ZStack {
-            Color.black.opacity(0.4)
-                .ignoresSafeArea()
-                .onTapGesture {
-                    isEnabled = false
-                }
-
-            VStack(spacing: 0) {
-                HStack {
-                    Text(title)
-                        .font(.title2.bold())
-
-                    Spacer()
-
-                    Button {
-                        isEnabled = false
-                    } label: {
-                        Image(systemName: "xmark")
-                            .font(.title3)
+        GeometryReader { geometry in
+            ZStack {
+                Color.black.opacity(0.4)
+                    .ignoresSafeArea()
+                    .onTapGesture {
+                        self.isEnabled = false
                     }
-                    .buttonStyle(.plain)
-                    .foregroundStyle(.secondary)
-                    .apgiAccessibility(
-                        label: "Close focus mode",
-                        hint: "Return to the main content view",
-                        traits: .isButton
-                    )
-                    .keyboardShortcut("w", modifiers: [.command])
-                }
-                .padding()
-                .background(.bar)
 
-                ScrollView {
-                    LazyGlossaryHighlightedContent(text: content)
-                        .font(.system(size: fontSize, design: .serif))
-                        .lineSpacing(8)
-                        .padding(40)
-                        .frame(maxWidth: 650, alignment: .leading)
-                        .textSelection(.enabled)
+                VStack(spacing: 0) {
+                    HStack {
+                        Text(self.title)
+                            .font(.title2.bold())
+
+                        Spacer()
+
+                        Button {
+                            self.isEnabled = false
+                        } label: {
+                            Image(systemName: "xmark")
+                                .font(.title3)
+                        }
+                        .buttonStyle(.plain)
+                        .foregroundStyle(.secondary)
+                        .apgiAccessibility(
+                            label: "Close focus mode",
+                            hint: "Return to the main content view",
+                            traits: .isButton
+                        )
+                        .keyboardShortcut("w", modifiers: [.command])
+                    }
+                    .padding()
+                    .background(.bar)
+
+                    ScrollView {
+                        LazyGlossaryHighlightedContent(text: self.content)
+                            .font(.system(size: self.fontSize, design: .serif))
+                            .lineSpacing(8)
+                            .padding(geometry.size.width > 600 ? 40 : 20) // Responsive padding
+                            .frame(maxWidth: geometry.size.width > 600 ? 650 : .infinity, alignment: .leading) // Responsive width
+                            .textSelection(.enabled)
+                    }
+                    .background(.background)
                 }
-                .background(.background)
+                .frame(
+                    width: min(geometry.size.width * 0.9, 800), // Responsive width
+                    height: min(geometry.size.height * 0.9, 700) // Responsive height
+                )
+                .clipShape(RoundedRectangle(cornerRadius: 16))
+                .shadow(radius: 20)
+                .position(x: geometry.size.width / 2, y: geometry.size.height / 2) // Center the overlay
             }
-            .frame(maxWidth: 800, maxHeight: 700)
-            .clipShape(RoundedRectangle(cornerRadius: 16))
-            .shadow(radius: 20)
         }
     }
 }
@@ -70,7 +76,7 @@ struct ReadingProgressView: View {
 
                     RoundedRectangle(cornerRadius: 2)
                         .fill(Color.accentColor)
-                        .frame(width: max(0, geometry.size.width * progress))
+                        .frame(width: max(0, geometry.size.width * self.progress))
                 }
             }
             .frame(height: 4)
@@ -78,7 +84,7 @@ struct ReadingProgressView: View {
             HStack(spacing: 4) {
                 Image(systemName: "clock")
                     .font(.caption)
-                Text("\(estimatedTime) min")
+                Text("\(self.estimatedTime) min")
                     .font(.caption.monospacedDigit())
             }
             .foregroundStyle(.secondary)
@@ -93,23 +99,23 @@ struct FontSizeControl: View {
     var body: some View {
         HStack(spacing: 8) {
             Button {
-                fontSize = max(12, fontSize - 1)
+                self.fontSize = max(12, self.fontSize - 1)
             } label: {
                 Image(systemName: "textformat.size.smaller")
             }
-            .disabled(fontSize <= 12)
+            .disabled(self.fontSize <= 12)
 
-            Text("\(Int(fontSize))pt")
+            Text("\(Int(self.fontSize))pt")
                 .font(.caption.monospacedDigit())
                 .foregroundStyle(.secondary)
                 .frame(width: 40)
 
             Button {
-                fontSize = min(24, fontSize + 1)
+                self.fontSize = min(24, self.fontSize + 1)
             } label: {
                 Image(systemName: "textformat.size.larger")
             }
-            .disabled(fontSize >= 24)
+            .disabled(self.fontSize >= 24)
         }
         .buttonStyle(.borderless)
     }

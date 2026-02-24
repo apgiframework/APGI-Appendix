@@ -1,15 +1,15 @@
-import Foundation
-import CoreML
 import AppKit
+import CoreML
+import Foundation
 
 class CoreMLMemoryManager {
-    public static let shared = CoreMLMemoryManager()
+    static let shared = CoreMLMemoryManager()
 
     private var isUnderMemoryPressure = false
     private var memoryOptimizationLevel: MemoryOptimizationLevel = .normal
 
-    public init() {
-        setupMemoryMonitoring()
+    init() {
+        self.setupMemoryMonitoring()
     }
 
     private func setupMemoryMonitoring() {
@@ -18,8 +18,8 @@ class CoreMLMemoryManager {
     }
 
     @objc private func handleMemoryWarning() {
-        isUnderMemoryPressure = true
-        memoryOptimizationLevel = .aggressive
+        self.isUnderMemoryPressure = true
+        self.memoryOptimizationLevel = .aggressive
 
         // Reset after 30 seconds
         DispatchQueue.main.asyncAfter(deadline: .now() + 30) {
@@ -29,12 +29,12 @@ class CoreMLMemoryManager {
     }
 
     func optimizeForMemoryPressure() {
-        isUnderMemoryPressure = true
-        memoryOptimizationLevel = .aggressive
+        self.isUnderMemoryPressure = true
+        self.memoryOptimizationLevel = .aggressive
     }
 
     func getOptimizedConfiguration(for baseConfig: APGIConfiguration) -> APGIConfiguration {
-        switch memoryOptimizationLevel {
+        switch self.memoryOptimizationLevel {
         case .normal:
             return baseConfig
         case .moderate:
@@ -115,11 +115,11 @@ class CoreMLMemoryManager {
     }
 
     func shouldBatchInferences() -> Bool {
-        return isUnderMemoryPressure
+        return self.isUnderMemoryPressure
     }
 
     func getInferenceBatchSize() -> Int {
-        switch memoryOptimizationLevel {
+        switch self.memoryOptimizationLevel {
         case .normal: return 1
         case .moderate: return 2
         case .aggressive: return 4
@@ -136,7 +136,7 @@ class CoreMLMemoryManager {
     }
 
     func shouldReduceModelComplexity() -> Bool {
-        return memoryOptimizationLevel == .aggressive
+        return self.memoryOptimizationLevel == .aggressive
     }
 }
 
@@ -160,7 +160,7 @@ extension MLMultiArray {
 
         let newArray = try MLMultiArray(shape: self.shape, dataType: .float32)
 
-        for index in 0..<self.count {
+        for index in 0 ..< self.count {
             let value = self[index].doubleValue
             newArray[index] = NSNumber(value: Float(value))
         }
@@ -176,14 +176,15 @@ class MLMultiArrayPool {
     private var availableArrays: [String: [MLMultiArray]] = [:]
     private let maxPoolSize = 10
 
-    private init() {}
+    private init() {
+    }
 
     func getArray(shape: [NSNumber], dataType: MLMultiArrayDataType) -> MLMultiArray {
-        let key = arrayKey(shape: shape, dataType: dataType)
+        let key = self.arrayKey(shape: shape, dataType: dataType)
 
         if var pool = availableArrays[key], !pool.isEmpty {
             let array = pool.removeLast()
-            availableArrays[key] = pool
+            self.availableArrays[key] = pool
             return array
         }
 
@@ -191,15 +192,16 @@ class MLMultiArrayPool {
     }
 
     func returnArray(_ array: MLMultiArray) {
-        let key = arrayKey(shape: array.shape, dataType: array.dataType)
+        let key = self.arrayKey(shape: array.shape, dataType: array.dataType)
 
         if var pool = availableArrays[key] {
-            if pool.count < maxPoolSize {
+            if pool.count < self.maxPoolSize {
                 pool.append(array)
-                availableArrays[key] = pool
+                self.availableArrays[key] = pool
             }
-        } else {
-            availableArrays[key] = [array]
+        }
+        else {
+            self.availableArrays[key] = [array]
         }
     }
 
@@ -209,6 +211,6 @@ class MLMultiArrayPool {
     }
 
     func clearPool() {
-        availableArrays.removeAll()
+        self.availableArrays.removeAll()
     }
 }

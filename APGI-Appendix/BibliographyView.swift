@@ -10,7 +10,7 @@ struct BibliographyCardView: View {
     var body: some View {
         EnhancedContentCard(
             title: "Bibliography",
-            content: bibliographyBody,
+            content: self.bibliographyBody,
             category: SectionCategory.reference,
             hasDataTable: false
         )

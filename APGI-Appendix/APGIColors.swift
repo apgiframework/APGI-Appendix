@@ -68,7 +68,7 @@ enum APGISpacing {
     static let xl: CGFloat = 24
     static let xxl: CGFloat = 32
     static let xxxl: CGFloat = 48
-    
+
     // Additional spacing properties for compatibility
     static let xs: CGFloat = 4
     static let sm: CGFloat = 6

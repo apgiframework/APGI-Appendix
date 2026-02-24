@@ -1,7 +1,7 @@
-import SwiftUI
 import AppKit
 import Combine
 import Foundation
+import SwiftUI
 
 // MARK: - App Theme
 
@@ -10,7 +10,9 @@ enum AppTheme: String, CaseIterable, Identifiable {
     case dark = "Dark"
     case system = "System"
 
-    var id: String { rawValue }
+    var id: String {
+        rawValue
+    }
 
     var icon: String {
         switch self {
@@ -26,16 +28,25 @@ enum AppTheme: String, CaseIterable, Identifiable {
 class ThemeManager: ObservableObject {
     static let shared = ThemeManager()
 
-    @Published var selectedTheme: AppTheme = .system
+    @Published var selectedTheme: AppTheme = .system {
+        didSet {
+            // Immediately apply theme change across all windows
+            self.applyTheme()
+            // Save settings immediately for persistence
+            UserDefaults.standard.set(self.selectedTheme.rawValue, forKey: "selectedTheme")
+            UserDefaults.standard.synchronize()
+        }
+    }
+
     @Published var highContrastMode: Bool = false
-    @AppStorage("contentFontSize") public var fontSize: Double = 15.0
-    @AppStorage("enableAnimations") public var enableAnimations: Bool = true
-    @AppStorage("sidebarVisible") public var sidebarVisible: Bool = true
-    @AppStorage("focusModeEnabled") public var focusModeEnabled: Bool = false
-    @AppStorage("autoSaveBookmarks") public var autoSaveBookmarks: Bool = true
+    @AppStorage("contentFontSize") var fontSize: Double = 15.0
+    @AppStorage("enableAnimations") var enableAnimations: Bool = true
+    @AppStorage("sidebarVisible") var sidebarVisible: Bool = true
+    @AppStorage("focusModeEnabled") var focusModeEnabled: Bool = false
+    @AppStorage("autoSaveBookmarks") var autoSaveBookmarks: Bool = true
 
     var backgroundColor: Color {
-        switch selectedTheme {
+        switch self.selectedTheme {
         case .light:
             return Color(NSColor.controlBackgroundColor)
         case .dark:
@@ -46,8 +57,8 @@ class ThemeManager: ObservableObject {
     }
 
     private init() {
-        loadSettings()
-        setupAutoSave()
+        self.loadSettings()
+        self.setupAutoSave()
     }
 
     private func setupAutoSave() {
@@ -61,7 +72,7 @@ class ThemeManager: ObservableObject {
     }
 
     func applyTheme() {
-        switch selectedTheme {
+        switch self.selectedTheme {
         case .light:
             NSApp.appearance = NSAppearance(named: .aqua)
         case .dark:
@@ -73,41 +84,42 @@ class ThemeManager: ObservableObject {
 
     private func loadSettings() {
         if let themeRaw = UserDefaults.standard.string(forKey: "selectedTheme"),
-           let theme = AppTheme(rawValue: themeRaw) {
-            selectedTheme = theme
+           let theme = AppTheme(rawValue: themeRaw)
+        {
+            self.selectedTheme = theme
         }
 
-        highContrastMode = UserDefaults.standard.bool(forKey: "highContrastMode")
-        fontSize = UserDefaults.standard.object(forKey: "contentFontSize") as? Double ?? 15.0
-        enableAnimations = UserDefaults.standard.object(forKey: "enableAnimations") as? Bool ?? true
-        sidebarVisible = UserDefaults.standard.object(forKey: "sidebarVisible") as? Bool ?? true
-        focusModeEnabled = UserDefaults.standard.object(forKey: "focusModeEnabled") as? Bool ?? false
-        autoSaveBookmarks = UserDefaults.standard.object(forKey: "autoSaveBookmarks") as? Bool ?? true
+        self.highContrastMode = UserDefaults.standard.bool(forKey: "highContrastMode")
+        self.fontSize = UserDefaults.standard.object(forKey: "contentFontSize") as? Double ?? 15.0
+        self.enableAnimations = UserDefaults.standard.object(forKey: "enableAnimations") as? Bool ?? true
+        self.sidebarVisible = UserDefaults.standard.object(forKey: "sidebarVisible") as? Bool ?? true
+        self.focusModeEnabled = UserDefaults.standard.object(forKey: "focusModeEnabled") as? Bool ?? false
+        self.autoSaveBookmarks = UserDefaults.standard.object(forKey: "autoSaveBookmarks") as? Bool ?? true
 
-        applyTheme()
+        self.applyTheme()
     }
 
     func saveSettings() {
-        UserDefaults.standard.set(selectedTheme.rawValue, forKey: "selectedTheme")
-        UserDefaults.standard.set(highContrastMode, forKey: "highContrastMode")
-        UserDefaults.standard.set(fontSize, forKey: "contentFontSize")
-        UserDefaults.standard.set(enableAnimations, forKey: "enableAnimations")
-        UserDefaults.standard.set(sidebarVisible, forKey: "sidebarVisible")
-        UserDefaults.standard.set(focusModeEnabled, forKey: "focusModeEnabled")
-        UserDefaults.standard.set(autoSaveBookmarks, forKey: "autoSaveBookmarks")
+        UserDefaults.standard.set(self.selectedTheme.rawValue, forKey: "selectedTheme")
+        UserDefaults.standard.set(self.highContrastMode, forKey: "highContrastMode")
+        UserDefaults.standard.set(self.fontSize, forKey: "contentFontSize")
+        UserDefaults.standard.set(self.enableAnimations, forKey: "enableAnimations")
+        UserDefaults.standard.set(self.sidebarVisible, forKey: "sidebarVisible")
+        UserDefaults.standard.set(self.focusModeEnabled, forKey: "focusModeEnabled")
+        UserDefaults.standard.set(self.autoSaveBookmarks, forKey: "autoSaveBookmarks")
 
         UserDefaults.standard.synchronize()
     }
 
     func resetToDefaults() {
-        fontSize = 15.0
-        enableAnimations = true
-        sidebarVisible = true
-        focusModeEnabled = false
-        autoSaveBookmarks = true
-        selectedTheme = .system
-        highContrastMode = false
-        saveSettings()
+        self.fontSize = 15.0
+        self.enableAnimations = true
+        self.sidebarVisible = true
+        self.focusModeEnabled = false
+        self.autoSaveBookmarks = true
+        self.selectedTheme = .system
+        self.highContrastMode = false
+        self.saveSettings()
     }
 }
 

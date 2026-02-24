@@ -1,6 +1,7 @@
 import SwiftUI
 
 // MARK: - Guided Tour View
+
 struct GuidedTour: View {
     @StateObject private var manager = OnboardingManager.shared
     @State private var animateContent = false
@@ -17,35 +18,36 @@ struct GuidedTour: View {
 
             VStack(spacing: 0) {
                 // Progress bar
-                progressBar
+                self.progressBar
 
                 // Main content
-                if manager.currentStep < manager.steps.count {
-                    stepView(manager.steps[manager.currentStep], index: manager.currentStep)
+                if self.manager.currentStep < self.manager.steps.count {
+                    self.stepView(self.manager.steps[self.manager.currentStep], index: self.manager.currentStep)
                 }
 
                 // Navigation buttons
-                navigationButtons
+                self.navigationButtons
             }
             .padding(.bottom, 40)
         }
         .onAppear {
             withAnimation(.easeInOut(duration: 0.5).delay(0.3)) {
-                animateContent = true
+                self.animateContent = true
             }
         }
     }
 
     // MARK: - Progress Bar
+
     private var progressBar: some View {
         HStack(spacing: 6) {
-            ForEach(0..<manager.steps.count, id: \.self) { index in
+            ForEach(0 ..< self.manager.steps.count, id: \.self) { index in
                 Capsule()
-                    .fill(index <= manager.currentStep
-                          ? manager.steps[manager.currentStep].highlightColor
-                          : Color.white.opacity(0.3))
+                    .fill(index <= self.manager.currentStep
+                        ? self.manager.steps[self.manager.currentStep].highlightColor
+                        : Color.white.opacity(0.3))
                     .frame(height: 4)
-                    .animation(.spring(response: 0.3), value: manager.currentStep)
+                    .animation(.spring(response: 0.3), value: self.manager.currentStep)
             }
         }
         .padding(.horizontal, 40)
@@ -53,12 +55,13 @@ struct GuidedTour: View {
     }
 
     // MARK: - Step View
-    private func stepView(_ step: OnboardingStep, index: Int) -> some View {
+
+    private func stepView(_ step: OnboardingStep, index _: Int) -> some View {
         VStack(spacing: 24) {
             Spacer()
-            stepIconView(step: step)
-            stepContentView(step: step)
-            stepTipsView(step: step)
+            self.stepIconView(step: step)
+            self.stepContentView(step: step)
+            self.stepTipsView(step: step)
             Spacer()
         }
     }
@@ -74,7 +77,7 @@ struct GuidedTour: View {
             Image(systemName: step.imageName)
                 .font(.system(size: 44, weight: .medium))
                 .foregroundColor(.white)
-                .symbolEffect(.bounce, value: manager.currentStep)
+                .symbolEffect(.bounce, value: self.manager.currentStep)
         }
     }
 
@@ -92,8 +95,8 @@ struct GuidedTour: View {
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, 40)
         }
-        .scaleEffect(animateContent ? 1 : 0.5)
-        .opacity(animateContent ? 1 : 0)
+        .scaleEffect(self.animateContent ? 1 : 0.5)
+        .opacity(self.animateContent ? 1 : 0)
     }
 
     private func stepTipsView(step: OnboardingStep) -> some View {
@@ -107,27 +110,28 @@ struct GuidedTour: View {
                         .font(.system(size: 13))
                         .foregroundColor(.white.opacity(0.9))
                 }
-                .offset(x: animateContent ? 0 : -20)
-                .opacity(animateContent ? 1 : 0)
+                .offset(x: self.animateContent ? 0 : -20)
+                .opacity(self.animateContent ? 1 : 0)
                 .animation(
                     .spring(response: 0.4).delay(Double(tipIndex) * 0.1),
-                    value: animateContent
+                    value: self.animateContent
                 )
             }
         }
         .padding(.horizontal, 60)
         .padding(.top, 8)
-        .offset(y: animateContent ? 0 : 20)
-        .opacity(animateContent ? 1 : 0)
+        .offset(y: self.animateContent ? 0 : 20)
+        .opacity(self.animateContent ? 1 : 0)
     }
 
     // MARK: - Navigation Buttons
+
     private var navigationButtons: some View {
         HStack(spacing: 16) {
             // Skip button
-            if manager.currentStep < manager.steps.count - 1 {
+            if self.manager.currentStep < self.manager.steps.count - 1 {
                 Button("Skip") {
-                    manager.completeOnboarding()
+                    self.manager.completeOnboarding()
                 }
                 .buttonStyle(.plain)
                 .foregroundColor(.white.opacity(0.6))
@@ -136,10 +140,10 @@ struct GuidedTour: View {
             Spacer()
 
             // Previous button
-            if manager.currentStep > 0 {
+            if self.manager.currentStep > 0 {
                 Button("Previous") {
                     withAnimation(.spring(response: 0.4)) {
-                        manager.previousStep()
+                        self.manager.previousStep()
                     }
                 }
                 .buttonStyle(.bordered)
@@ -148,13 +152,14 @@ struct GuidedTour: View {
             }
 
             // Next/Get Started button
-            Button(manager.currentStep < manager.steps.count - 1 ? "Next" : "Get Started") {
-                if manager.currentStep < manager.steps.count - 1 {
+            Button(self.manager.currentStep < self.manager.steps.count - 1 ? "Next" : "Get Started") {
+                if self.manager.currentStep < self.manager.steps.count - 1 {
                     withAnimation(.spring(response: 0.4)) {
-                        manager.nextStep()
+                        self.manager.nextStep()
                     }
-                } else {
-                    manager.completeOnboarding()
+                }
+                else {
+                    self.manager.completeOnboarding()
                 }
             }
             .buttonStyle(.borderedProminent)

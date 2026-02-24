@@ -1,5 +1,5 @@
-import SwiftUI
 import Combine
+import SwiftUI
 
 struct HelpView: View {
     var body: some View {
@@ -15,13 +15,14 @@ struct HelpView: View {
 
             ScrollView {
                 VStack(alignment: .leading, spacing: 20) {
-                    let content = getLocalHelpContent()
+                    let content = self.getLocalHelpContent()
 
                     if content.isEmpty {
                         Text("No help content available")
                             .foregroundStyle(.secondary)
                             .padding()
-                    } else {
+                    }
+                    else {
                         LazyGlossaryHighlightedContent(text: content)
                             .frame(maxWidth: .infinity, alignment: .leading)
                     }
@@ -84,17 +85,17 @@ struct HelpSectionView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
-                Text(section.title)
+                Text(self.section.title)
                     .font(.headline)
 
                 Spacer()
 
-                Text("Updated: \(section.lastUpdated)")
+                Text("Updated: \(self.section.lastUpdated)")
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
 
-            Text(section.content)
+            Text(self.section.content)
                 .font(.body)
                 .foregroundStyle(.secondary)
         }

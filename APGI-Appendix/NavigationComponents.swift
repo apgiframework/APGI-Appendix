@@ -1,4 +1,5 @@
 import SwiftUI
+
 struct NavigationHeader: View {
     @Binding var selectedTab: Tab
     let onTabSelected: (Tab) -> Void
@@ -15,13 +16,13 @@ struct NavigationHeader: View {
                 GridItem(.flexible()),
                 GridItem(.flexible()),
                 GridItem(.flexible()),
-                GridItem(.flexible())
+                GridItem(.flexible()),
             ], spacing: 8) {
                 ForEach(Tab.allCases) { tab in
                     NavigationButton(
                         tab: tab,
-                        isSelected: selectedTab == tab,
-                        onTap: { onTabSelected(tab) }
+                        isSelected: self.selectedTab == tab,
+                        onTap: { self.onTabSelected(tab) }
                     )
                 }
             }
@@ -39,15 +40,15 @@ struct NavigationButton: View {
     let onTap: () -> Void
 
     var body: some View {
-        Button(action: onTap) {
+        Button(action: self.onTap) {
             VStack(spacing: 4) {
-                Image(systemName: tab.icon)
-                    .font(.system(size: 16, weight: isSelected ? .bold : .regular))
-                    .foregroundColor(isSelected ? .blue : .primary)
+                Image(systemName: self.tab.icon)
+                    .font(.system(size: 16, weight: self.isSelected ? .bold : .regular))
+                    .foregroundColor(self.isSelected ? .blue : .primary)
 
-                Text(shortenedTitle)
+                Text(self.shortenedTitle)
                     .font(.system(size: 10, weight: .medium))
-                    .foregroundColor(isSelected ? .blue : .primary)
+                    .foregroundColor(self.isSelected ? .blue : .primary)
                     .lineLimit(2)
                     .multilineTextAlignment(.center)
             }
@@ -55,23 +56,23 @@ struct NavigationButton: View {
             .padding(.vertical, 6)
             .background(
                 RoundedRectangle(cornerRadius: 8)
-                    .fill(isSelected ? Color.blue.opacity(0.1) : Color.clear)
+                    .fill(self.isSelected ? Color.blue.opacity(0.1) : Color.clear)
             )
             .overlay(
                 RoundedRectangle(cornerRadius: 8)
-                    .stroke(isSelected ? Color.blue : Color.clear, lineWidth: 1)
+                    .stroke(self.isSelected ? Color.blue : Color.clear, lineWidth: 1)
             )
         }
         .buttonStyle(PlainButtonStyle())
     }
 
     private var shortenedTitle: String {
-        let title = tab.rawValue
+        let title = self.tab.rawValue
         if title.count <= 20 {
             return title
         }
 
-        switch tab {
+        switch self.tab {
         case .methodology:
             return "Methodology"
         case .mathematicalModel:

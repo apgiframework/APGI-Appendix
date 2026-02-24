@@ -2,8 +2,7 @@ import Foundation
 
 // MARK: - APGI Simulator Constants
 
-struct APGISimulatorConstants {
-
+enum APGISimulatorConstants {
     // MARK: - Network Architecture
 
     static let defaultHiddenSize: Int = 128

@@ -1,6 +1,6 @@
+import Combine
 import Foundation
 import SwiftUI
-import Combine
 
 // MARK: - Table Data Models
 
@@ -16,19 +16,19 @@ struct ParsedTable {
     }
 
     var id: String {
-        return "table-\(headers.hashValue)-\(rows.hashValue)"
+        return "table-\(self.headers.hashValue)-\(self.rows.hashValue)"
     }
 
     var columnCount: Int {
-        return headers.count
+        return self.headers.count
     }
 
     var rowCount: Int {
-        return rows.count
+        return self.rows.count
     }
 
     var title: String? {
-        return metadata.title
+        return self.metadata.title
     }
 }
 
@@ -40,7 +40,8 @@ struct TableMetadata {
     let columnWidths: [CGFloat?]
 
     init(title: String? = nil, source: String? = nil, format: TableFormat = .markdown,
-         columnAlignments: [TextAlignment] = [], columnWidths: [CGFloat?] = []) {
+         columnAlignments: [TextAlignment] = [], columnWidths: [CGFloat?] = [])
+    {
         self.title = title
         self.source = source
         self.format = format
@@ -65,9 +66,9 @@ enum TableParseError: LocalizedError {
 
     var errorDescription: String? {
         switch self {
-        case .invalidFormat(let format):
+        case let .invalidFormat(format):
             return "Unsupported table format: \(format)"
-        case .malformedTable(let reason):
+        case let .malformedTable(reason):
             return "Malformed table: \(reason)"
         case .emptyContent:
             return "No table content found"
@@ -81,7 +82,6 @@ enum TableParseError: LocalizedError {
 
 @MainActor
 final class TableParser: ObservableObject {
-
     // MARK: - Public Interface
 
     /// Parse table data from various formats
@@ -89,8 +89,9 @@ final class TableParser: ObservableObject {
         let detectedFormat: TableFormat = {
             if let format = format {
                 return format
-            } else {
-                return detectFormat(content)
+            }
+            else {
+                return self.detectFormat(content)
             }
         }()
         let trimmedContent = content.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -101,23 +102,23 @@ final class TableParser: ObservableObject {
 
         switch detectedFormat {
         case .markdown:
-            return try parseMarkdownTable(trimmedContent)
+            return try self.parseMarkdownTable(trimmedContent)
         case .csv:
-            return try parseCSVTable(trimmedContent, delimiter: ",")
+            return try self.parseCSVTable(trimmedContent, delimiter: ",")
         case .tsv:
-            return try parseCSVTable(trimmedContent, delimiter: "\t")
+            return try self.parseCSVTable(trimmedContent, delimiter: "\t")
         case .json:
-            return try parseJSONTable(trimmedContent)
+            return try self.parseJSONTable(trimmedContent)
         case .structured:
-            return try parseStructuredTable(trimmedContent)
+            return try self.parseStructuredTable(trimmedContent)
         }
     }
 
     /// Parse table from a file
     func parseTableFromFile(at url: URL) throws -> ParsedTable {
         let content = try String(contentsOf: url, encoding: .utf8)
-        let format = detectFormatFromFileExtension(url.pathExtension)
-        return try parseTable(from: content, format: format)
+        let format = self.detectFormatFromFileExtension(url.pathExtension)
+        return try self.parseTable(from: content, format: format)
     }
 
     /// Convert ParsedTable to EnhancedDataTableView format
@@ -125,7 +126,7 @@ final class TableParser: ObservableObject {
         let columns = table.headers.enumerated().map { index, header in
             let textAlignment = index < table.metadata.columnAlignments.count ?
                 table.metadata.columnAlignments[index] : .leading
-            let alignment = convertTextToHorizontalAlignment(textAlignment)
+            let alignment = self.convertTextToHorizontalAlignment(textAlignment)
             let width = index < table.metadata.columnWidths.count ?
                 table.metadata.columnWidths[index] : nil
             return EnhancedDataTableView.Column(header: header, width: width, alignment: alignment)
@@ -160,7 +161,8 @@ final class TableParser: ObservableObject {
 
         // Check for JSON
         if content.trimmingCharacters(in: .whitespaces).hasPrefix("{") ||
-           content.trimmingCharacters(in: .whitespaces).hasPrefix("[") {
+            content.trimmingCharacters(in: .whitespaces).hasPrefix("[")
+        {
             return .json
         }
 
@@ -172,7 +174,8 @@ final class TableParser: ObservableObject {
         // Check for CSV/TSV
         if lines[0].contains(",") && !lines[0].contains("|") {
             return .csv
-        } else if lines[0].contains("\t") && !lines[0].contains("|") {
+        }
+        else if lines[0].contains("\t") && !lines[0].contains("|") {
             return .tsv
         }
 
@@ -208,17 +211,17 @@ final class TableParser: ObservableObject {
 
         // Parse headers
         let headerLine = lines[0].trimmingCharacters(in: CharacterSet(charactersIn: "|"))
-        let headers = parseCSVLine(headerLine, delimiter: "|")
+        let headers = self.parseCSVLine(headerLine, delimiter: "|")
 
         // Parse alignment from separator line
         let separatorLine = lines[1].trimmingCharacters(in: CharacterSet(charactersIn: "|"))
-        let alignments = parseMarkdownAlignments(separatorLine)
+        let alignments = self.parseMarkdownAlignments(separatorLine)
 
         // Parse data rows
         var rows: [[String]] = []
         for line in lines.dropFirst(2) {
             let rowLine = line.trimmingCharacters(in: CharacterSet(charactersIn: "|"))
-            let row = parseCSVLine(rowLine, delimiter: "|")
+            let row = self.parseCSVLine(rowLine, delimiter: "|")
 
             // Pad row if necessary
             let paddedRow = row + Array(repeating: "", count: max(0, headers.count - row.count))
@@ -239,11 +242,13 @@ final class TableParser: ObservableObject {
             .filter { !$0.isEmpty }
 
         return columns.map { column in
-            if column.hasPrefix(":") && column.hasSuffix(":") {
+            if column.hasPrefix(":"), column.hasSuffix(":") {
                 return TextAlignment.center
-            } else if column.hasSuffix(":") {
+            }
+            else if column.hasSuffix(":") {
                 return TextAlignment.trailing
-            } else {
+            }
+            else {
                 return TextAlignment.leading
             }
         }
@@ -261,12 +266,12 @@ final class TableParser: ObservableObject {
         }
 
         // Parse headers
-        let headers = parseCSVLine(lines[0], delimiter: String(delimiter))
+        let headers = self.parseCSVLine(lines[0], delimiter: String(delimiter))
 
         // Parse data rows
         var rows: [[String]] = []
         for line in lines.dropFirst() {
-            let row = parseCSVLine(line, delimiter: String(delimiter))
+            let row = self.parseCSVLine(line, delimiter: String(delimiter))
 
             // Validate column count
             guard row.count == headers.count || row.isEmpty else {
@@ -292,17 +297,20 @@ final class TableParser: ObservableObject {
         for (index, char) in line.enumerated() {
             if char == "\"" {
                 // Handle escaped quotes
-                if index + 1 < line.count && line[line.index(line.startIndex, offsetBy: index + 1)] == "\"" {
+                if index + 1 < line.count, line[line.index(line.startIndex, offsetBy: index + 1)] == "\"" {
                     current.append("\"")
                     // Skip the next quote
                     continue
-                } else {
+                }
+                else {
                     inQuotes.toggle()
                 }
-            } else if String(char) == delimiter && !inQuotes {
+            }
+            else if String(char) == delimiter, !inQuotes {
                 result.append(current.trimmingCharacters(in: .whitespaces))
                 current = ""
-            } else {
+            }
+            else {
                 current.append(char)
             }
         }
@@ -331,7 +339,8 @@ final class TableParser: ObservableObject {
                 headers.map { key in
                     if let value = row[key] {
                         return String(describing: value)
-                    } else {
+                    }
+                    else {
                         return ""
                     }
                 }
@@ -339,21 +348,24 @@ final class TableParser: ObservableObject {
 
             let metadata = TableMetadata(format: TableFormat.json)
             return ParsedTable(headers: headers, rows: rows, metadata: metadata)
-
-        } else if let dict = jsonObject as? [String: Any] {
+        }
+        else if let dict = jsonObject as? [String: Any] {
             // Single object or structured format
             if let headers = dict["headers"] as? [String],
-               let rows = dict["rows"] as? [[String]] {
+               let rows = dict["rows"] as? [[String]]
+            {
                 let metadata = TableMetadata(
                     title: dict["title"] as? String,
                     source: dict["source"] as? String,
                     format: TableFormat.json
                 )
                 return ParsedTable(headers: headers, rows: rows, metadata: metadata)
-            } else {
+            }
+            else {
                 throw TableParseError.malformedTable("JSON structure not recognized")
             }
-        } else {
+        }
+        else {
             throw TableParseError.malformedTable("JSON must be array of objects or structured table")
         }
     }
@@ -386,7 +398,8 @@ final class TableParser: ObservableObject {
 
             let metadata = TableMetadata(format: TableFormat.structured)
             return ParsedTable(headers: headers, rows: rows, metadata: metadata)
-        } else {
+        }
+        else {
             // Simple tabular structure
             let headers = lines[0].components(separatedBy: .whitespaces)
                 .filter { !$0.isEmpty }
@@ -409,10 +422,9 @@ final class TableParser: ObservableObject {
 }
 
 extension TableParser {
-
     /// Parse table from CSV string
     func parseCSV(from csv: String) throws -> ParsedTable {
-        return try parseTable(from: csv, format: TableFormat.csv)
+        return try self.parseTable(from: csv, format: TableFormat.csv)
     }
 
     /// Create table from structured data
@@ -433,7 +445,6 @@ extension TableParser {
 // MARK: - SwiftUI Integration
 
 extension ParsedTable {
-
     /// Convert to SwiftUI view
     func toSwiftUIView() -> EnhancedDataTableView {
         let parser = TableParser()
@@ -445,13 +456,13 @@ extension ParsedTable {
         var result = ""
 
         // Headers
-        result += "| " + headers.joined(separator: " | ") + " |\n"
+        result += "| " + self.headers.joined(separator: " | ") + " |\n"
 
         // Separator
-        result += "|" + headers.map { _ in " --- " }.joined(separator: "|") + "|\n"
+        result += "|" + self.headers.map { _ in " --- " }.joined(separator: "|") + "|\n"
 
         // Rows
-        for row in rows {
+        for row in self.rows {
             result += "| " + row.joined(separator: " | ") + " |\n"
         }
 
@@ -463,11 +474,11 @@ extension ParsedTable {
         var result = ""
 
         // Headers
-        result += headers.map { escapeCSVField($0) }.joined(separator: ",") + "\n"
+        result += self.headers.map { self.escapeCSVField($0) }.joined(separator: ",") + "\n"
 
         // Rows
-        for row in rows {
-            result += row.map { escapeCSVField($0) }.joined(separator: ",") + "\n"
+        for row in self.rows {
+            result += row.map { self.escapeCSVField($0) }.joined(separator: ",") + "\n"
         }
 
         return result

@@ -14,10 +14,10 @@ struct NeuralNode: Identifiable {
     let nodeType: NodeType
 
     enum NodeType {
-        case cortical      // Brain regions
-        case subcortical   // Thalamus, brainstem
+        case cortical // Brain regions
+        case subcortical // Thalamus, brainstem
         case neuromodulator // NT systems
-        case variable      // APGI variables
+        case variable // APGI variables
     }
 }
 
@@ -66,7 +66,7 @@ struct APGINeuralCircuitDiagram: View {
     @Environment(\.colorScheme) private var colorScheme
     @AppStorage("highContrastMode") private var highContrastMode = false
 
-    // Define nodes
+    /// Define nodes
     private let nodes: [NeuralNode] = [
         // Cortical regions
         NeuralNode(
@@ -164,64 +164,64 @@ struct APGINeuralCircuitDiagram: View {
             color: .pink,
             size: 40,
             nodeType: .variable
-        )
+        ),
     ]
 
-    // Define connections
+    /// Define connections
     private var connections: [NeuralConnection] {
-        guard nodes.count >= 10 else { return [] }
+        guard self.nodes.count >= 10 else { return [] }
 
         return [
             // PPC → PFC-L5 (evidence)
             NeuralConnection(
-                fromNode: nodes[0].id, toNode: nodes[1].id,
+                fromNode: self.nodes[0].id, toNode: self.nodes[1].id,
                 connectionType: .excitatory, label: "Evidence", strength: 0.8
             ),
             // PFC-L5 ↔ AI (integration)
             NeuralConnection(
-                fromNode: nodes[1].id, toNode: nodes[2].id,
+                fromNode: self.nodes[1].id, toNode: self.nodes[2].id,
                 connectionType: .bidirectional, label: nil, strength: 0.6
             ),
             // AI → ACC
             NeuralConnection(
-                fromNode: nodes[2].id, toNode: nodes[3].id,
+                fromNode: self.nodes[2].id, toNode: self.nodes[3].id,
                 connectionType: .excitatory, label: "Intero PE", strength: 0.7
             ),
             // TRN → Pulvinar (inhibitory)
             NeuralConnection(
-                fromNode: nodes[4].id, toNode: nodes[5].id,
+                fromNode: self.nodes[4].id, toNode: self.nodes[5].id,
                 connectionType: .inhibitory, label: "GABA", strength: 0.9
             ),
             // Pulvinar → PFC-L5 L1
             NeuralConnection(
-                fromNode: nodes[5].id, toNode: nodes[1].id,
+                fromNode: self.nodes[5].id, toNode: self.nodes[1].id,
                 connectionType: .excitatory, label: "L1 drive", strength: 0.85
             ),
             // LC → TRN (suppression)
             NeuralConnection(
-                fromNode: nodes[6].id, toNode: nodes[4].id,
+                fromNode: self.nodes[6].id, toNode: self.nodes[4].id,
                 connectionType: .inhibitory, label: "Suppression", strength: 0.7
             ),
             // LC → AI (NE boost)
             NeuralConnection(
-                fromNode: nodes[6].id, toNode: nodes[2].id,
+                fromNode: self.nodes[6].id, toNode: self.nodes[2].id,
                 connectionType: .modulatory, label: "↑Πᵢ", strength: 0.8
             ),
             // BF → PPC (ACh)
             NeuralConnection(
-                fromNode: nodes[7].id, toNode: nodes[0].id,
+                fromNode: self.nodes[7].id, toNode: self.nodes[0].id,
                 connectionType: .modulatory, label: "↑Πₑ", strength: 0.7
             ),
             // PPC → Sₜ variable
             NeuralConnection(
-                fromNode: nodes[0].id, toNode: nodes[8].id,
+                fromNode: self.nodes[0].id, toNode: self.nodes[8].id,
                 connectionType: .excitatory, label: nil, strength: 0.9
             ),
             // LC → θₜ variable
             NeuralConnection(
-                fromNode: nodes[6].id, toNode: nodes[9].id,
+                fromNode: self.nodes[6].id, toNode: self.nodes[9].id,
                 connectionType: .modulatory, label: "↓θₜ", strength: 0.6
-            )
+            ),
         ]
     }
 
@@ -234,19 +234,19 @@ struct APGINeuralCircuitDiagram: View {
 
                 Spacer()
 
-                Toggle("Labels", isOn: $showLabels)
+                Toggle("Labels", isOn: self.$showLabels)
                     .toggleStyle(.switch)
                     .controlSize(.small)
 
                 Menu {
                     Button("Ignition Pathway") {
-                        highlightedPathway = "ignition"
+                        self.highlightedPathway = "ignition"
                     }
                     Button("Neuromodulation") {
-                        highlightedPathway = "neuromod"
+                        self.highlightedPathway = "neuromod"
                     }
                     Button("All Pathways") {
-                        highlightedPathway = nil
+                        self.highlightedPathway = nil
                     }
                 } label: {
                     Label("Pathways", systemImage: "arrow.triangle.branch")
@@ -255,34 +255,34 @@ struct APGINeuralCircuitDiagram: View {
             }
 
             // Legend
-            legendView
+            self.legendView
 
             // Main diagram
             GeometryReader { geometry in
                 ZStack {
                     // Background
                     RoundedRectangle(cornerRadius: 16)
-                        .fill(diagramBackground)
+                        .fill(self.diagramBackground)
 
                     // Connections layer
-                    ForEach(connections) { connection in
+                    ForEach(self.connections) { connection in
                         ConnectionLine(
                             connection: connection,
-                            nodes: nodes,
+                            nodes: self.nodes,
                             size: geometry.size,
-                            isHighlighted: shouldHighlight(connection),
-                            animationPhase: animationPhase
+                            isHighlighted: self.shouldHighlight(connection),
+                            animationPhase: self.animationPhase
                         )
                     }
 
                     // Nodes layer
-                    ForEach(nodes) { node in
+                    ForEach(self.nodes) { node in
                         NodeView(
                             node: node,
-                            isSelected: selectedNode?.id == node.id,
-                            isHovered: hoveredNode?.id == node.id,
-                            showLabel: showLabels,
-                            highContrast: highContrastMode
+                            isSelected: self.selectedNode?.id == node.id,
+                            isHovered: self.hoveredNode?.id == node.id,
+                            showLabel: self.showLabels,
+                            highContrast: self.highContrastMode
                         )
                         .position(
                             x: node.position.x * geometry.size.width,
@@ -290,11 +290,11 @@ struct APGINeuralCircuitDiagram: View {
                         )
                         .onTapGesture {
                             withAnimation(.spring(response: 0.3)) {
-                                selectedNode = selectedNode?.id == node.id ? nil : node
+                                self.selectedNode = self.selectedNode?.id == node.id ? nil : node
                             }
                         }
                         .onHover { hovering in
-                            hoveredNode = hovering ? node : nil
+                            self.hoveredNode = hovering ? node : nil
                         }
                     }
                 }
@@ -308,14 +308,14 @@ struct APGINeuralCircuitDiagram: View {
 
             // Selected node details
             if let node = selectedNode {
-                nodeDetailView(node)
+                self.nodeDetailView(node)
                     .transition(.move(edge: .bottom).combined(with: .opacity))
             }
         }
         .padding()
         .onAppear {
             withAnimation(.linear(duration: 3).repeatForever(autoreverses: false)) {
-                animationPhase = 1
+                self.animationPhase = 1
             }
         }
     }
@@ -328,7 +328,7 @@ struct APGINeuralCircuitDiagram: View {
                 ("Excitatory", Color.green),
                 ("Inhibitory", Color.red),
                 ("Modulatory", Color.purple),
-                ("Bidirectional", Color.blue)
+                ("Bidirectional", Color.blue),
             ], id: \.0) { item in
                 HStack(spacing: 6) {
                     Circle()
@@ -343,10 +343,10 @@ struct APGINeuralCircuitDiagram: View {
             Spacer()
 
             HStack(spacing: 12) {
-                legendItem(shape: .circle, label: "Cortical")
-                legendItem(shape: .roundedRect, label: "Subcortical")
-                legendItem(shape: .diamond, label: "Neuromod")
-                legendItem(shape: .hexagon, label: "Variable")
+                self.legendItem(shape: .circle, label: "Cortical")
+                self.legendItem(shape: .roundedRect, label: "Subcortical")
+                self.legendItem(shape: .diamond, label: "Neuromod")
+                self.legendItem(shape: .hexagon, label: "Variable")
             }
         }
         .padding(.horizontal)
@@ -405,7 +405,7 @@ struct APGINeuralCircuitDiagram: View {
 
             Button {
                 withAnimation {
-                    selectedNode = nil
+                    self.selectedNode = nil
                 }
             } label: {
                 Image(systemName: "xmark.circle.fill")
@@ -425,14 +425,14 @@ struct APGINeuralCircuitDiagram: View {
     }
 
     private var diagramBackground: some ShapeStyle {
-        if highContrastMode {
-            return AnyShapeStyle(colorScheme == .dark ? Color.black : Color.white)
+        if self.highContrastMode {
+            return AnyShapeStyle(self.colorScheme == .dark ? Color.black : Color.white)
         }
         return AnyShapeStyle(
             LinearGradient(
                 colors: [
                     Color(NSColor.controlBackgroundColor),
-                    Color(NSColor.controlBackgroundColor).opacity(0.95)
+                    Color(NSColor.controlBackgroundColor).opacity(0.95),
                 ],
                 startPoint: .topLeading,
                 endPoint: .bottomTrailing
@@ -447,12 +447,12 @@ struct APGINeuralCircuitDiagram: View {
         case "ignition":
             // Highlight PPC → PFC → Pulv pathway
             return [0, 4, 5].contains { idx in
-                connections.indices.contains(idx) && connections[idx].id == connection.id
+                self.connections.indices.contains(idx) && self.connections[idx].id == connection.id
             }
         case "neuromod":
             // Highlight LC and BF connections
             return [6, 7, 8, 9].contains { idx in
-                connections.indices.contains(idx) && connections[idx].id == connection.id
+                self.connections.indices.contains(idx) && self.connections[idx].id == connection.id
             }
         default:
             return true
@@ -473,35 +473,35 @@ struct NodeView: View {
         VStack(spacing: 4) {
             ZStack {
                 // Shape based on node type
-                nodeShape
-                    .foregroundStyle(nodeFill)
-                    .frame(width: node.size, height: node.size)
-                    .shadow(color: node.color.opacity(isSelected ? 0.5 : 0.2), radius: isSelected ? 10 : 4)
+                self.nodeShape
+                    .foregroundStyle(self.nodeFill)
+                    .frame(width: self.node.size, height: self.node.size)
+                    .shadow(color: self.node.color.opacity(self.isSelected ? 0.5 : 0.2), radius: self.isSelected ? 10 : 4)
 
                 // Abbreviation
-                Text(node.abbreviation)
-                    .font(.system(size: node.size * 0.25, weight: .bold, design: .rounded))
+                Text(self.node.abbreviation)
+                    .font(.system(size: self.node.size * 0.25, weight: .bold, design: .rounded))
                     .foregroundColor(.white)
             }
-            .scaleEffect(isHovered ? 1.1 : (isSelected ? 1.15 : 1.0))
-            .animation(.spring(response: 0.3), value: isHovered)
-            .animation(.spring(response: 0.3), value: isSelected)
+            .scaleEffect(self.isHovered ? 1.1 : (self.isSelected ? 1.15 : 1.0))
+            .animation(.spring(response: 0.3), value: self.isHovered)
+            .animation(.spring(response: 0.3), value: self.isSelected)
 
             // Label
-            if showLabel {
-                Text(node.label)
+            if self.showLabel {
+                Text(self.node.label)
                     .font(.system(size: 9, weight: .medium))
                     .foregroundStyle(.secondary)
                     .lineLimit(2)
                     .multilineTextAlignment(.center)
-                    .frame(width: node.size * 1.5)
+                    .frame(width: self.node.size * 1.5)
             }
         }
     }
 
     @ViewBuilder
     private var nodeShape: some View {
-        switch node.nodeType {
+        switch self.node.nodeType {
         case .cortical:
             Circle()
         case .subcortical:
@@ -514,16 +514,16 @@ struct NodeView: View {
     }
 
     private var nodeFill: some ShapeStyle {
-        if isSelected {
+        if self.isSelected {
             return AnyShapeStyle(
                 LinearGradient(
-                    colors: [node.color, node.color.opacity(0.7)],
+                    colors: [self.node.color, self.node.color.opacity(0.7)],
                     startPoint: .topLeading,
                     endPoint: .bottomTrailing
                 )
             )
         }
-        return AnyShapeStyle(node.color.opacity(isHovered ? 0.9 : 0.8))
+        return AnyShapeStyle(self.node.color.opacity(self.isHovered ? 0.9 : 0.8))
     }
 }
 
@@ -537,17 +537,17 @@ struct ConnectionLine: View {
     let animationPhase: Double
 
     var body: some View {
-        let fromNode = nodes.first { $0.id == connection.fromNode }
-        let toNode = nodes.first { $0.id == connection.toNode }
+        let fromNode = self.nodes.first { $0.id == self.connection.fromNode }
+        let toNode = self.nodes.first { $0.id == self.connection.toNode }
 
         if let from = fromNode, let to = toNode {
             let startPoint = CGPoint(
-                x: from.position.x * size.width,
-                y: from.position.y * size.height
+                x: from.position.x * self.size.width,
+                y: from.position.y * self.size.height
             )
             let endPoint = CGPoint(
-                x: to.position.x * size.width,
-                y: to.position.y * size.height
+                x: to.position.x * self.size.width,
+                y: to.position.y * self.size.height
             )
 
             ZStack {
@@ -563,29 +563,29 @@ struct ConnectionLine: View {
                     path.addQuadCurve(to: endPoint, control: midPoint)
                 }
                 .stroke(
-                    connection.connectionType.color.opacity(isHighlighted ? 0.8 : 0.2),
+                    self.connection.connectionType.color.opacity(self.isHighlighted ? 0.8 : 0.2),
                     style: StrokeStyle(
-                        lineWidth: CGFloat(connection.strength) * 3,
+                        lineWidth: CGFloat(self.connection.strength) * 3,
                         lineCap: .round,
-                        dash: connection.connectionType.dashPattern
+                        dash: self.connection.connectionType.dashPattern
                     )
                 )
 
                 // Arrow head
-                arrowHead(from: startPoint, to: endPoint)
-                    .fill(connection.connectionType.color.opacity(isHighlighted ? 0.8 : 0.3))
+                self.arrowHead(from: startPoint, to: endPoint)
+                    .fill(self.connection.connectionType.color.opacity(self.isHighlighted ? 0.8 : 0.3))
 
                 // Bidirectional arrow (if needed)
-                if connection.connectionType == .bidirectional {
-                    arrowHead(from: endPoint, to: startPoint)
-                        .fill(connection.connectionType.color.opacity(isHighlighted ? 0.8 : 0.3))
+                if self.connection.connectionType == .bidirectional {
+                    self.arrowHead(from: endPoint, to: startPoint)
+                        .fill(self.connection.connectionType.color.opacity(self.isHighlighted ? 0.8 : 0.3))
                 }
 
                 // Label
                 if let label = connection.label {
                     Text(label)
                         .font(.system(size: 9, weight: .medium))
-                        .foregroundStyle(connection.connectionType.color)
+                        .foregroundStyle(self.connection.connectionType.color)
                         .padding(.horizontal, 4)
                         .padding(.vertical, 2)
                         .background(Color(NSColor.windowBackgroundColor).opacity(0.9))
@@ -606,7 +606,7 @@ struct ConnectionLine: View {
 
         // Position arrow near the target node
         let distance = sqrt(pow(to.x - from.x, 2) + pow(to.y - from.y, 2))
-        let ratio = max(0, (distance - 35)) / distance
+        let ratio = max(0, distance - 35) / distance
         let arrowPoint = CGPoint(
             x: from.x + (to.x - from.x) * ratio,
             y: from.y + (to.y - from.y) * ratio
@@ -649,12 +649,12 @@ struct HexagonShape: Shape {
         let cy = rect.midY
 
         return Path { path in
-            path.move(to: CGPoint(x: cx + w/2, y: cy))
-            path.addLine(to: CGPoint(x: cx + w/4, y: cy - h/2))
-            path.addLine(to: CGPoint(x: cx - w/4, y: cy - h/2))
-            path.addLine(to: CGPoint(x: cx - w/2, y: cy))
-            path.addLine(to: CGPoint(x: cx - w/4, y: cy + h/2))
-            path.addLine(to: CGPoint(x: cx + w/4, y: cy + h/2))
+            path.move(to: CGPoint(x: cx + w / 2, y: cy))
+            path.addLine(to: CGPoint(x: cx + w / 4, y: cy - h / 2))
+            path.addLine(to: CGPoint(x: cx - w / 4, y: cy - h / 2))
+            path.addLine(to: CGPoint(x: cx - w / 2, y: cy))
+            path.addLine(to: CGPoint(x: cx - w / 4, y: cy + h / 2))
+            path.addLine(to: CGPoint(x: cx + w / 4, y: cy + h / 2))
             path.closeSubpath()
         }
     }
@@ -672,7 +672,7 @@ struct IgnitionProcessDiagram: View {
         ("Threshold Check", "Compare Sₜ against dynamic θₜ", .orange),
         ("Ignition", "NMDA Ca²⁺ spike in L5 apical dendrites", .red),
         ("Broadcast", "Global workspace activation via long-range connections", .green),
-        ("Refractory", "θₜ elevated, preventing immediate re-ignition", .gray)
+        ("Refractory", "θₜ elevated, preventing immediate re-ignition", .gray),
     ]
 
     var body: some View {
@@ -682,19 +682,19 @@ struct IgnitionProcessDiagram: View {
 
             // Phase visualization
             HStack(spacing: 0) {
-                ForEach(Array(phases.enumerated()), id: \.offset) { index, phase in
+                ForEach(Array(self.phases.enumerated()), id: \.offset) { index, phase in
                     VStack(spacing: 8) {
                         // Phase circle
                         ZStack {
                             Circle()
-                                .fill(index <= currentPhase ? phase.color : phase.color.opacity(0.3))
+                                .fill(index <= self.currentPhase ? phase.color : phase.color.opacity(0.3))
                                 .frame(width: 50, height: 50)
 
                             Text("\(index + 1)")
                                 .font(.system(size: 16, weight: .bold))
                                 .foregroundColor(.white)
 
-                            if index == currentPhase && isAnimating {
+                            if index == self.currentPhase && self.isAnimating {
                                 Circle()
                                     .stroke(phase.color, lineWidth: 3)
                                     .frame(width: 60, height: 60)
@@ -702,7 +702,7 @@ struct IgnitionProcessDiagram: View {
                                     .opacity(0.5)
                                     .animation(
                                         .easeInOut(duration: 1).repeatForever(autoreverses: true),
-                                        value: isAnimating
+                                        value: self.isAnimating
                                     )
                             }
                         }
@@ -710,16 +710,16 @@ struct IgnitionProcessDiagram: View {
                         // Title
                         Text(phase.title)
                             .font(.system(size: 10, weight: .medium))
-                            .foregroundStyle(index <= currentPhase ? .primary : .secondary)
+                            .foregroundStyle(index <= self.currentPhase ? .primary : .secondary)
                             .multilineTextAlignment(.center)
                             .frame(width: 70)
                     }
 
                     // Connector arrow
-                    if index < phases.count - 1 {
+                    if index < self.phases.count - 1 {
                         Image(systemName: "arrow.right")
                             .font(.system(size: 14))
-                            .foregroundStyle(index < currentPhase ? phases[index].color : .secondary.opacity(0.3))
+                            .foregroundStyle(index < self.currentPhase ? self.phases[index].color : .secondary.opacity(0.3))
                             .padding(.horizontal, 4)
                             .padding(.bottom, 30)
                     }
@@ -727,8 +727,8 @@ struct IgnitionProcessDiagram: View {
             }
 
             // Current phase description
-            if currentPhase < phases.count {
-                let phase = phases[currentPhase]
+            if self.currentPhase < self.phases.count {
+                let phase = self.phases[self.currentPhase]
                 HStack(spacing: 12) {
                     Circle()
                         .fill(phase.color)
@@ -746,46 +746,46 @@ struct IgnitionProcessDiagram: View {
             // Controls
             HStack {
                 Button {
-                    currentPhase = 0
-                    isAnimating = false
+                    self.currentPhase = 0
+                    self.isAnimating = false
                 } label: {
                     Image(systemName: "arrow.counterclockwise")
                 }
                 .buttonStyle(.bordered)
 
                 Button {
-                    if currentPhase > 0 {
-                        currentPhase -= 1
+                    if self.currentPhase > 0 {
+                        self.currentPhase -= 1
                     }
                 } label: {
                     Image(systemName: "chevron.left")
                 }
                 .buttonStyle(.bordered)
-                .disabled(currentPhase == 0)
+                .disabled(self.currentPhase == 0)
 
                 Button {
-                    isAnimating.toggle()
-                    if isAnimating {
-                        startAutoAdvance()
+                    self.isAnimating.toggle()
+                    if self.isAnimating {
+                        self.startAutoAdvance()
                     }
                 } label: {
-                    Image(systemName: isAnimating ? "pause.fill" : "play.fill")
+                    Image(systemName: self.isAnimating ? "pause.fill" : "play.fill")
                 }
                 .buttonStyle(.borderedProminent)
 
                 Button {
-                    if currentPhase < phases.count - 1 {
-                        currentPhase += 1
+                    if self.currentPhase < self.phases.count - 1 {
+                        self.currentPhase += 1
                     }
                 } label: {
                     Image(systemName: "chevron.right")
                 }
                 .buttonStyle(.bordered)
-                .disabled(currentPhase == phases.count - 1)
+                .disabled(self.currentPhase == self.phases.count - 1)
 
                 Spacer()
 
-                Text("Phase \(currentPhase + 1) of \(phases.count)")
+                Text("Phase \(self.currentPhase + 1) of \(self.phases.count)")
                     .font(.system(size: 12))
                     .foregroundStyle(.secondary)
             }
@@ -796,18 +796,19 @@ struct IgnitionProcessDiagram: View {
     }
 
     private func startAutoAdvance() {
-        guard isAnimating else { return }
+        guard self.isAnimating else { return }
 
         DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
-            guard isAnimating else { return }
+            guard self.isAnimating else { return }
 
             withAnimation(.easeInOut) {
-                if currentPhase < phases.count - 1 {
-                    currentPhase += 1
-                    startAutoAdvance()
-                } else {
-                    currentPhase = 0
-                    startAutoAdvance()
+                if self.currentPhase < self.phases.count - 1 {
+                    self.currentPhase += 1
+                    self.startAutoAdvance()
+                }
+                else {
+                    self.currentPhase = 0
+                    self.startAutoAdvance()
                 }
             }
         }
@@ -827,7 +828,7 @@ struct NeuralCircuitVisualizationsView: View {
                     .padding(.horizontal)
 
                 // Visualization picker
-                Picker("Visualization", selection: $selectedVisualization) {
+                Picker("Visualization", selection: self.$selectedVisualization) {
                     Text("Neural Circuit").tag(0)
                     Text("Ignition Process").tag(1)
                 }
@@ -836,7 +837,7 @@ struct NeuralCircuitVisualizationsView: View {
 
                 // Selected visualization
                 Group {
-                    switch selectedVisualization {
+                    switch self.selectedVisualization {
                     case 0:
                         APGINeuralCircuitDiagram()
                     case 1:

@@ -1,8 +1,9 @@
-import SwiftUI
 import AppKit
 import Combine
+import SwiftUI
 
 // MARK: - Onboarding Data Model
+
 struct OnboardingStep: Identifiable {
     let id = UUID()
     let title: String
@@ -38,6 +39,7 @@ enum ImageType {
 }
 
 // MARK: - Onboarding Manager
+
 @MainActor
 class OnboardingManager: ObservableObject {
     static let shared = OnboardingManager()
@@ -46,12 +48,13 @@ class OnboardingManager: ObservableObject {
     @Published var isShowingTour: Bool = false
     @Published var hasCompletedOnboarding: Bool {
         didSet {
-            UserDefaults.standard.set(hasCompletedOnboarding, forKey: "hasCompletedOnboarding")
+            UserDefaults.standard.set(self.hasCompletedOnboarding, forKey: "hasCompletedOnboarding")
         }
     }
+
     @Published var completedOnboardingVersion: Int {
         didSet {
-            UserDefaults.standard.set(completedOnboardingVersion, forKey: "completedOnboardingVersion")
+            UserDefaults.standard.set(self.completedOnboardingVersion, forKey: "completedOnboardingVersion")
         }
     }
 
@@ -69,7 +72,7 @@ class OnboardingManager: ObservableObject {
                 "Enhanced reading layout with key takeaways and collapsible subsections",
                 "Glossary-highlighted terms for fast definitions",
                 "APGI Simulator window for interactive modeling",
-                "Dark/light mode support"
+                "Dark/light mode support",
             ],
             highlightColor: .blue
         ),
@@ -85,7 +88,7 @@ class OnboardingManager: ObservableObject {
             tips: [
                 "⌘1-9: Jump to main sections",
                 "⌘F: Search",
-                "⌘↑/↓: Navigate between sections"
+                "⌘↑/↓: Navigate between sections",
             ],
             highlightColor: .purple
         ),
@@ -102,7 +105,7 @@ class OnboardingManager: ObservableObject {
                 "⌘⇧M: Open simulator window",
                 "Adjust parameters with sliders",
                 "Real-time visualization updates",
-                "Save and load model configurations"
+                "Save and load model configurations",
             ],
             highlightColor: .teal
         ),
@@ -117,7 +120,7 @@ class OnboardingManager: ObservableObject {
             tips: [
                 "Click and drag to explore",
                 "Scroll/trackpad to zoom",
-                "Use labels to orient yourself"
+                "Use labels to orient yourself",
             ],
             highlightColor: .indigo
         ),
@@ -130,7 +133,7 @@ class OnboardingManager: ObservableObject {
             tips: [
                 "⌘⇧T: Open timeline window",
                 "Use zoom controls for scale",
-                "Tap/inspect events for details"
+                "Tap/inspect events for details",
             ],
             highlightColor: .orange
         ),
@@ -147,7 +150,7 @@ class OnboardingManager: ObservableObject {
                 "⌘,: Open Settings",
                 "⌘0: Reset zoom",
                 "⌘++/--: Adjust text size",
-                "Full VoiceOver support"
+                "Full VoiceOver support",
             ],
             highlightColor: .green
         ),
@@ -163,7 +166,7 @@ class OnboardingManager: ObservableObject {
             tips: [
                 "Start with the hero card for the key takeaway",
                 "Expand only the subsections you need",
-                "Use Related links to jump across the framework"
+                "Use Related links to jump across the framework",
             ],
             highlightColor: .purple
         ),
@@ -180,10 +183,10 @@ class OnboardingManager: ObservableObject {
                 "⌘?: Quick help anytime",
                 "Right-click for context menus",
                 "Drag and drop to reorganize",
-                "Check back for updates"
+                "Check back for updates",
             ],
             highlightColor: .blue
-        )
+        ),
     ]
 
     init() {
@@ -192,36 +195,37 @@ class OnboardingManager: ObservableObject {
     }
 
     func nextStep() {
-        if currentStep < steps.count - 1 {
-            currentStep += 1
+        if self.currentStep < self.steps.count - 1 {
+            self.currentStep += 1
         }
     }
 
     func previousStep() {
-        if currentStep > 0 {
-            currentStep -= 1
+        if self.currentStep > 0 {
+            self.currentStep -= 1
         }
     }
 
     func completeOnboarding() {
-        hasCompletedOnboarding = true
-        completedOnboardingVersion = 1
-        isShowingTour = false
-        currentStep = 0
+        self.hasCompletedOnboarding = true
+        self.completedOnboardingVersion = 1
+        self.isShowingTour = false
+        self.currentStep = 0
     }
 
     func resetOnboarding() {
-        hasCompletedOnboarding = false
-        completedOnboardingVersion = 0
+        self.hasCompletedOnboarding = false
+        self.completedOnboardingVersion = 0
     }
 
     func startOnboarding() {
-        currentStep = 0
-        isShowingTour = true
+        self.currentStep = 0
+        self.isShowingTour = true
     }
 }
 
 // MARK: - Onboarding Tour View
+
 struct OnboardingTourView: View {
     @StateObject private var manager = OnboardingManager.shared
     @EnvironmentObject private var themeManager: ThemeManager
@@ -230,21 +234,22 @@ struct OnboardingTourView: View {
 
     var body: some View {
         Group {
-            if manager.hasCompletedOnboarding {
+            if self.manager.hasCompletedOnboarding {
                 // Show main app content
                 MainContentView()
                     .applyTheme()
-                    .environmentObject(themeManager)
-                    .environmentObject(onboardingManager)
-                    .environmentObject(navigationManager)
-            } else {
+                    .environmentObject(self.themeManager)
+                    .environmentObject(self.onboardingManager)
+                    .environmentObject(self.navigationManager)
+            }
+            else {
                 // Show onboarding
-                onboardingContent
+                self.onboardingContent
             }
         }
         .onAppear {
-            if !manager.hasCompletedOnboarding && !manager.isShowingTour {
-                manager.startOnboarding()
+            if !self.manager.hasCompletedOnboarding && !self.manager.isShowingTour {
+                self.manager.startOnboarding()
             }
         }
     }
@@ -255,22 +260,22 @@ struct OnboardingTourView: View {
             LinearGradient(
                 colors: [
                     Color(red: 0.1, green: 0.1, blue: 0.2),
-                    Color(red: 0.2, green: 0.1, blue: 0.3)
+                    Color(red: 0.2, green: 0.1, blue: 0.3),
                 ],
                 startPoint: .topLeading,
                 endPoint: .bottomTrailing
             )
             .ignoresSafeArea()
 
-            content
+            self.content
 
-            if manager.isShowingTour {
+            if self.manager.isShowingTour {
                 GuidedTour()
                     .transition(.opacity)
             }
         }
         .frame(width: 700, height: 550)
-        .background(backgroundGradient)
+        .background(self.backgroundGradient)
         .clipShape(RoundedRectangle(cornerRadius: 20))
         .shadow(color: .black.opacity(0.2), radius: 30)
         .overlay(
@@ -290,7 +295,7 @@ struct OnboardingTourView: View {
                 Spacer()
 
                 Button("Skip Tour") {
-                    manager.completeOnboarding()
+                    self.manager.completeOnboarding()
                 }
                 .buttonStyle(.plain)
                 .foregroundColor(.white.opacity(0.7))
@@ -299,12 +304,12 @@ struct OnboardingTourView: View {
 
             Spacer()
 
-            if !manager.isShowingTour {
+            if !self.manager.isShowingTour {
                 VStack(spacing: 24) {
                     Image(systemName: "brain.head.profile")
                         .font(.system(size: 80))
                         .foregroundColor(.white)
-                        .symbolEffect(.bounce, value: manager.hasCompletedOnboarding)
+                        .symbolEffect(.bounce, value: self.manager.hasCompletedOnboarding)
 
                     Text("Explore the APGI Framework")
                         .font(.title.weight(.bold))
@@ -317,13 +322,13 @@ struct OnboardingTourView: View {
 
                     HStack(spacing: 16) {
                         Button("Start Tour") {
-                            manager.startOnboarding()
+                            self.manager.startOnboarding()
                         }
                         .buttonStyle(.borderedProminent)
                         .controlSize(.large)
 
                         Button("Skip") {
-                            manager.completeOnboarding()
+                            self.manager.completeOnboarding()
                         }
                         .buttonStyle(.bordered)
                         .controlSize(.large)
@@ -340,7 +345,7 @@ struct OnboardingTourView: View {
         LinearGradient(
             colors: [
                 Color(red: 0.1, green: 0.1, blue: 0.2),
-                Color(red: 0.2, green: 0.1, blue: 0.3)
+                Color(red: 0.2, green: 0.1, blue: 0.3),
             ],
             startPoint: .topLeading,
             endPoint: .bottomTrailing

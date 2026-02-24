@@ -1,6 +1,6 @@
 # APGI Appendix – User Guide
 
-The APGI Appendix app provides a comprehensive, interconnected resource for understanding the Adaptive Predictive Gamma Integration framework and its applications. By exploring the timeline, neuromodulators, glossary, and supporting content, users can build a deep understanding of this complex system and its relevance to neuroscience, psychiatry, and clinical practice.
+The APGI Appendix app provides a comprehensive, interconnected resource for understanding the Adaptive Predictive Gamma Integration framework and its applications. By exploring the theoretical foundations, mathematical models, biological implementations, cognitive integrations, and practical applications, users can build a deep understanding of this complex system and its relevance to neuroscience, psychiatry, and clinical practice.
 
 ---
 
@@ -10,12 +10,15 @@ The APGI Appendix app provides a comprehensive, interconnected resource for unde
 
 The **APGI Appendix** app is an interactive reference and learning tool that brings together:
 
-- An **enhanced interactive timeline** of key events and developments
-- Detailed views of **neuromodulator effects** and their impacts
-- A comprehensive **glossary** of technical terms
-- A structured **bibliography** of supporting references
-- **Methodology** information
-- **Psychiatric disorders** context and connections
+- **Theoretical Foundation** - Core concepts and methodological approaches
+- **Mathematical Framework** - Quantitative models and parameter relationships
+- **Biological Implementation** - Neural systems and neuromodulatory mechanisms
+- **Cognitive Integration** - Psychological and cognitive construct mappings
+- **Applications & Extensions** - Clinical applications and disorder analysis
+- **Interactive Demonstrations** - Timeline visualizations and simulation tools
+- **Reference Materials** - Comprehensive glossary and bibliography
+
+The app features **dynamic content loading** with remote updates for glossary terms, bibliography references, and help documentation. Network connectivity is monitored in real-time with graceful offline functionality.
 
 The app is designed for students, educators, and clinicians who need quick, curated access to content related to APGI (Adaptive Predictive Gamma Integration) and neuromodulatory systems.
 
@@ -27,9 +30,8 @@ The app is designed for students, educators, and clinicians who need quick, cura
 
 - **Platform:** macOS
 - **Minimum OS version:** macOS 14 or later
-- **Network:** Content is primarily local; an internet connection may be required for:
-  - App updates
-  - External links
+- **Network:** Internet connection recommended for content updates and remote features; app functions offline with cached content
+- **Storage:** ~50MB for app installation; additional space for cached remote content
 
 ### 2.2 Installing the App
 
@@ -84,18 +86,23 @@ On first launch you will see:
   - Category filtering options
 
 - **Toolbar Features**
+  - Network connectivity indicator with real-time status
   - Bookmark management with auto-save
-  - Focus mode toggle
-  - Font size adjustment
-  - Export functionality
-  - Keyboard shortcuts (Cmd+F for search, Cmd+B for bookmark)
+  - Focus mode toggle for distraction-free reading
+  - Global search with Cmd+F shortcut
+  - Export functionality (PDF and text formats)
+  - Font size adjustment (10-24pt)
+  - Inspector panel toggle
+  - Keyboard shortcuts support
 
 - **Settings Panel**
-  - Font size control (10-24pt)
-  - Sidebar visibility preferences
-  - Dark mode toggle
-  - Animation controls
-  - Bookmark management
+  - **General**: Font size (10-24pt), sidebar visibility, focus mode, animations
+  - **Appearance**: Theme selection, high contrast mode
+  - **Bookmarks**: Auto-save toggle, bookmark management
+  - **Network**: Remote content settings, auto-refresh intervals, cellular data controls
+  - **Logs**: Error logging and diagnostics
+  - **Validation**: UserDefaults validation tools
+  - **About**: Version information and framework description
 
 ### 3.2 Color & Design
 
@@ -141,37 +148,53 @@ The **Mathematical Framework** category contains the quantitative models and com
 
 ---
 
-## 6. Biological Implementation
+## 6. Demonstrations
 
-The **Biological Implementation** category connects the APGI framework to neural systems and neuromodulation.
+The **Demonstrations** category provides interactive tools for exploring APGI concepts through visualizations and simulations.
 
 ### 6.1 Available Sections
 
-- **Biological Implementation** - Neural mapping and implementation
-- **Neuromodulator Effects** - Detailed neuromodulator impacts
-- **Neuromodulatory Implementation** - Control parameter implementation
-- **Explicit Neuromodulator Mapping** - Direct neuromodulator relationships
-- **Ignition Timeline** - Temporal dynamics of neural ignition
-- **Neuromodulatory Control System** - Regulatory mechanisms
+- **Ignition Timeline** - Interactive temporal dynamics of neural ignition
+- **APGI Simulator** - Real-time simulation environment for parameter exploration
 
-### 6.2 Enhanced Interactive Timeline
+### 6.2 Interactive Timeline
 
-The **Ignition Timeline** is a key feature for exploring temporal dynamics:
+The **Ignition Timeline** provides a dynamic visualization of the temporal sequence of neural ignition:
 
 - **Playback Controls**
-  - Play/pause functionality
-  - Adjustable playback speed
-  - Timeline scrubbing and navigation
+  - Play/pause functionality with adjustable speed
+  - Timeline scrubbing for precise navigation
+  - Event markers with detailed information
 
 - **Visual Features**
-  - Phase indicators showing different ignition stages
-  - Event blocks with detailed information
-  - Real-time playhead indicator
+  - Phase progression indicators
+  - Real-time event highlighting
+  - Interactive event details on tap
 
-- **Interactions**
-  - Tap events for detailed information
-  - Zoom in/out for different time scales
-  - Filter events by type or category
+- **Exploration Modes**
+  - Step-through mode for detailed analysis
+  - Overview mode for pattern recognition
+  - Event filtering by type and significance
+
+### 6.3 APGI Simulator
+
+The **APGI Simulator** offers an interactive computational environment:
+
+- **Parameter Controls**
+  - Real-time adjustment of APGI parameters (ε, π, θ, β)
+  - Dynamic visualization of system state changes
+  - Parameter relationship exploration
+
+- **Simulation Features**
+  - Predictive coding dynamics visualization
+  - Neuromodulatory system modeling
+  - State transition analysis
+  - Custom scenario creation
+
+- **Educational Tools**
+  - Pre-configured examples for common scenarios
+  - Parameter sensitivity analysis
+  - System behavior prediction
 
 ---
 
@@ -199,7 +222,7 @@ This section provides detailed information on psychological states:
 
 ## 8. Applications & Extensions
 
-The **Applications & Extensions** category shows practical applications and extended functionality.
+The **Applications & Extensions** category shows practical applications and extended functionality of the APGI framework.
 
 ### 8.1 Available Sections
 
@@ -207,33 +230,17 @@ The **Applications & Extensions** category shows practical applications and exte
 - **Disorders & Conditions** - Parameter table for disorders and conditions
 - **Life Stages** - APGI parameters across development
 - **Thermodynamic and Evolutionary Efficiency** - Efficiency considerations
-- **Interactive Visualizations** - 3D neural visualizations and network graphs
-- **APGI Simulator** - Interactive simulation environment
 
-### 8.2 Interactive Visualizations
+### 8.2 Dynamic Table System
 
-The **Interactive Visualizations** section provides advanced visual exploration:
+The app features a **comprehensive table parsing system** that supports multiple formats:
 
-- **Interactive Neural Visualization**
-  - 3D brain models with SceneKit
-  - Real-time parameter adjustment
-  - Neuromodulator effects visualization
+- **Supported Formats**: Markdown tables, CSV, TSV, JSON, and structured text
+- **Dynamic Content**: Tables can be loaded from external files or remote sources
+- **Export Capabilities**: Convert tables to different formats (Markdown, CSV, JSON)
+- **Interactive Display**: Tables with proper alignment, sorting, and filtering
 
-- **Network Graph**
-  - Interactive connectivity diagrams
-  - Brain region relationships
-  - Dynamic parameter mapping
-
-### 8.3 APGI Simulator
-
-The **APGI Simulator** offers an interactive simulation environment:
-
-- Real-time parameter manipulation
-- Dynamic system behavior visualization
-- Predictive coding simulations
-- Neuromodulatory system modeling
-
-### 8.4 Psychiatric Disorders Section
+### 8.3 Psychiatric Disorders Section
 
 Clinical applications include:
 
@@ -242,7 +249,7 @@ Clinical applications include:
 - Timeline correlations with research developments
 - Clinical implications and treatment considerations
 
-### 8.5 Disorders & Conditions
+### 8.4 Disorders & Conditions
 
 Comprehensive parameter table covering:
 
@@ -250,6 +257,14 @@ Comprehensive parameter table covering:
 - Schizophrenia, Major Depressive Disorder
 - Generalized Anxiety Disorder, PTSD
 - Detailed parameter profiles for each condition
+
+### 8.5 Life Stages
+
+Developmental parameter analysis across:
+
+- Infancy through Adulthood
+- Age-specific parameter relationships
+- Developmental trajectory insights
 
 ---
 
@@ -259,12 +274,17 @@ The **Reference Materials** category provides supporting documentation and searc
 
 ### 9.1 Available Sections
 
-- **Glossary** - Comprehensive term definitions and cross-references
-- **Bibliography** - Reference materials and citations
+- **Glossary** - Comprehensive term definitions with remote updates
+- **Bibliography** - Reference materials with remote content integration
 
 ### 9.2 Enhanced Glossary
 
 The **Glossary** centralizes definitions with enhanced features:
+
+- **Remote Content Integration**
+  - Automatic fetching from online sources with fallback to local content
+  - Real-time updates when network connectivity is restored
+  - Merged local and remote term definitions
 
 - **Search Functionality**
   - Real-time filtering as you type
@@ -272,18 +292,19 @@ The **Glossary** centralizes definitions with enhanced features:
   - Category-based filtering
 
 - **Term Details**
-  - Comprehensive definitions
+  - Comprehensive definitions with cross-references
+  - Highlighted terms that link to other glossary entries
   - Related terms with cross-links
-  - Links to relevant sections throughout the app
   - Associated neuromodulators and timeline events
 
 ### 9.3 Bibliography
 
 The **Bibliography** provides:
 
-- **Comprehensive Reference List**
-  - Authors, year, title, and source information
-  - Full citation formatting
+- **Remote Content Integration**
+  - Automatic fetching of updated reference lists
+  - Combined local and remote bibliography content
+  - Network-aware loading with offline fallbacks
 
 - **Advanced Search**
   - Filter by author name, year, or keywords
@@ -432,24 +453,36 @@ The app is designed for interconnected learning:
 Access the Settings panel to customize your experience:
 
 - **General Settings**
-  - Font size adjustment (10-24pt)
-  - Sidebar visibility preferences
-  - Focus mode enablement
-  - Animation controls
+  - Font size adjustment (10-24pt) with slider control
+  - Sidebar visibility preferences with auto-show options
+  - Focus mode enablement for distraction-free reading
+  - Animation controls for smooth interactions
 
 - **Appearance**
-  - Dark mode toggle
-  - Theme customization
+  - Multiple theme selection (APGI themes, high contrast, etc.)
+  - High contrast mode for accessibility
+  - Color scheme customization
 
 - **Bookmarks**
   - Auto-save bookmarks toggle
   - Clear all bookmarks functionality
-  - Bookmark synchronization
+  - Bookmark synchronization across sessions
+
+- **Network Settings**
+  - Remote content fetching controls
+  - Auto-refresh interval configuration (1 hour to 1 week)
+  - Cellular data usage permissions
+  - Connection diagnostics and testing
+
+- **Logs & Diagnostics**
+  - Error logging viewer
+  - Network connectivity diagnostics
+  - UserDefaults validation tools
 
 - **About**
-  - Version information (v1.0.0)
-  - Build details
-  - Framework description
+  - Version information and build details
+  - Framework description and credits
+  - Technical specifications
 
 ### 12.2 Accessibility Features
 
@@ -472,24 +505,37 @@ Access the Settings panel to customize your experience:
 ### 13.1 System Architecture
 
 - **Platform**: macOS native application
-- **Framework**: SwiftUI
+- **Framework**: SwiftUI with MVVM architecture
 - **Minimum macOS Version**: macOS 14.0+
-- **Architecture**: MVVM with ObservableObject pattern
-- **Navigation**: NavigationSplitView with sidebar
+- **Navigation**: NavigationSplitView with three-panel layout
+- **State Management**: ObservableObject pattern with Combine publishers
+- **Networking**: NWPathMonitor for connectivity monitoring, URLSession for remote content
+- **Data Persistence**: UserDefaults for settings, ContentCacheManager for remote content
 
 ### 13.2 Data Management
 
-- **Content Storage**: Local structured data
-- **Search Index**: Pre-computed search indices
-- **Bookmarks**: UserDefaults persistence
-- **Settings**: AppStorage preferences
+- **Content Storage**: Local structured data with remote content caching
+- **Table System**: Dynamic TableParser supporting multiple formats (Markdown, CSV, TSV, JSON)
+- **Search Index**: Pre-computed search indices with real-time filtering
+- **Bookmarks**: UserDefaults persistence with auto-save functionality
+- **Remote Content**: Cached glossary and bibliography with offline fallbacks
+- **Settings**: AppStorage preferences with validation tools
 
-### 13.3 Performance Features
+### 13.3 Network Features
 
-- **Lazy Loading**: Content loaded on demand
-- **Memory Management**: Optimized for large datasets
-- **Search Performance**: Indexed search with relevance ranking
-- **Animation Performance**: Smooth 60fps interactions
+- **Connectivity Monitoring**: Real-time network status with visual indicators
+- **Remote Content**: Automatic fetching from APGI API endpoints
+- **Offline Support**: Graceful degradation with cached content
+- **Retry Logic**: Exponential backoff for failed network requests
+- **Cellular Controls**: User-configurable cellular data usage
+
+### 13.4 Performance Features
+
+- **Lazy Loading**: Content loaded on demand with virtualized views
+- **Memory Management**: Optimized for large datasets with efficient caching
+- **Search Performance**: Indexed search with relevance ranking and filtering
+- **Animation Performance**: Hardware-accelerated animations with user controls
+- **Table Rendering**: Efficient parsing and display of complex tabular data
 
 ---
 
@@ -497,12 +543,34 @@ Access the Settings panel to customize your experience:
 
 ### 14.1 Common Issues
 
-- **Search Not Working**: Check if content is properly indexed
-- **Bookmarks Not Saving**: Ensure auto-save is enabled in settings
-- **Performance Issues**: Try closing unused sections or reducing font size
-- **Navigation Problems**: Restart the app to reset navigation state
+- **Network Connectivity Issues**
+  - Check the network status indicator in the toolbar
+  - Ensure internet connection for remote content updates
+  - Remote content (glossary, bibliography) will fallback to cached versions when offline
 
-### 14.2 Support
+- **Content Loading Problems**
+  - Glossary or bibliography not updating: Check network settings and try manual refresh
+  - Table parsing errors: Verify file format (Markdown, CSV, TSV, JSON supported)
+  - Search not working: Content may still be indexing, try restarting the app
+
+- **Performance Issues**
+  - Large tables loading slowly: Tables are parsed on demand, try closing unused sections
+  - App running slow: Reduce font size or disable animations in settings
+  - Memory usage high: Close unused sections or restart the app
+
+- **Navigation Problems**
+  - Sections not responding: Try keyboard shortcuts (Cmd+[ / Cmd+]) for navigation
+  - Related links not working: Check if related sections are properly configured
+  - Deep links not opening: Ensure URL scheme is properly registered
+
+- **Export Functionality**
+  - PDF export failing: Check file permissions and available disk space
+  - Text export not working: Verify write permissions to selected location
+
+- **Settings Not Saving**
+  - Settings not persisting: Check UserDefaults validation in settings
+  - Theme changes not applying: Try restarting the app
+  - Network settings reset: Use the reset option in network settings tab
 
 For technical support or feature requests:
 

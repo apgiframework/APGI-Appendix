@@ -1,13 +1,12 @@
-import SwiftUI
 import Combine
+import SwiftUI
 
-// Bookmark manager with persistence and feedback
+/// Bookmark manager with persistence and feedback
 @MainActor
 class BookmarkManager: ObservableObject {
     @Published var bookmarks: [String] = []
     @Published var lastAction: BookmarkAction?
 
-    private let userDefaults = UserDefaults.standard
     private let bookmarksKey = "APGIBookmarks"
 
     enum BookmarkAction {
@@ -16,27 +15,28 @@ class BookmarkManager: ObservableObject {
 
         var message: String {
             switch self {
-            case .added(let title):
+            case let .added(title):
                 return "Bookmark added: \(title)"
-            case .removed(let title):
+            case let .removed(title):
                 return "Bookmark removed: \(title)"
             }
         }
     }
 
     init() {
-        loadBookmarks()
+        self.loadBookmarks()
     }
 
     func addBookmark(_ tab: Tab) {
-        guard !bookmarks.contains(tab.id) else { return }
+        guard !self.bookmarks.contains(tab.id) else { return }
 
-        bookmarks.append(tab.id)
-        saveBookmarks()
-        lastAction = .added(tab.shortTitle)
+        self.bookmarks.append(tab.id)
+        self.saveBookmarks()
+        self.lastAction = .added(tab.shortTitle)
 
         // Clear action after delay to prevent stale feedback
-        DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) { [weak self] in
+            guard let self = self else { return }
             if self.lastAction?.message == self.lastAction?.message {
                 self.lastAction = nil
             }
@@ -46,12 +46,13 @@ class BookmarkManager: ObservableObject {
     func removeBookmark(_ tab: Tab) {
         guard let index = bookmarks.firstIndex(of: tab.id) else { return }
 
-        bookmarks.remove(at: index)
-        saveBookmarks()
-        lastAction = .removed(tab.shortTitle)
+        self.bookmarks.remove(at: index)
+        self.saveBookmarks()
+        self.lastAction = .removed(tab.shortTitle)
 
         // Clear action after delay
-        DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) { [weak self] in
+            guard let self = self else { return }
             if self.lastAction?.message == self.lastAction?.message {
                 self.lastAction = nil
             }
@@ -59,16 +60,27 @@ class BookmarkManager: ObservableObject {
     }
 
     func isBookmarked(_ tab: Tab) -> Bool {
-        bookmarks.contains(tab.id)
+        self.bookmarks.contains(tab.id)
     }
 
     private func loadBookmarks() {
-        if let savedBookmarks = userDefaults.stringArray(forKey: bookmarksKey) {
-            bookmarks = savedBookmarks
+        // Try to load from Keychain first, fallback to UserDefaults for migration
+        if let savedBookmarks: [String] = KeychainHelper.shared.retrieveObject(for: bookmarksKey) {
+            self.bookmarks = savedBookmarks
+        }
+        else if let legacyBookmarks = UserDefaults.standard.stringArray(forKey: bookmarksKey) {
+            // Migrate from UserDefaults to Keychain
+            self.bookmarks = legacyBookmarks
+            self.saveBookmarks()
+            // Optionally clear legacy data
+            UserDefaults.standard.removeObject(forKey: self.bookmarksKey)
         }
     }
 
     private func saveBookmarks() {
-        userDefaults.set(bookmarks, forKey: bookmarksKey)
+        let success = KeychainHelper.shared.save(object: self.bookmarks, for: self.bookmarksKey)
+        if !success {
+            logError(NSError(domain: "BookmarkManager", code: -1, userInfo: [NSLocalizedDescriptionKey: "Failed to save bookmarks to Keychain"]), context: "saveBookmarks()", function: #function, file: #file, line: #line)
+        }
     }
 }

@@ -1,6 +1,6 @@
 import SwiftUI
 
-// Bookmark button with feedback for user actions
+/// Bookmark button with feedback for user actions
 struct BookmarkButton: View {
     let tab: Tab
     @StateObject private var bookmarkManager = BookmarkManager()
@@ -8,23 +8,23 @@ struct BookmarkButton: View {
     @State private var feedbackMessage = ""
 
     private var isBookmarked: Bool {
-        bookmarkManager.isBookmarked(tab)
+        self.bookmarkManager.isBookmarked(self.tab)
     }
 
     var body: some View {
         Button {
-            toggleBookmark()
+            self.toggleBookmark()
         } label: {
-            Image(systemName: isBookmarked ? "bookmark.fill" : "bookmark")
-                .foregroundColor(isBookmarked ? .accentColor : .primary)
-                .scaleEffect(showFeedback ? 1.2 : 1.0)
-                .animation(.easeInOut(duration: 0.2), value: showFeedback)
+            Image(systemName: self.isBookmarked ? "bookmark.fill" : "bookmark")
+                .foregroundColor(self.isBookmarked ? .accentColor : .primary)
+                .scaleEffect(self.showFeedback ? 1.2 : 1.0)
+                .animation(.easeInOut(duration: 0.2), value: self.showFeedback)
         }
         .overlay(
             // Feedback toast
             VStack {
-                if showFeedback {
-                    Text(feedbackMessage)
+                if self.showFeedback {
+                    Text(self.feedbackMessage)
                         .font(.caption)
                         .padding(.horizontal, 8)
                         .padding(.vertical, 4)
@@ -39,29 +39,30 @@ struct BookmarkButton: View {
             alignment: .top
         )
         .apgiAccessibility(
-            label: isBookmarked ? "Remove bookmark" : "Add bookmark",
-            hint: "\(tab.shortTitle) section",
+            label: self.isBookmarked ? "Remove bookmark" : "Add bookmark",
+            hint: "\(self.tab.shortTitle) section",
             traits: .isButton
         )
     }
 
     private func toggleBookmark() {
-        if isBookmarked {
-            bookmarkManager.removeBookmark(tab)
-        } else {
-            bookmarkManager.addBookmark(tab)
+        if self.isBookmarked {
+            self.bookmarkManager.removeBookmark(self.tab)
+        }
+        else {
+            self.bookmarkManager.addBookmark(self.tab)
         }
 
         // Show feedback animation
         withAnimation(.easeInOut(duration: 0.3)) {
-            showFeedback = true
-            feedbackMessage = bookmarkManager.lastAction?.message ?? ""
+            self.showFeedback = true
+            self.feedbackMessage = self.bookmarkManager.lastAction?.message ?? ""
         }
 
         // Hide feedback after delay
         DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
             withAnimation(.easeInOut(duration: 0.3)) {
-                showFeedback = false
+                self.showFeedback = false
             }
         }
     }

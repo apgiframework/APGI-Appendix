@@ -10,19 +10,21 @@ struct TabContentView: View {
 
     var body: some View {
         Group {
-            if isLoading {
-                loadingView
-            } else if let errorMessage = errorMessage {
-                errorView(errorMessage)
-            } else {
-                contentView
+            if self.isLoading {
+                self.loadingView
+            }
+            else if let errorMessage = errorMessage {
+                self.errorView(errorMessage)
+            }
+            else {
+                self.contentView
             }
         }
         .onAppear {
-            loadContentIfNeeded()
+            self.loadContentIfNeeded()
         }
-        .onChange(of: tab) { _, _ in
-            loadContentIfNeeded()
+        .onChange(of: self.tab) { _, _ in
+            self.loadContentIfNeeded()
         }
     }
 
@@ -30,7 +32,7 @@ struct TabContentView: View {
         VStack(spacing: 16) {
             ProgressView()
                 .scaleEffect(1.2)
-            Text("Loading \(tab.shortTitle)...")
+            Text("Loading \(self.tab.shortTitle)...")
                 .font(.headline)
                 .foregroundStyle(.secondary)
         }
@@ -54,12 +56,12 @@ struct TabContentView: View {
                 .padding(.horizontal)
 
             Button("Retry") {
-                loadContentIfNeeded()
+                self.loadContentIfNeeded()
             }
             .buttonStyle(.borderedProminent)
 
             Button("Show Fallback") {
-                showFallbackContent()
+                self.showFallbackContent()
             }
             .buttonStyle(.bordered)
         }
@@ -69,7 +71,7 @@ struct TabContentView: View {
 
     private var contentView: some View {
         Group {
-            switch tab {
+            switch self.tab {
             case .methodology:
                 MethodologyView()
             case .mathematicalModel:
@@ -122,51 +124,52 @@ struct TabContentView: View {
             insertion: .opacity.combined(with: .move(edge: .trailing)),
             removal: .opacity.combined(with: .move(edge: .leading))
         ))
-        .animation(.easeInOut(duration: 0.3), value: tab)
+        .animation(.easeInOut(duration: 0.3), value: self.tab)
     }
 
     private func loadContentIfNeeded() {
-        guard !contentLoadAttempted else { return }
+        guard !self.contentLoadAttempted else { return }
 
-        contentLoadAttempted = true
-        isLoading = true
-        errorMessage = nil
+        self.contentLoadAttempted = true
+        self.isLoading = true
+        self.errorMessage = nil
 
         Task {
             do {
                 // Check cache first
                 let cacheKey = "content_\(tab.rawValue)"
-                if performanceManager.getCachedContent(for: cacheKey) != nil {
+                if self.performanceManager.getCachedContent(for: cacheKey) != nil {
                     await MainActor.run {
-                        isLoading = false
-                        errorMessage = nil
+                        self.isLoading = false
+                        self.errorMessage = nil
                     }
                     return
                 }
 
                 // Determine content type and loading delay
-                let contentType = getContentType(tab)
-                let loadingDelay = performanceManager.getOptimizedLoadingDelay(for: contentType)
+                let contentType = self.getContentType(self.tab)
+                let loadingDelay = self.performanceManager.getOptimizedLoadingDelay(for: contentType)
 
                 try await Task.sleep(nanoseconds: UInt64(loadingDelay * 1_000_000_000))
 
                 // Validate content availability
-                guard !tab.content.isEmpty else {
+                guard !self.tab.content.isEmpty else {
                     throw ContentLoadError.emptyContent
                 }
 
                 // Cache the content
-                let cachedContent = CachedContent(content: tab.content, cost: getContentCost(tab))
-                performanceManager.setCachedContent(cachedContent, for: cacheKey)
+                let cachedContent = CachedContent(content: tab.content, cost: self.getContentCost(self.tab))
+                self.performanceManager.setCachedContent(cachedContent, for: cacheKey)
 
                 await MainActor.run {
-                    isLoading = false
-                    errorMessage = nil
+                    self.isLoading = false
+                    self.errorMessage = nil
                 }
-            } catch {
+            }
+            catch {
                 await MainActor.run {
-                    isLoading = false
-                    errorMessage = error.localizedDescription
+                    self.isLoading = false
+                    self.errorMessage = error.localizedDescription
                 }
             }
         }
@@ -188,7 +191,7 @@ struct TabContentView: View {
     }
 
     private func getContentCost(_ tab: Tab) -> Int {
-        switch getContentType(tab) {
+        switch self.getContentType(tab) {
         case .light: return 1
         case .medium: return 3
         case .heavy: return 5
@@ -197,7 +200,7 @@ struct TabContentView: View {
     }
 
     private func showFallbackContent() {
-        errorMessage = nil
+        self.errorMessage = nil
         // Fallback content will be shown through the default case
     }
 }

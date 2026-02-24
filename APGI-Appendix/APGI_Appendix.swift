@@ -1,6 +1,6 @@
-import SwiftUI
 import AppKit
 import Combine
+import SwiftUI
 
 // MARK: - Updated Main App Entry Point
 
@@ -10,42 +10,53 @@ struct APGIAppendixApp: App {
     @StateObject private var themeManager = ThemeManager.shared
     @StateObject private var onboardingManager = OnboardingManager.shared
     @StateObject private var navigationManager = KeyboardNavigationManager.shared
+    @StateObject private var memoryMonitor = MemoryMonitor.shared
+
+    init() {
+        // StateObjects are automatically initialized by SwiftUI
+        // Don't access them here to avoid creating new instances
+    }
 
     var body: some Scene {
         WindowGroup("APGI Framework") {
             OnboardingTourView()
-            .applyTheme()
-            .environmentObject(themeManager)
-            .environmentObject(onboardingManager)
-            .environmentObject(navigationManager)
+                .applyTheme()
+                .environmentObject(self.themeManager)
+                .environmentObject(self.onboardingManager)
+                .environmentObject(self.navigationManager)
+                .environmentObject(self.memoryMonitor)
+                .onAppear {
+                    // Start memory monitoring when the view appears
+                    self.memoryMonitor.startMonitoring(interval: 30.0)
+                }
         }
         .commands {
             APGICommands()
 
             CommandGroup(replacing: .help) {
                 Button("APGI Help") {
-                    showHelp()
+                    self.showHelp()
                 }
                 .keyboardShortcut("?", modifiers: [.command, .shift])
 
                 Divider()
 
                 Button("Take a Tour") {
-                    onboardingManager.startOnboarding()
+                    self.onboardingManager.startOnboarding()
                 }
 
                 Button("What's New") {
-                    showWhatsNew()
+                    self.showWhatsNew()
                 }
 
                 Button("Quick Start Guide") {
-                    showQuickStart()
+                    self.showQuickStart()
                 }
 
                 Divider()
 
                 Button("Keyboard Shortcuts") {
-                    navigationManager.showKeyboardShortcuts = true
+                    self.navigationManager.showKeyboardShortcuts = true
                 }
                 .keyboardShortcut("/", modifiers: [.command])
             }
@@ -54,14 +65,14 @@ struct APGIAppendixApp: App {
         Window("Neural Timeline", id: "timeline") {
             IgnitionTimelineView()
                 .applyTheme()
-                .environmentObject(themeManager)
+                .environmentObject(self.themeManager)
         }
         .defaultSize(width: 1000, height: 800)
 
         Window("Glossary", id: "glossary") {
             GlossaryView()
                 .applyTheme()
-                .environmentObject(themeManager)
+                .environmentObject(self.themeManager)
         }
         .defaultSize(width: 1000, height: 800)
         .defaultPosition(.trailing)
@@ -69,38 +80,38 @@ struct APGIAppendixApp: App {
         Window("APGI Simulator", id: "simulator") {
             APGISimulatorView()
                 .applyTheme()
-                .environmentObject(themeManager)
+                .environmentObject(self.themeManager)
         }
         .defaultSize(width: 1000, height: 800)
 
         Settings {
             EnhancedSettingsView()
                 .applyTheme()
-                .environmentObject(themeManager)
+                .environmentObject(self.themeManager)
         }
     }
 
     private func showHelp() {
         URLValidator.shared.openSafely("https://apgi-framework.com/help") {
             // Fallback: show local help content
-            showLocalHelp()
+            self.showLocalHelp()
         }
     }
-    
+
     private func showLocalHelp() {
         let helpContent = URLValidator.shared.getLocalHelpContent()
-        
+
         let helpWindow = NSWindow(
             contentRect: NSRect(x: 0, y: 0, width: 600, height: 700),
             styleMask: [.titled, .closable, .resizable],
             backing: .buffered,
             defer: false
         )
-        
+
         helpWindow.title = "APGI Appendix Help"
         helpWindow.center()
         helpWindow.setFrameAutosaveName("HelpWindow")
-        
+
         let helpView = ScrollView {
             VStack(alignment: .leading, spacing: 16) {
                 Text(helpContent)
@@ -110,7 +121,7 @@ struct APGIAppendixApp: App {
             }
             .frame(maxWidth: .infinity, alignment: .leading)
         }
-        
+
         helpWindow.contentView = NSHostingView(rootView: helpView)
         helpWindow.makeKeyAndOrderFront(nil)
     }
@@ -145,17 +156,34 @@ struct APGIAppendixApp: App {
 // MARK: - App Delegate
 
 class AppDelegate: NSObject, NSApplicationDelegate {
-    func applicationDidFinishLaunching(_ notification: Notification) {
-        setupAppearance()
-        
+    func applicationDidFinishLaunching(_: Notification) {
+        self.setupAppearance()
+
         // Initialize screenshot automation if running in screenshot mode
         #if DEBUG
-        ScreenshotAutomationRunner.run()
+            ScreenshotAutomationRunner.run()
         #endif
     }
 
-    func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {
+    func applicationShouldTerminate(_: NSApplication) -> NSApplication.TerminateReply {
         return .terminateNow
+    }
+
+    func application(_: NSApplication, continue userActivity: NSUserActivity, restorationHandler _: @escaping ([NSUserActivityRestoring]) -> Void) -> Bool {
+        // Handle incoming Handoff activities
+        guard userActivity.activityType == "com.apgi.appendix.content" else {
+            return false
+        }
+
+        logInfo("Received Handoff activity: \(userActivity.activityType)", context: "AppDelegate.continueUserActivity")
+
+        // Post notification for MainContentView to handle
+        NotificationCenter.default.post(
+            name: NSNotification.Name("HandleHandoffActivity"),
+            object: userActivity
+        )
+
+        return true
     }
 
     private func setupAppearance() {
@@ -172,12 +200,12 @@ struct ThemeToggleButton: View {
         Menu {
             ForEach(AppTheme.allCases) { theme in
                 Button {
-                    themeManager.selectedTheme = theme
+                    self.themeManager.selectedTheme = theme
                 } label: {
                     HStack {
                         Image(systemName: theme.icon)
                         Text(theme.rawValue)
-                        if themeManager.selectedTheme == theme {
+                        if self.themeManager.selectedTheme == theme {
                             Image(systemName: "checkmark")
                         }
                     }
@@ -186,9 +214,9 @@ struct ThemeToggleButton: View {
 
             Divider()
 
-            Toggle("High Contrast", isOn: $themeManager.highContrastMode)
+            Toggle("High Contrast", isOn: self.$themeManager.highContrastMode)
         } label: {
-            Image(systemName: themeManager.selectedTheme.icon)
+            Image(systemName: self.themeManager.selectedTheme.icon)
         }
         .help("Appearance Settings")
     }
@@ -202,7 +230,7 @@ struct EnhancedTabContentView: View {
 
     var body: some View {
         Group {
-            switch tab {
+            switch self.tab {
             case .methodology:
                 MethodologyView()
             case .mathematicalModel:

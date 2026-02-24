@@ -1,7 +1,7 @@
-import SwiftUI
 import Charts
+import SwiftUI
 
-// Enhanced lazy loading container with improved responsiveness
+/// Enhanced lazy loading container with improved responsiveness
 struct LazyLoadingContainer<Content: View, Placeholder: View, Loading: View>: View {
     let content: () -> Content
     let placeholder: () -> Placeholder
@@ -37,55 +37,57 @@ struct LazyLoadingContainer<Content: View, Placeholder: View, Loading: View>: Vi
     var body: some View {
         GeometryReader { proxy in
             let isVisible = proxy.frame(in: .global).intersects(
-                CGRect(x: -proxy.size.width * contentType.preloadThreshold,
-                      y: -proxy.size.height * contentType.preloadThreshold,
-                      width: proxy.size.width * (1 + 2 * contentType.preloadThreshold),
-                      height: proxy.size.height * (1 + 2 * contentType.preloadThreshold))
+                CGRect(x: -proxy.size.width * self.contentType.preloadThreshold,
+                       y: -proxy.size.height * self.contentType.preloadThreshold,
+                       width: proxy.size.width * (1 + 2 * self.contentType.preloadThreshold),
+                       height: proxy.size.height * (1 + 2 * self.contentType.preloadThreshold))
             )
 
             Group {
-                if hasLoaded {
-                    content()
+                if self.hasLoaded {
+                    self.content()
                         .transition(.opacity.combined(with: .move(edge: .top)))
-                } else if isVisible && !hasLoaded {
-                    loadingView()
+                }
+                else if isVisible && !self.hasLoaded {
+                    self.loadingView()
                         .onAppear {
-                            loadContentWithDelay()
+                            self.loadContentWithDelay()
                         }
-                } else {
-                    placeholder()
+                }
+                else {
+                    self.placeholder()
                 }
             }
-            .animation(.easeInOut(duration: 0.3), value: hasLoaded)
+            .animation(.easeInOut(duration: 0.3), value: self.hasLoaded)
         }
         .onAppear {
             self.isVisible = true
         }
         .onDisappear {
-            if contentType == .heavy || contentType == .critical {
+            if self.contentType == .heavy || self.contentType == .critical {
                 // Unload heavy content when not visible to save memory
-                hasLoaded = false
-                isLoading = false
+                self.hasLoaded = false
+                self.isLoading = false
             }
         }
     }
 
     private func loadContentWithDelay() {
-        guard !isLoading else { return }
+        guard !self.isLoading else { return }
 
-        isLoading = true
+        self.isLoading = true
 
         // Add delay for heavy content to improve perceived performance
-        DispatchQueue.main.asyncAfter(deadline: .now() + contentType.loadDelay) {
-            loadContent()
+        DispatchQueue.main.asyncAfter(deadline: .now() + self.contentType.loadDelay) {
+            self.loadContent()
         }
     }
 
     private func loadContent() {
         Task {
             await MainActor.run {
-                hasLoaded = true
-                isLoading = false
+                self.hasLoaded = true
+                self.isLoading = false
             }
         }
     }
@@ -101,10 +103,10 @@ struct LazyChartView: View {
         LazyLoadingContainer(
             content: {
                 VStack(alignment: .leading, spacing: 16) {
-                    Text(title)
+                    Text(self.title)
                         .font(.headline)
 
-                    Chart(data) { point in
+                    Chart(self.data) { point in
                         LineMark(
                             x: .value("Time", point.timestamp),
                             y: .value("Value", point.value)
@@ -150,7 +152,8 @@ struct LazyTableView: View {
                 VStack(alignment: .leading, spacing: 16) {
                     if let parsedTable = try? TableParser().parseMarkdownTable(markdownTable) {
                         parsedTable.toSwiftUIView()
-                    } else {
+                    }
+                    else {
                         Text("Failed to load table")
                             .foregroundStyle(.red)
                     }
@@ -190,7 +193,7 @@ struct LazySimulationView: View {
         LazyLoadingContainer(
             content: {
                 APGISimulatorView()
-                    .environmentObject(simulationEngine)
+                    .environmentObject(self.simulationEngine)
             },
             placeholder: {
                 VStack(spacing: 12) {
@@ -235,7 +238,7 @@ struct PerformanceOptimizedChart: View {
 
     var body: some View {
         GeometryReader { geometry in
-            Chart(visibleDataPoints) { point in
+            Chart(self.visibleDataPoints) { point in
                 LineMark(
                     x: .value("Time", point.timestamp),
                     y: .value("Value", point.value)
@@ -243,29 +246,29 @@ struct PerformanceOptimizedChart: View {
                 .foregroundStyle(.blue)
             }
             .frame(height: 300)
-            .onChange(of: geometry.size.width) { oldWidth, newWidth in
-                updateVisibleDataPoints(for: newWidth)
+            .onChange(of: geometry.size.width) { _, newWidth in
+                self.updateVisibleDataPoints(for: newWidth)
             }
             .onAppear {
-                let _ = calculateVisibleRange(geometry.size.width)
-                updateVisibleDataPoints(for: geometry.size.width)
+                let _ = self.calculateVisibleRange(geometry.size.width)
+                self.updateVisibleDataPoints(for: geometry.size.width)
             }
         }
     }
 
     private func calculateVisibleRange(_ width: CGFloat) -> Range<Int> {
-        let maxVisiblePoints = performanceManager.shouldLimitConcurrentOperations ? 50 : 200
+        let maxVisiblePoints = self.performanceManager.shouldLimitConcurrentOperations ? 50 : 200
         let pointsPerPixel = Double(data.count) / Double(width)
         let visiblePoints = min(maxVisiblePoints, Int(width * pointsPerPixel))
 
         let startIndex = max(0, data.count - visiblePoints)
-        let endIndex = data.count
+        let endIndex = self.data.count
 
-        return startIndex..<endIndex
+        return startIndex ..< endIndex
     }
 
     private func updateVisibleDataPoints(for width: CGFloat) {
-        let range = calculateVisibleRange(width)
-        visibleDataPoints = Array(data[range])
+        let range = self.calculateVisibleRange(width)
+        self.visibleDataPoints = Array(self.data[range])
     }
 }

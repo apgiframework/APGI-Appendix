@@ -1,7 +1,8 @@
-import SwiftUI
 import Combine
+import SwiftUI
 
 // MARK: - Tour Highlight View
+
 struct TourHighlight: View {
     let target: TourTarget
     let title: String
@@ -10,50 +11,51 @@ struct TourHighlight: View {
     let highlightColor: Color
     let onNext: () -> Void
     let onSkip: () -> Void
-    
+
     @State private var animateHighlight = false
     @State private var animateTooltip = false
     @State private var pulseScale: CGFloat = 1.0
-    
+
     var body: some View {
         GeometryReader { geometry in
             ZStack {
                 // Dark overlay
                 Color.black.opacity(0.65)
                     .ignoresSafeArea()
-                
+
                 // Highlight cutout
-                highlightCutout(geometry: geometry)
-                
+                self.highlightCutout(geometry: geometry)
+
                 // Tooltip
-                tooltipView(geometry: geometry)
+                self.tooltipView(geometry: geometry)
             }
         }
         .onAppear {
             withAnimation(.easeInOut(duration: 0.3)) {
-                animateHighlight = true
+                self.animateHighlight = true
             }
-            
+
             withAnimation(.easeInOut(duration: 0.4).delay(0.2)) {
-                animateTooltip = true
+                self.animateTooltip = true
             }
-            
+
             // Pulse animation for highlight
             withAnimation(.easeInOut(duration: 1.5).repeatForever(autoreverses: true)) {
-                pulseScale = 1.1
+                self.pulseScale = 1.1
             }
         }
     }
-    
+
     // MARK: - Highlight Cutout
+
     private func highlightCutout(geometry: GeometryProxy) -> some View {
-        let targetFrame = getTargetFrame(geometry: geometry)
-        
+        let targetFrame = self.getTargetFrame(geometry: geometry)
+
         return ZStack {
             // Main overlay with cutout
             ZStack {
                 Color.black.opacity(0.65)
-                
+
                 // Cutout for highlighted area
                 RoundedRectangle(cornerRadius: 8)
                     .frame(width: targetFrame.width + 20, height: targetFrame.height + 20)
@@ -61,75 +63,76 @@ struct TourHighlight: View {
                     .blendMode(.destinationOut)
             }
             .compositingGroup()
-            
+
             // Highlight border
             RoundedRectangle(cornerRadius: 8)
-                .stroke(highlightColor, lineWidth: 3)
+                .stroke(self.highlightColor, lineWidth: 3)
                 .frame(width: targetFrame.width + 20, height: targetFrame.height + 20)
                 .position(x: targetFrame.midX, y: targetFrame.midY)
-                .scaleEffect(pulseScale)
-                .opacity(animateHighlight ? 0.8 : 0)
-            
+                .scaleEffect(self.pulseScale)
+                .opacity(self.animateHighlight ? 0.8 : 0)
+
             // Glow effect
             RoundedRectangle(cornerRadius: 8)
-                .fill(highlightColor.opacity(0.2))
+                .fill(self.highlightColor.opacity(0.2))
                 .frame(width: targetFrame.width + 30, height: targetFrame.height + 30)
                 .position(x: targetFrame.midX, y: targetFrame.midY)
                 .blur(radius: 15)
-                .opacity(animateHighlight ? 0.6 : 0)
+                .opacity(self.animateHighlight ? 0.6 : 0)
         }
     }
-    
+
     // MARK: - Tooltip View
+
     private func tooltipView(geometry: GeometryProxy) -> some View {
-        let targetFrame = getTargetFrame(geometry: geometry)
-        let tooltipPosition = calculateTooltipPosition(targetFrame: targetFrame, geometry: geometry)
-        
+        let targetFrame = self.getTargetFrame(geometry: geometry)
+        let tooltipPosition = self.calculateTooltipPosition(targetFrame: targetFrame, geometry: geometry)
+
         return VStack(spacing: 0) {
             // Content arrow
-            tooltipArrow(position: position)
-            
+            self.tooltipArrow(position: self.position)
+
             // Tooltip content
             VStack(alignment: .leading, spacing: 12) {
                 // Header
                 HStack {
-                    Image(systemName: target.icon)
+                    Image(systemName: self.target.icon)
                         .font(.title2)
-                        .foregroundColor(highlightColor)
-                    
-                    Text(target.name)
+                        .foregroundColor(self.highlightColor)
+
+                    Text(self.target.name)
                         .font(.headline)
                         .foregroundColor(.primary)
-                    
+
                     Spacer()
                 }
-                
+
                 // Title
-                Text(title)
+                Text(self.title)
                     .font(.title3.weight(.semibold))
                     .foregroundColor(.primary)
-                
+
                 // Description
-                Text(description)
+                Text(self.description)
                     .font(.body)
                     .foregroundColor(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
-                
+
                 // Navigation buttons
                 HStack {
                     Button("Skip") {
                         withAnimation(.easeInOut(duration: 0.3)) {
-                            onSkip()
+                            self.onSkip()
                         }
                     }
                     .buttonStyle(.plain)
                     .foregroundColor(.secondary)
-                    
+
                     Spacer()
-                    
+
                     Button("Next") {
                         withAnimation(.easeInOut(duration: 0.3)) {
-                            onNext()
+                            self.onNext()
                         }
                     }
                     .buttonStyle(.borderedProminent)
@@ -146,11 +149,12 @@ struct TourHighlight: View {
             .frame(maxWidth: 280)
         }
         .position(x: tooltipPosition.x, y: tooltipPosition.y)
-        .scaleEffect(animateTooltip ? 1 : 0.8)
-        .opacity(animateTooltip ? 1 : 0)
+        .scaleEffect(self.animateTooltip ? 1 : 0.8)
+        .opacity(self.animateTooltip ? 1 : 0)
     }
-    
+
     // MARK: - Tooltip Arrow
+
     private func tooltipArrow(position: TooltipPosition) -> some View {
         Group {
             switch position {
@@ -187,12 +191,13 @@ struct TourHighlight: View {
             }
         }
     }
-    
+
     // MARK: - Helper Methods
+
     private func getTargetFrame(geometry: GeometryProxy) -> CGRect {
         let screenSize = geometry.size
-        
-        switch target {
+
+        switch self.target {
         case .sidebar:
             return CGRect(x: 20, y: 100, width: 250, height: screenSize.height - 200)
         case .search:
@@ -211,51 +216,52 @@ struct TourHighlight: View {
             return CGRect(x: screenSize.width - 200, y: 100, width: 150, height: 100)
         }
     }
-    
+
     private func calculateTooltipPosition(targetFrame: CGRect, geometry: GeometryProxy) -> CGPoint {
         let tooltipWidth: CGFloat = 280
         let tooltipHeight: CGFloat = 200
         let padding: CGFloat = 20
-        
-        switch position {
+
+        switch self.position {
         case .top:
             return CGPoint(
-                x: min(max(targetFrame.midX, tooltipWidth/2 + padding), geometry.size.width - tooltipWidth/2 - padding),
-                y: targetFrame.minY - tooltipHeight/2 - 30
+                x: min(max(targetFrame.midX, tooltipWidth / 2 + padding), geometry.size.width - tooltipWidth / 2 - padding),
+                y: targetFrame.minY - tooltipHeight / 2 - 30
             )
         case .bottom:
             return CGPoint(
-                x: min(max(targetFrame.midX, tooltipWidth/2 + padding), geometry.size.width - tooltipWidth/2 - padding),
-                y: targetFrame.maxY + tooltipHeight/2 + 30
+                x: min(max(targetFrame.midX, tooltipWidth / 2 + padding), geometry.size.width - tooltipWidth / 2 - padding),
+                y: targetFrame.maxY + tooltipHeight / 2 + 30
             )
         case .leading:
             return CGPoint(
-                x: targetFrame.minX - tooltipWidth/2 - 30,
-                y: min(max(targetFrame.midY, tooltipHeight/2 + padding), geometry.size.height - tooltipHeight/2 - padding)
+                x: targetFrame.minX - tooltipWidth / 2 - 30,
+                y: min(max(targetFrame.midY, tooltipHeight / 2 + padding), geometry.size.height - tooltipHeight / 2 - padding)
             )
         case .trailing:
             return CGPoint(
-                x: targetFrame.maxX + tooltipWidth/2 + 30,
-                y: min(max(targetFrame.midY, tooltipHeight/2 + padding), geometry.size.height - tooltipHeight/2 - padding)
+                x: targetFrame.maxX + tooltipWidth / 2 + 30,
+                y: min(max(targetFrame.midY, tooltipHeight / 2 + padding), geometry.size.height - tooltipHeight / 2 - padding)
             )
         case .center:
-            return CGPoint(x: geometry.size.width/2, y: geometry.size.height/2)
+            return CGPoint(x: geometry.size.width / 2, y: geometry.size.height / 2)
         }
     }
 }
 
 // MARK: - Arrow Shape
+
 struct ArrowShape: Shape {
     enum Direction {
         case up, down, left, right
     }
-    
+
     let direction: Direction
-    
+
     func path(in rect: CGRect) -> Path {
         var path = Path()
-        
-        switch direction {
+
+        switch self.direction {
         case .up:
             path.move(to: CGPoint(x: rect.midX, y: rect.maxY))
             path.addLine(to: CGPoint(x: rect.minX, y: rect.minY))
@@ -273,78 +279,81 @@ struct ArrowShape: Shape {
             path.addLine(to: CGPoint(x: rect.maxX, y: rect.minY))
             path.addLine(to: CGPoint(x: rect.maxX, y: rect.maxY))
         }
-        
+
         path.closeSubpath()
         return path
     }
 }
 
 // MARK: - Tour Highlight Manager
+
 @MainActor
 class TourHighlightManager: ObservableObject {
     static let shared = TourHighlightManager()
-    
+
     @Published var isShowingHighlight = false
     @Published var currentStep: TourStep?
     @Published var tourSteps: [TourStep] = []
-    
+
     private var currentStepIndex = 0
-    
+
     func startTour(steps: [TourStep]) {
-        tourSteps = steps
-        currentStepIndex = 0
-        showStep(at: 0)
+        self.tourSteps = steps
+        self.currentStepIndex = 0
+        self.showStep(at: 0)
     }
-    
+
     func nextStep() {
-        if currentStepIndex < tourSteps.count - 1 {
-            currentStepIndex += 1
-            showStep(at: currentStepIndex)
-        } else {
-            completeTour()
+        if self.currentStepIndex < self.tourSteps.count - 1 {
+            self.currentStepIndex += 1
+            self.showStep(at: self.currentStepIndex)
+        }
+        else {
+            self.completeTour()
         }
     }
-    
+
     func skipTour() {
-        completeTour()
+        self.completeTour()
     }
-    
+
     private func showStep(at index: Int) {
-        guard index < tourSteps.count else { return }
-        currentStep = tourSteps[index]
-        isShowingHighlight = true
-        
+        guard index < self.tourSteps.count else { return }
+        self.currentStep = self.tourSteps[index]
+        self.isShowingHighlight = true
+
         // Execute action if available
-        currentStep?.action?()
+        self.currentStep?.action?()
     }
-    
+
     private func completeTour() {
-        isShowingHighlight = false
-        currentStep = nil
-        currentStepIndex = 0
+        self.isShowingHighlight = false
+        self.currentStep = nil
+        self.currentStepIndex = 0
     }
 }
 
 // MARK: - Tour Highlight Overlay
+
 struct TourHighlightOverlay: View {
     @StateObject private var tourManager = TourHighlightManager.shared
-    
+
     var body: some View {
         Group {
-            if tourManager.isShowingHighlight, let step = tourManager.currentStep {
+            if self.tourManager.isShowingHighlight, let step = tourManager.currentStep {
                 TourHighlight(
                     target: step.target,
                     title: step.title,
                     description: step.description,
                     position: step.position,
                     highlightColor: step.highlightColor,
-                    onNext: tourManager.nextStep,
-                    onSkip: tourManager.skipTour
+                    onNext: self.tourManager.nextStep,
+                    onSkip: self.tourManager.skipTour
                 )
                 .transition(.opacity.combined(with: .scale(scale: 0.8)))
             }
         }
-        .animation(.easeInOut(duration: 0.3), value: tourManager.isShowingHighlight)
+        .animation(.easeInOut(duration: 0.3), value: self.tourManager.isShowingHighlight)
     }
 }
 
@@ -355,7 +364,9 @@ struct TourHighlightOverlay: View {
         description: "Browse all sections of the APGI framework from here. Use the sidebar to quickly jump between different topics and categories.",
         position: .trailing,
         highlightColor: .blue,
-        onNext: {},
-        onSkip: {}
+        onNext: {
+        },
+        onSkip: {
+        }
     )
 }

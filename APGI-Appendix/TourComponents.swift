@@ -1,6 +1,7 @@
 import SwiftUI
 
 // MARK: - Feature Spotlight
+
 struct FeatureSpotlight: View {
     let title: String
     let description: String
@@ -9,17 +10,17 @@ struct FeatureSpotlight: View {
 
     var body: some View {
         HStack(spacing: 16) {
-            Image(systemName: icon)
+            Image(systemName: self.icon)
                 .font(.title2)
-                .foregroundColor(color)
+                .foregroundColor(self.color)
                 .frame(width: 30)
 
             VStack(alignment: .leading, spacing: 4) {
-                Text(title)
+                Text(self.title)
                     .font(.headline)
                     .foregroundColor(.primary)
 
-                Text(description)
+                Text(self.description)
                     .font(.caption)
                     .foregroundColor(.secondary)
             }
@@ -32,21 +33,22 @@ struct FeatureSpotlight: View {
             RoundedRectangle(cornerRadius: 6)
                 .fill(Color.gray.opacity(0.1))
         )
-        .scaleEffect(isVisible ? 1 : 0.8)
-        .opacity(isVisible ? 1 : 0)
-        .animation(.spring(response: 0.4, dampingFraction: 0.8), value: isVisible)
+        .scaleEffect(self.isVisible ? 1 : 0.8)
+        .opacity(self.isVisible ? 1 : 0)
+        .animation(.spring(response: 0.4, dampingFraction: 0.8), value: self.isVisible)
     }
 
     @State private var isVisible = false
 
     func onAppear() {
         withAnimation(.spring(response: 0.4, dampingFraction: 0.8).delay(0.2)) {
-            isVisible = true
+            self.isVisible = true
         }
     }
 }
 
 // MARK: - Tour Target
+
 enum TourTarget: CaseIterable {
     case sidebar
     case search
@@ -98,6 +100,7 @@ enum TourTarget: CaseIterable {
 }
 
 // MARK: - Tooltip Position
+
 enum TooltipPosition {
     case top
     case bottom
@@ -107,6 +110,7 @@ enum TooltipPosition {
 }
 
 // MARK: - Tour Step
+
 struct TourStep: Identifiable {
     let id = UUID()
     let target: TourTarget

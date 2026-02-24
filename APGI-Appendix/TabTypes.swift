@@ -25,7 +25,9 @@ enum Tab: String, CaseIterable, Identifiable {
     case glossary = "Glossary"
     case apgiSimulator = "APGI Simulator"
 
-    var id: String { rawValue }
+    var id: String {
+        rawValue
+    }
 
     var icon: String {
         switch self {
@@ -119,10 +121,10 @@ enum Tab: String, CaseIterable, Identifiable {
         switch self {
         case .methodology:
             return "Methodology\n" +
-            "The persistent challenges in the field are the pitfalls of vague assertions, implicit assumptions and unfalsifiable claims that have long hindered progress."
+                "The persistent challenges in the field are the pitfalls of vague assertions, implicit assumptions and unfalsifiable claims that have long hindered progress."
         case .mathematicalModel:
             return "Mathematical Model\n" +
-            "The Allostatic Precision-Gated Ignition Framework provides a quantitative framework for understanding the dynamics of conscious access."
+                "The Allostatic Precision-Gated Ignition Framework provides a quantitative framework for understanding the dynamics of conscious access."
         case .apgiMapping:
             return "APGI Explicit Mapping\nSurprise (Sₜ)\nIgnition Threshold (θₜ)\nIgnition Probability (Bₜ)\nPrecision-Weighted Surprise\nThalamic Reticular Nucleus\nLocus Coeruleus–Norepinephrine"
         case .parameterIdentifiability:
@@ -151,12 +153,12 @@ enum Tab: String, CaseIterable, Identifiable {
             return rawValue
         case .disordersConditions:
             return "APGI Parameter Table — Disorders & Conditions\n" +
-            "Disorder\n" +
-            "Prediction Error ε (σ)\n" +
-            "Precision π (dominant channels)\n" +
-            "Threshold θₜ (%)\n" +
-            "Somatic Bias β\n" +
-            "ADHD\nAutism Spectrum Disorder\nSchizophrenia\nMajor Depressive Disorder\nGeneralized Anxiety Disorder\nPTSD"
+                "Disorder\n" +
+                "Prediction Error ε (σ)\n" +
+                "Precision π (dominant channels)\n" +
+                "Threshold θₜ (%)\n" +
+                "Somatic Bias β\n" +
+                "ADHD\nAutism Spectrum Disorder\nSchizophrenia\nMajor Depressive Disorder\nGeneralized Anxiety Disorder\nPTSD"
         case .apgiStatement:
             return rawValue
         case .lifeStages:
@@ -175,7 +177,7 @@ enum Tab: String, CaseIterable, Identifiable {
     }
 
     var content: String {
-        searchIndexText
+        self.searchIndexText
     }
 }
 
@@ -186,7 +188,9 @@ enum NavigationSection: String, CaseIterable, Identifiable, Hashable {
     case clinical = "Clinical Applications"
     case reference = "Reference"
 
-    var id: String { rawValue }
+    var id: String {
+        rawValue
+    }
 
     var tabs: [Tab] {
         switch self {

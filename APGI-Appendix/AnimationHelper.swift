@@ -2,11 +2,12 @@ import SwiftUI
 
 // MARK: - Animation Helper
 
-struct AnimationHelper {
+enum AnimationHelper {
     static func animated(_ animation: Animation? = nil) -> Animation? {
         if ThemeManager.shared.enableAnimations {
             return animation ?? .easeInOut(duration: APGISimulatorConstants.animationDuration)
-        } else {
+        }
+        else {
             return nil
         }
     }
@@ -14,7 +15,8 @@ struct AnimationHelper {
     static func transition(_ transition: AnyTransition? = nil) -> AnyTransition {
         if ThemeManager.shared.enableAnimations {
             return transition ?? .opacity.combined(with: .scale(scale: APGISimulatorConstants.transitionScale))
-        } else {
+        }
+        else {
             return .identity
         }
     }
@@ -33,8 +35,8 @@ struct AnimatedModifier: ViewModifier {
 
     func body(content: Content) -> some View {
         content
-            .animation(AnimationHelper.animated(animation), value: ThemeManager.shared.enableAnimations)
-            .transition(AnimationHelper.transition(transition))
+            .animation(AnimationHelper.animated(self.animation), value: ThemeManager.shared.enableAnimations)
+            .transition(AnimationHelper.transition(self.transition))
     }
 }
 
@@ -55,9 +57,10 @@ struct ConditionalAnimationModifier: ViewModifier {
     let animation: Animation?
 
     func body(content: Content) -> some View {
-        if condition {
-            content.animation(AnimationHelper.animated(animation), value: UUID())
-        } else {
+        if self.condition {
+            content.animation(AnimationHelper.animated(self.animation), value: UUID())
+        }
+        else {
             content
         }
     }

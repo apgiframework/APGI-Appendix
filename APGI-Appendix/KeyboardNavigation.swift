@@ -1,6 +1,6 @@
-import SwiftUI
 import AppKit
 import Combine
+import SwiftUI
 
 // MARK: - Keyboard Navigation Manager
 
@@ -13,41 +13,42 @@ final class KeyboardNavigationManager: ObservableObject {
     @Published var currentSectionIndex = 0
     @Published var showKeyboardShortcuts = false
 
-    private init() {}
+    private init() {
+    }
 
     var allTabs: [Tab] {
         Tab.allCases
     }
 
     func navigateToNextSection() {
-        let maxIndex = allTabs.count - 1
-        if currentSectionIndex < maxIndex {
-            currentSectionIndex += 1
+        let maxIndex = self.allTabs.count - 1
+        if self.currentSectionIndex < maxIndex {
+            self.currentSectionIndex += 1
         }
     }
 
     func navigateToPreviousSection() {
-        if currentSectionIndex > 0 {
-            currentSectionIndex -= 1
+        if self.currentSectionIndex > 0 {
+            self.currentSectionIndex -= 1
         }
     }
 
     func navigateToSection(at index: Int) {
-        guard index >= 0 && index < allTabs.count else { return }
-        currentSectionIndex = index
+        guard index >= 0, index < self.allTabs.count else { return }
+        self.currentSectionIndex = index
     }
 
     func currentTab() -> Tab {
-        guard currentSectionIndex < allTabs.count else { return .methodology }
-        return allTabs[currentSectionIndex]
+        guard self.currentSectionIndex < self.allTabs.count else { return .methodology }
+        return self.allTabs[self.currentSectionIndex]
     }
 
     func focusSearch() {
-        isSearchFocused = true
+        self.isSearchFocused = true
     }
 
     func toggleGlossary() {
-        isGlossaryOpen.toggle()
+        self.isGlossaryOpen.toggle()
     }
 }
 
@@ -63,42 +64,43 @@ struct KeyboardShortcutsView: View {
             ("⌘↓", "Next section"),
             ("⌘1-9", "Jump to section 1-9"),
             ("⌘[", "Back in history"),
-            ("⌘]", "Forward in history")
+            ("⌘]", "Forward in history"),
         ]),
         ("Search & Reference", [
             ("⌘F", "Focus search bar"),
             ("⌘G", "Toggle glossary"),
             ("⌘B", "Toggle bookmarks"),
             ("⌘S", "Toggle sidebar"),
-            ("⌘/", "Show keyboard shortcuts")
+            ("⌘/", "Show keyboard shortcuts"),
         ]),
         ("Windows", [
             ("⌘⇧T", "Open timeline window"),
             ("⌘W", "Close current window"),
             ("⌘M", "Minimize window"),
-            ("⌘⌃F", "Toggle fullscreen")
+            ("⌘⌃F", "Toggle fullscreen"),
         ]),
         ("Reading", [
             ("⌘=", "Increase font size"),
             ("⌘-", "Decrease font size"),
             ("⌘0", "Reset font size"),
             ("Space", "Scroll down"),
-            ("⇧Space", "Scroll up")
+            ("⇧Space", "Scroll up"),
         ]),
         ("General", [
             ("⌘,", "Open settings"),
             ("⌘/", "Show this help"),
             ("⌘Q", "Quit application"),
-        ])
+        ]),
     ]
 
     var body: some View {
         VStack(spacing: 0) {
             // Header
             HStack {
-                Image(systemName: "keyboard")
+                Image(systemName: SFSymbols.keyboard)
                     .font(.title2)
                     .foregroundStyle(.secondary)
+                    .accessibilityLabel("Keyboard shortcuts")
 
                 Text("Keyboard Shortcuts")
                     .font(.title2.bold())
@@ -106,11 +108,12 @@ struct KeyboardShortcutsView: View {
                 Spacer()
 
                 Button {
-                    isPresented = false
+                    self.isPresented = false
                 } label: {
-                    Image(systemName: "xmark.circle.fill")
+                    Image(systemName: SFSymbols.closeCircleFill)
                         .font(.title2)
                         .foregroundStyle(.secondary)
+                        .accessibilityLabel("Close")
                 }
                 .buttonStyle(.plain)
                 .keyboardShortcut(.escape, modifiers: [])
@@ -124,10 +127,10 @@ struct KeyboardShortcutsView: View {
             ScrollView {
                 LazyVGrid(columns: [
                     GridItem(.flexible(), spacing: 20),
-                    GridItem(.flexible(), spacing: 20)
+                    GridItem(.flexible(), spacing: 20),
                 ], spacing: 24) {
-                    ForEach(shortcuts, id: \.category) { section in
-                        shortcutSection(section.category, items: section.items)
+                    ForEach(self.shortcuts, id: \.category) { section in
+                        self.shortcutSection(section.category, items: section.items)
                     }
                 }
                 .padding(24)
@@ -184,22 +187,24 @@ struct FocusableSearchField: View {
 
     var body: some View {
         HStack(spacing: 8) {
-            Image(systemName: "magnifyingglass")
+            Image(systemName: SFSymbols.search)
                 .foregroundStyle(.secondary)
                 .font(.system(size: 14))
+                .accessibilityLabel("Search")
 
-            TextField(placeholder, text: $text)
+            TextField(self.placeholder, text: self.$text)
                 .textFieldStyle(.plain)
                 .font(.system(size: 14))
-                .focused($fieldFocused)
+                .focused(self.$fieldFocused)
 
-            if !text.isEmpty {
+            if !self.text.isEmpty {
                 Button {
-                    text = ""
+                    self.text = ""
                 } label: {
-                    Image(systemName: "xmark.circle.fill")
+                    Image(systemName: SFSymbols.closeCircleFill)
                         .foregroundStyle(.secondary)
                         .font(.system(size: 12))
+                        .accessibilityLabel("Clear search")
                 }
                 .buttonStyle(.plain)
             }
@@ -213,15 +218,15 @@ struct FocusableSearchField: View {
         .overlay(
             RoundedRectangle(cornerRadius: 8)
                 .strokeBorder(
-                    fieldFocused ? Color.accentColor : Color.clear,
+                    self.fieldFocused ? Color.accentColor : Color.clear,
                     lineWidth: 2
                 )
         )
-        .onChange(of: isFocused) { _, newValue in
-            fieldFocused = newValue
+        .onChange(of: self.isFocused) { _, newValue in
+            self.fieldFocused = newValue
         }
-        .onChange(of: fieldFocused) { _, newValue in
-            isFocused = newValue
+        .onChange(of: self.fieldFocused) { _, newValue in
+            self.isFocused = newValue
         }
     }
 }
@@ -237,49 +242,49 @@ struct KeyboardNavigableMainView: View {
     var body: some View {
         NavigationSplitView {
             EnhancedSidebarView(
-                selectedTab: $selectedTab,
-                searchText: $searchText,
-                isSearchFocused: $navigationManager.isSearchFocused
+                selectedTab: self.$selectedTab,
+                searchText: self.$searchText,
+                isSearchFocused: self.$navigationManager.isSearchFocused
             )
         } detail: {
             ZStack {
-                TabContentView(tab: selectedTab, selectedTab: $selectedTab)
+                TabContentView(tab: self.selectedTab, selectedTab: self.$selectedTab)
 
                 // Glossary slide-over panel
-                if showGlossaryPanel {
-                    GlossarySlidePanel(isPresented: $showGlossaryPanel)
+                if self.showGlossaryPanel {
+                    GlossarySlidePanel(isPresented: self.$showGlossaryPanel)
                         .transition(.move(edge: .trailing))
                 }
             }
         }
-        .onChange(of: navigationManager.currentSectionIndex) { _, newIndex in
+        .onChange(of: self.navigationManager.currentSectionIndex) { _, newIndex in
             let tabs = Tab.allCases
             if newIndex < tabs.count {
                 withAnimation(.easeInOut(duration: 0.2)) {
-                    selectedTab = tabs[newIndex]
+                    self.selectedTab = tabs[newIndex]
                 }
             }
         }
-        .onChange(of: selectedTab) { _, newTab in
+        .onChange(of: self.selectedTab) { _, newTab in
             if let index = Tab.allCases.firstIndex(of: newTab) {
-                navigationManager.currentSectionIndex = index
+                self.navigationManager.currentSectionIndex = index
             }
         }
-        .onChange(of: navigationManager.isGlossaryOpen) { _, isOpen in
+        .onChange(of: self.navigationManager.isGlossaryOpen) { _, isOpen in
             withAnimation(.spring(response: 0.3)) {
-                showGlossaryPanel = isOpen
+                self.showGlossaryPanel = isOpen
             }
         }
         .onReceive(NotificationCenter.default.publisher(for: .navigateToTab)) { notification in
             if let tab = notification.object as? Tab {
-                selectedTab = tab
+                self.selectedTab = tab
             }
         }
-        .sheet(isPresented: $navigationManager.showKeyboardShortcuts) {
-            KeyboardShortcutsView(isPresented: $navigationManager.showKeyboardShortcuts)
+        .sheet(isPresented: self.$navigationManager.showKeyboardShortcuts) {
+            KeyboardShortcutsView(isPresented: self.$navigationManager.showKeyboardShortcuts)
         }
         .onAppear {
-            setupKeyboardMonitor()
+            self.setupKeyboardMonitor()
         }
     }
 
@@ -287,14 +292,14 @@ struct KeyboardNavigableMainView: View {
         NSEvent.addLocalMonitorForEvents(matching: .keyDown) { event in
             // Handle escape key
             if event.keyCode == 53 { // Escape
-                if navigationManager.isSearchFocused {
-                    navigationManager.isSearchFocused = false
+                if self.navigationManager.isSearchFocused {
+                    self.navigationManager.isSearchFocused = false
                     return nil
                 }
-                if showGlossaryPanel {
+                if self.showGlossaryPanel {
                     withAnimation {
-                        showGlossaryPanel = false
-                        navigationManager.isGlossaryOpen = false
+                        self.showGlossaryPanel = false
+                        self.navigationManager.isGlossaryOpen = false
                     }
                     return nil
                 }
@@ -320,14 +325,14 @@ struct EnhancedSidebarView: View {
     var body: some View {
         VStack(spacing: 0) {
             // Header
-            sidebarHeader
+            self.sidebarHeader
 
             Divider()
 
             // Search
             FocusableSearchField(
-                text: $searchText,
-                isFocused: $isSearchFocused,
+                text: self.$searchText,
+                isFocused: self.$isSearchFocused,
                 placeholder: "Search topics... (⌘F)"
             )
             .padding(.horizontal, 16)
@@ -338,13 +343,13 @@ struct EnhancedSidebarView: View {
             // Navigation items
             ScrollView {
                 LazyVStack(alignment: .leading, spacing: 4) {
-                    ForEach(filteredSections) { (section: SidebarSection) in
+                    ForEach(self.filteredSections) { (section: SidebarSection) in
                         NavigationSectionView(
                             section: section,
-                            selection: $selectedTab,
-                            isExpanded: expandedSections.contains(section.section)
+                            selection: self.$selectedTab,
+                            isExpanded: self.expandedSections.contains(section.section)
                         ) {
-                            toggleSection(section.section)
+                            self.toggleSection(section.section)
                         }
                     }
                 }
@@ -374,7 +379,7 @@ struct EnhancedSidebarView: View {
 
     private var sidebarHeader: some View {
         HStack(spacing: 10) {
-            Image(systemName: "brain.head.profile")
+            Image(systemName: SFSymbols.methodology)
                 .font(.title)
                 .foregroundStyle(
                     LinearGradient(
@@ -383,6 +388,7 @@ struct EnhancedSidebarView: View {
                         endPoint: .bottomTrailing
                     )
                 )
+                .accessibilityLabel("APGI Framework")
 
             VStack(alignment: .leading, spacing: 2) {
                 Text("APGI")
@@ -411,17 +417,18 @@ struct EnhancedSidebarView: View {
     }
 
     private var filteredSections: [SidebarSection] {
-        guard !searchText.isEmpty else { return allSections }
+        guard !self.searchText.isEmpty else { return self.allSections }
 
-        return allSections.compactMap { section in
+        return self.allSections.compactMap { section in
             let matchingTabs = section.tabs.filter { tab in
-                tab.shortTitle.localizedCaseInsensitiveContains(searchText) ||
-                tab.rawValue.localizedCaseInsensitiveContains(searchText)
+                tab.shortTitle.localizedCaseInsensitiveContains(self.searchText) ||
+                    tab.rawValue.localizedCaseInsensitiveContains(self.searchText)
             }
 
-            if section.title.localizedCaseInsensitiveContains(searchText) {
+            if section.title.localizedCaseInsensitiveContains(self.searchText) {
                 return section
-            } else if !matchingTabs.isEmpty {
+            }
+            else if !matchingTabs.isEmpty {
                 return SidebarSection(
                     section: section.section,
                     title: section.title,
@@ -435,10 +442,11 @@ struct EnhancedSidebarView: View {
     }
 
     private func toggleSection(_ section: NavigationSection) {
-        if expandedSections.contains(section) {
-            expandedSections.remove(section)
-        } else {
-            expandedSections.insert(section)
+        if self.expandedSections.contains(section) {
+            self.expandedSections.remove(section)
+        }
+        else {
+            self.expandedSections.insert(section)
         }
     }
 }
@@ -450,10 +458,10 @@ struct GlossarySlidePanel: View {
     @State private var searchText = ""
 
     private var filteredEntries: [GlossaryEntry] {
-        guard !searchText.isEmpty else { return GlossaryData.entries }
+        guard !self.searchText.isEmpty else { return GlossaryData.entries }
         return GlossaryData.entries.filter {
-            $0.term.localizedCaseInsensitiveContains(searchText) ||
-            $0.definition.localizedCaseInsensitiveContains(searchText)
+            $0.term.localizedCaseInsensitiveContains(self.searchText) ||
+                $0.definition.localizedCaseInsensitiveContains(self.searchText)
         }
     }
 
@@ -468,11 +476,12 @@ struct GlossarySlidePanel: View {
 
                 Button {
                     withAnimation {
-                        isPresented = false
+                        self.isPresented = false
                     }
                 } label: {
-                    Image(systemName: "xmark.circle.fill")
+                    Image(systemName: SFSymbols.closeCircleFill)
                         .foregroundStyle(.secondary)
+                        .accessibilityLabel("Close glossary")
                 }
                 .buttonStyle(.plain)
                 .keyboardShortcut(.escape, modifiers: [])
@@ -481,7 +490,7 @@ struct GlossarySlidePanel: View {
             .background(.bar)
 
             // Search
-            TextField("Search glossary...", text: $searchText)
+            TextField("Search glossary...", text: self.$searchText)
                 .textFieldStyle(.roundedBorder)
                 .padding(.horizontal)
                 .padding(.vertical, 8)
@@ -491,7 +500,7 @@ struct GlossarySlidePanel: View {
             // Terms list
             ScrollView {
                 LazyVStack(alignment: .leading, spacing: 8) {
-                    ForEach(filteredEntries) { entry in
+                    ForEach(self.filteredEntries) { entry in
                         GlossaryTermRow(entry: entry)
                     }
                 }
@@ -507,7 +516,7 @@ struct GlossarySlidePanel: View {
         .background(Color.black.opacity(0.2).ignoresSafeArea())
         .onTapGesture {
             withAnimation {
-                isPresented = false
+                self.isPresented = false
             }
         }
     }
@@ -521,25 +530,26 @@ struct GlossaryTermRow: View {
         VStack(alignment: .leading, spacing: 6) {
             Button {
                 withAnimation(.spring(response: 0.3)) {
-                    isExpanded.toggle()
+                    self.isExpanded.toggle()
                 }
             } label: {
                 HStack {
-                    Text(entry.term)
+                    Text(self.entry.term)
                         .font(.system(size: 14, weight: .medium))
                         .foregroundStyle(.primary)
 
                     Spacer()
 
-                    Image(systemName: isExpanded ? "chevron.up" : "chevron.down")
+                    Image(systemName: self.isExpanded ? SFSymbols.Navigation.up.symbol : SFSymbols.Navigation.down.symbol)
                         .font(.system(size: 10))
                         .foregroundStyle(.secondary)
+                        .accessibilityLabel(self.isExpanded ? "Collapse" : "Expand")
                 }
             }
             .buttonStyle(.plain)
 
-            if isExpanded {
-                Text(entry.definition)
+            if self.isExpanded {
+                Text(self.entry.definition)
                     .font(.system(size: 13))
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
@@ -550,7 +560,8 @@ struct GlossaryTermRow: View {
         .background(Color.primary.opacity(0.03))
         .clipShape(RoundedRectangle(cornerRadius: 8))
         .contentShape(Rectangle())
-        .onTapGesture {} // Prevent background tap from dismissing
+        .onTapGesture {
+        } // Prevent background tap from dismissing
     }
 }
 

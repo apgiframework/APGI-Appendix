@@ -1,8 +1,93 @@
-import SwiftUI
 import Combine
+import SwiftUI
 
-// GlossaryManager simplified to remove remote functionality
-// All glossary data is now sourced locally from GlossaryData
+@MainActor
+class GlossaryManager: ObservableObject {
+    static let shared = GlossaryManager()
+
+    @Published var entries: [GlossaryEntry] = []
+    @Published var isLoading = false
+    @Published var lastUpdate: Date?
+
+    private let cacheManager = ContentCacheManager.shared
+    private let cacheKey = "glossary_remote"
+    private var cancellables = Set<AnyCancellable>()
+
+    private init() {
+        self.loadCachedContent()
+        self.setupAutoRefresh()
+    }
+
+    private func setupAutoRefresh() {
+        self.cacheManager.$isOfflineMode
+            .filter { !$0 } // When coming back online
+            .debounce(for: .seconds(2), scheduler: DispatchQueue.main)
+            .sink { [weak self] _ in
+                Task {
+                    await self?.refreshContent()
+                }
+            }
+            .store(in: &self.cancellables)
+    }
+
+    private func loadCachedContent() {
+        if let cachedEntries: [GlossaryEntry] = cacheManager.cachedObject(for: cacheKey) {
+            self.entries = cachedEntries
+            if let metadata = cacheManager.cacheMetadata(for: cacheKey),
+               let timestamp = metadata["cachedAt"] as? TimeInterval
+            {
+                self.lastUpdate = Date(timeIntervalSince1970: timestamp)
+            }
+            logInfo("Loaded \(cachedEntries.count) glossary entries from cache", context: "GlossaryManager")
+        }
+        else {
+            // Fall back to local data
+            self.entries = GlossaryData.entries
+            logInfo("Using local glossary data (no cache available)", context: "GlossaryManager")
+        }
+    }
+
+    func refreshContent() async {
+        guard !self.isLoading else { return }
+
+        self.isLoading = true
+        defer { isLoading = false }
+
+        do {
+            // Try to fetch from remote source
+            let remoteURL = URL(string: "https://api.apgi-framework.org/glossary.json")!
+            let data = try await cacheManager.fetchAndCache(from: remoteURL, cacheKey: self.cacheKey)
+
+            // Parse remote data
+            let remoteEntries = try JSONDecoder().decode([RemoteGlossaryEntry].self, from: data)
+                .map { GlossaryEntry(term: $0.term, definition: $0.definition) }
+
+            // Merge with local data, preferring remote
+            var mergedEntries = remoteEntries
+            let remoteTerms = Set(remoteEntries.map { $0.term.lowercased() })
+
+            // Add local entries that aren't in remote
+            for localEntry in GlossaryData.entries {
+                if !remoteTerms.contains(localEntry.term.lowercased()) {
+                    mergedEntries.append(localEntry)
+                }
+            }
+
+            // Remove duplicates and sort
+            mergedEntries = mergedEntries.removingDuplicates(by: { $0.term.lowercased() })
+                .sorted { $0.term < $1.term }
+
+            self.entries = mergedEntries
+            self.lastUpdate = Date()
+
+            logInfo("Refreshed glossary with \(mergedEntries.count) entries from remote", context: "GlossaryManager")
+        }
+        catch {
+            logWarning("Failed to refresh glossary content: \(error.localizedDescription)", context: "GlossaryManager")
+            // Keep existing cached/local data
+        }
+    }
+}
 
 private struct RemoteGlossaryEntry: Codable {
     let term: String
@@ -16,10 +101,16 @@ extension Array {
     }
 }
 
-struct GlossaryEntry: Identifiable, Hashable {
-    let id = UUID()
+struct GlossaryEntry: Identifiable, Hashable, Codable {
+    let id: UUID
     let term: String
     let definition: String
+
+    init(id: UUID = UUID(), term: String, definition: String) {
+        self.id = id
+        self.term = term
+        self.definition = definition
+    }
 }
 
 enum GlossaryData {
@@ -58,7 +149,7 @@ enum GlossaryData {
         GlossaryEntry(term: "Surprise", definition: "The negative log probability of an observation given a model. The brain minimizes a bound on surprise (variational free energy) through perception, learning and action."),
         GlossaryEntry(term: "Thermodynamic Costs", definition: "The metabolic energy required for neural processes. The APGI Framework emphasizes that global ignition is metabolically expensive and involves NMDA activation, sustained firing, neuromodulator release which provides the evolutionary rationale for a dynamic ignition threshold—consciousness is deployed only when benefits outweigh costs."),
         GlossaryEntry(term: "Threshold (θₜ)", definition: "The critical point at which a stimulus or prediction error triggers a detectable neural or behavioral response. Psychometrically measured as the stimulus intensity or signal-to-noise ratio at which performance reaches a predefined criterion (e.g., 75% detection accuracy), derived from psychometric curves or adaptive staircase procedures."),
-        GlossaryEntry(term: "Workspace Capacity", definition: "The limited amount of information that can be simultaneously maintained in the global workspace. This capacity is constrained by the winner-take-all nature of the ignition process and the post-ignition refractory period (elevated θₜ) which underlies phenomena like the attentional blink.")
+        GlossaryEntry(term: "Workspace Capacity", definition: "The limited amount of information that can be simultaneously maintained in the global workspace. This capacity is constrained by the winner-take-all nature of the ignition process and the post-ignition refractory period (elevated θₜ) which underlies phenomena like the attentional blink."),
     ]
 
     static let termToDefinition: [String: String] = {
@@ -72,11 +163,13 @@ enum GlossaryData {
     static let terms: [String] = entries.map { $0.term }
 
     static func definition(for term: String) -> String? {
-        termToDefinition[term.lowercased()]
+        self.termToDefinition[term.lowercased()]
     }
 }
 
 struct GlossaryView: View {
+    @StateObject private var glossaryManager = GlossaryManager.shared
+
     var body: some View {
         VStack(spacing: 0) {
             HStack {
@@ -84,25 +177,62 @@ struct GlossaryView: View {
                     .font(.title.bold())
 
                 Spacer()
+
+                if self.glossaryManager.isLoading {
+                    ProgressView()
+                        .controlSize(.small)
+                }
+
+                Button {
+                    Task {
+                        await self.glossaryManager.refreshContent()
+                    }
+                } label: {
+                    Image(systemName: "arrow.clockwise")
+                }
+                .disabled(self.glossaryManager.isLoading)
+                .help("Refresh glossary content")
+
+                if let lastUpdate = glossaryManager.lastUpdate {
+                    Text("Updated \(lastUpdate.formatted(.relative(presentation: .named)))")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
             }
             .padding()
             .background(.thinMaterial)
 
             ScrollView {
                 LazyVStack(alignment: .leading, spacing: 12) {
-                    let entries = GlossaryData.entries
+                    let entries = self.glossaryManager.entries
 
                     if entries.isEmpty {
-                        Text("No glossary entries available")
-                            .foregroundStyle(.secondary)
-                            .padding()
-                    } else {
+                        HStack {
+                            Spacer()
+                            if self.glossaryManager.isLoading {
+                                ProgressView("Loading glossary...")
+                            }
+                            else {
+                                Text("No glossary entries available")
+                                    .foregroundStyle(.secondary)
+                            }
+                            Spacer()
+                        }
+                        .padding()
+                    }
+                    else {
                         ForEach(entries) { entry in
                             GlossaryTermView(term: entry.term, definition: entry.definition)
                         }
                     }
                 }
                 .padding()
+            }
+        }
+        .task {
+            // Auto-refresh on first load if we have network
+            if !ContentCacheManager.shared.isOfflineMode {
+                await self.glossaryManager.refreshContent()
             }
         }
     }
@@ -118,20 +248,21 @@ struct GlossaryTermView: View {
             Button {
                 if ThemeManager.shared.enableAnimations {
                     withAnimation(.spring(response: 0.3)) {
-                        isExpanded.toggle()
+                        self.isExpanded.toggle()
                     }
-                } else {
-                    isExpanded.toggle()
+                }
+                else {
+                    self.isExpanded.toggle()
                 }
             } label: {
                 HStack {
-                    Text(term)
+                    Text(self.term)
                         .font(.headline)
                         .foregroundStyle(.primary)
 
                     Spacer()
 
-                    Image(systemName: isExpanded ? "chevron.up" : "chevron.down")
+                    Image(systemName: self.isExpanded ? "chevron.up" : "chevron.down")
                         .foregroundStyle(.secondary)
                         .font(.caption.bold())
                 }
@@ -140,13 +271,13 @@ struct GlossaryTermView: View {
             }
             .buttonStyle(.plain)
             .apgiAccessibility(
-                label: term,
-                hint: isExpanded ? "Collapse definition" : "Expand definition",
+                label: self.term,
+                hint: self.isExpanded ? "Collapse definition" : "Expand definition",
                 traits: .isButton
             )
 
-            if isExpanded {
-                Text(definition)
+            if self.isExpanded {
+                Text(self.definition)
                     .font(.body)
                     .foregroundStyle(.secondary)
                     .padding()
@@ -169,10 +300,10 @@ struct GlossaryPopover: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text(term)
+            Text(self.term)
                 .font(.headline)
 
-            Text(definition)
+            Text(self.definition)
                 .font(.body)
                 .foregroundStyle(.secondary)
         }
@@ -192,23 +323,23 @@ struct GlossaryHighlightedText: View {
     @State private var selected: GlossaryEntry?
 
     var body: some View {
-        Text(attributedText)
+        Text(self.attributedText)
             .onOpenURL { url in
                 guard url.scheme == "glossary" else { return }
                 guard let term = url.host(percentEncoded: false) else { return }
                 guard let definition = GlossaryData.definition(for: term) else { return }
-                selected = GlossaryEntry(term: term, definition: definition)
+                self.selected = GlossaryEntry(term: term, definition: definition)
             }
-            .popover(item: $selected) { entry in
+            .popover(item: self.$selected) { entry in
                 GlossaryPopover(term: entry.term, definition: entry.definition)
             }
     }
 
     private var attributedText: AttributedString {
         GlossaryAttributedStringBuilder.build(
-            from: text,
-            terms: terms,
-            baseFont: .system(size: fontSize, design: .default),
+            from: self.text,
+            terms: self.terms,
+            baseFont: .system(size: self.fontSize, design: .default),
             highlightColor: .accentColor
         )
     }
@@ -218,7 +349,7 @@ struct LazyGlossaryHighlightedContent: View {
     let text: String
 
     private var paragraphs: [String] {
-        text
+        self.text
             .components(separatedBy: "\n\n")
             .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
             .filter { !$0.isEmpty }
@@ -226,7 +357,7 @@ struct LazyGlossaryHighlightedContent: View {
 
     var body: some View {
         LazyVStack(alignment: .leading, spacing: 12) {
-            ForEach(Array(paragraphs.enumerated()), id: \.offset) { _, paragraph in
+            ForEach(Array(self.paragraphs.enumerated()), id: \.offset) { _, paragraph in
                 GlossaryHighlightedText(text: paragraph)
                     .frame(maxWidth: .infinity, alignment: .leading)
             }
@@ -253,15 +384,15 @@ private enum GlossaryAttributedStringBuilder {
             var searchStart = lower.startIndex
 
             while searchStart < lower.endIndex {
-                guard let found = lower.range(of: termLower, options: [], range: searchStart..<lower.endIndex) else { break }
+                guard let found = lower.range(of: termLower, options: [], range: searchStart ..< lower.endIndex) else { break }
 
                 let nsRange = NSRange(found, in: lower)
-                if !occupied.intersects(integersIn: nsRange.location..<(nsRange.location + nsRange.length)) {
+                if !occupied.intersects(integersIn: nsRange.location ..< (nsRange.location + nsRange.length)) {
                     if let attrRange = Range(nsRange, in: attributed) {
                         attributed[attrRange].foregroundColor = highlightColor
                         attributed[attrRange].underlineStyle = .single
                         attributed[attrRange].link = URL(string: "glossary://\(term.addingPercentEncoding(withAllowedCharacters: .urlHostAllowed) ?? term)")
-                        occupied.insert(integersIn: nsRange.location..<(nsRange.location + nsRange.length))
+                        occupied.insert(integersIn: nsRange.location ..< (nsRange.location + nsRange.length))
                     }
                 }
 

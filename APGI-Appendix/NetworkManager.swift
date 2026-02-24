@@ -1,75 +1,82 @@
+import Combine
 import Foundation
 import Network
 import SwiftUI
-import Combine
 
 // MARK: - Network Manager
+
 @MainActor
 class NetworkManager: ObservableObject {
     static let shared = NetworkManager()
-    
+
     @Published var isConnected = true
     @Published var connectionType: NWInterface.InterfaceType?
     @Published var isMonitoring = false
-    
+
     private let monitor: NWPathMonitor
     private let queue = DispatchQueue(label: "NetworkMonitor")
     private var cancellables = Set<AnyCancellable>()
-    
+
     private init() {
-        monitor = NWPathMonitor()
-        setupMonitoring()
+        self.monitor = NWPathMonitor()
+        self.setupMonitoring()
     }
-    
+
     deinit {
         monitor.cancel()
     }
-    
+
     // MARK: - Network Monitoring
+
     func startMonitoring() {
-        guard !isMonitoring else { return }
-        
-        monitor.start(queue: queue)
-        isMonitoring = true
-        
-        monitor.pathUpdateHandler = { [weak self] path in
+        guard !self.isMonitoring else { return }
+
+        self.monitor.start(queue: self.queue)
+        self.isMonitoring = true
+
+        self.monitor.pathUpdateHandler = { [weak self] path in
             DispatchQueue.main.async {
                 self?.updateConnectionStatus(path)
             }
         }
     }
-    
+
     func stopMonitoring() {
-        guard isMonitoring else { return }
-        
-        monitor.cancel()
-        isMonitoring = false
+        guard self.isMonitoring else { return }
+
+        self.monitor.cancel()
+        self.isMonitoring = false
     }
-    
+
     private func setupMonitoring() {
-        startMonitoring()
+        self.startMonitoring()
     }
-    
+
     private func updateConnectionStatus(_ path: NWPath) {
-        isConnected = path.status == .satisfied
-        
+        self.isConnected = path.status == .satisfied
+
         // Determine connection type
         if path.usesInterfaceType(.wifi) {
-            connectionType = .wifi
-        } else if path.usesInterfaceType(.cellular) {
-            connectionType = .cellular
-        } else if path.usesInterfaceType(.wiredEthernet) {
-            connectionType = .wiredEthernet
-        } else if path.usesInterfaceType(.other) {
-            connectionType = .other
-        } else {
-            connectionType = nil
+            self.connectionType = .wifi
+        }
+        else if path.usesInterfaceType(.cellular) {
+            self.connectionType = .cellular
+        }
+        else if path.usesInterfaceType(.wiredEthernet) {
+            self.connectionType = .wiredEthernet
+        }
+        else if path.usesInterfaceType(.other) {
+            self.connectionType = .other
+        }
+        else {
+            self.connectionType = nil
         }
     }
-    
+
     // MARK: - Connection Status
+
     var statusText: String {
-        if isConnected {
+        if self.isConnected {
             if let type = connectionType {
                 switch type {
                 case .wifi:
@@ -83,16 +90,18 @@ class NetworkManager: ObservableObject {
                 default:
                     return "Connected"
                 }
-            } else {
+            }
+            else {
                 return "Connected"
             }
-        } else {
+        }
+        else {
             return "Offline"
         }
     }
-    
+
     var statusIcon: String {
-        if isConnected {
+        if self.isConnected {
             if let type = connectionType {
                 switch type {
                 case .wifi:
@@ -104,39 +113,42 @@ class NetworkManager: ObservableObject {
                 default:
                     return "network"
                 }
-            } else {
+            }
+            else {
                 return "network"
             }
-        } else {
+        }
+        else {
             return "wifi.slash"
         }
     }
-    
+
     var statusColor: Color {
-        isConnected ? .green : .red
+        self.isConnected ? .green : .red
     }
 }
 
 // MARK: - Network Status View
+
 struct NetworkStatusView: View {
     @StateObject private var networkManager = NetworkManager.shared
-    
+
     var body: some View {
         HStack(spacing: 4) {
-            Image(systemName: networkManager.statusIcon)
-                .foregroundColor(networkManager.statusColor)
+            Image(systemName: self.networkManager.statusIcon)
+                .foregroundColor(self.networkManager.statusColor)
                 .font(.caption)
-            
-            if !networkManager.isConnected {
+
+            if !self.networkManager.isConnected {
                 Text("Offline")
                     .font(.caption2)
                     .foregroundColor(.secondary)
             }
         }
-        .help(networkManager.statusText)
+        .help(self.networkManager.statusText)
         .onAppear {
-            if !networkManager.isMonitoring {
-                networkManager.startMonitoring()
+            if !self.networkManager.isMonitoring {
+                self.networkManager.startMonitoring()
             }
         }
         .onDisappear {
@@ -146,43 +158,44 @@ struct NetworkStatusView: View {
 }
 
 // MARK: - Network Settings View
+
 struct NetworkSettingsView: View {
     @StateObject private var networkManager = NetworkManager.shared
     @AppStorage("enableRemoteContent") private var enableRemoteContent = true
     @AppStorage("autoRefreshInterval") private var autoRefreshInterval: Double = 24 // hours
     @AppStorage("useCellularData") private var useCellularData = false
-    
+
     var body: some View {
         Form {
             Section(header: Text("Network Status")) {
                 HStack {
-                    Image(systemName: networkManager.statusIcon)
-                        .foregroundColor(networkManager.statusColor)
-                    
+                    Image(systemName: self.networkManager.statusIcon)
+                        .foregroundColor(self.networkManager.statusColor)
+
                     VStack(alignment: .leading) {
-                        Text(networkManager.statusText)
+                        Text(self.networkManager.statusText)
                             .font(.headline)
-                        Text("Connection is \(networkManager.isConnected ? "active" : "inactive")")
+                        Text("Connection is \(self.networkManager.isConnected ? "active" : "inactive")")
                             .font(.caption)
                             .foregroundColor(.secondary)
                     }
-                    
+
                     Spacer()
-                    
+
                     Button("Refresh") {
-                        networkManager.startMonitoring()
+                        self.networkManager.startMonitoring()
                     }
                     .buttonStyle(.bordered)
                 }
             }
-            
+
             Section(header: Text("Remote Content")) {
-                Toggle("Enable remote content fetching", isOn: $enableRemoteContent)
-                
-                if enableRemoteContent {
+                Toggle("Enable remote content fetching", isOn: self.$enableRemoteContent)
+
+                if self.enableRemoteContent {
                     VStack(alignment: .leading) {
                         Text("Auto-refresh interval")
-                        Picker("Interval", selection: $autoRefreshInterval) {
+                        Picker("Interval", selection: self.$autoRefreshInterval) {
                             Text("Every hour").tag(1.0)
                             Text("Every 6 hours").tag(6.0)
                             Text("Every 12 hours").tag(12.0)
@@ -191,21 +204,21 @@ struct NetworkSettingsView: View {
                             Text("Every week").tag(168.0)
                         }
                         .pickerStyle(.menu)
-                        
-                        Toggle("Use cellular data", isOn: $useCellularData)
+
+                        Toggle("Use cellular data", isOn: self.$useCellularData)
                             .help("Allow remote content downloads over cellular connection")
                     }
                 }
             }
-            
+
             Section(header: Text("Network Diagnostics")) {
                 Button("Test Connection") {
-                    testConnection()
+                    self.testConnection()
                 }
                 .buttonStyle(.bordered)
-                
+
                 Button("Reset Network Settings") {
-                    resetNetworkSettings()
+                    self.resetNetworkSettings()
                 }
                 .buttonStyle(.bordered)
                 .foregroundColor(.red)
@@ -214,10 +227,10 @@ struct NetworkSettingsView: View {
         .padding()
         .frame(width: 400, height: 300)
     }
-    
+
     private func testConnection() {
         // Simple connection test
-        let task = URLSession.shared.dataTask(with: URL(string: "https://api.apgi-framework.org")!) { _, response, error in
+        let task = URLSession.shared.dataTask(with: URL(string: "https://api.apgi-framework.org")!) { _, _, error in
             DispatchQueue.main.async {
                 if let error = error {
                     let alert = NSAlert()
@@ -225,7 +238,8 @@ struct NetworkSettingsView: View {
                     alert.informativeText = error.localizedDescription
                     alert.alertStyle = .warning
                     alert.runModal()
-                } else {
+                }
+                else {
                     let alert = NSAlert()
                     alert.messageText = "Connection Test Successful"
                     alert.informativeText = "Network connection is working properly."
@@ -236,12 +250,12 @@ struct NetworkSettingsView: View {
         }
         task.resume()
     }
-    
+
     private func resetNetworkSettings() {
-        enableRemoteContent = true
-        autoRefreshInterval = 24
-        useCellularData = false
-        
+        self.enableRemoteContent = true
+        self.autoRefreshInterval = 24
+        self.useCellularData = false
+
         let alert = NSAlert()
         alert.messageText = "Network Settings Reset"
         alert.informativeText = "All network settings have been reset to their default values."

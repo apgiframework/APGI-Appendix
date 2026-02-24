@@ -1,9 +1,9 @@
-import Foundation
 import Accelerate
-import CoreML
-import SwiftUI
 import Charts
 import Combine
+import CoreML
+import Foundation
+import SwiftUI
 
 struct APGIState {
     var interoStatesFlat: MLMultiArray
@@ -40,12 +40,12 @@ struct APGIState {
         let pMean = (try? MLMultiArray(shape: [1, NSNumber(value: hiddenSize)], dataType: .float32)) ?? MLMultiArray()
         let pVar = (try? MLMultiArray(shape: [1, NSNumber(value: hiddenSize)], dataType: .float32)) ?? MLMultiArray()
 
-        for index in 0..<(hiddenSize * numLevels) {
+        for index in 0 ..< (hiddenSize * numLevels) {
             interoStates[index] = 0.0
             exteroStates[index] = 0.0
         }
 
-        for index in 0..<hiddenSize {
+        for index in 0 ..< hiddenSize {
             workspace[index] = 0.0
             qMean[index] = 0.0
             qVar[index] = 1.0
@@ -246,19 +246,19 @@ enum APGIError: Error, LocalizedError {
         switch self {
         case .modelNotLoaded:
             return "APGI model not loaded. Call loadModel() first."
-        case .modelLoadFailed(let message):
+        case let .modelLoadFailed(message):
             return "Failed to load APGI model: \(message)"
-        case .inferenceError(let message):
+        case let .inferenceError(message):
             return "Inference error: \(message)"
-        case .invalidInput(let message):
+        case let .invalidInput(message):
             return "Invalid input: \(message)"
-        case .stateUpdateFailed(let message):
+        case let .stateUpdateFailed(message):
             return "State update failed: \(message)"
         case .modelNotFound:
             return "The APGI CoreML model file was not found in the application bundle."
-        case .inputConversionFailed(let field):
+        case let .inputConversionFailed(field):
             return "Failed to convert input data for MLMultiArray: \(field)."
-        case .inferenceFailed(let error):
+        case let .inferenceFailed(error):
             return "CoreML inference failed: \(error.localizedDescription)"
         }
     }
@@ -267,177 +267,177 @@ enum APGIError: Error, LocalizedError {
 struct APGICore {
     let config: APGIConfiguration
 
-// MARK: - APGI Core Computational Functions
+    // MARK: - APGI Core Computational Functions
 
-/// Computes precision-weighted surprise from prediction errors
-///
-/// This function implements the core APGI surprise accumulation mechanism:
-/// S = Π · |ε| where Π is precision and ε is prediction error
-///
-/// Mathematical formulation:
-/// - Takes absolute prediction errors to ensure positive contributions
-/// - Computes mean error across all input dimensions: mean(|ε_i|)
-/// - Weights by precision to reflect reliability of sensory information
-///
-/// The precision weighting implements the precision gating mechanism
-/// from predictive coding, where high precision (low uncertainty) signals
-/// have greater influence on surprise accumulation
-///
-/// - Parameters:
-///   - predictionError: Array of prediction errors (observation - prediction)
-///   - precision: Precision weight (0.0 to 1.0) representing reliability
-/// - Returns: Precision-weighted surprise value
-func computeSurprise(predictionError: [Float], precision: Float) -> Float {
+    /// Computes precision-weighted surprise from prediction errors
+    ///
+    /// This function implements the core APGI surprise accumulation mechanism:
+    /// S = Π · |ε| where Π is precision and ε is prediction error
+    ///
+    /// Mathematical formulation:
+    /// - Takes absolute prediction errors to ensure positive contributions
+    /// - Computes mean error across all input dimensions: mean(|ε_i|)
+    /// - Weights by precision to reflect reliability of sensory information
+    ///
+    /// The precision weighting implements the precision gating mechanism
+    /// from predictive coding, where high precision (low uncertainty) signals
+    /// have greater influence on surprise accumulation
+    ///
+    /// - Parameters:
+    ///   - predictionError: Array of prediction errors (observation - prediction)
+    ///   - precision: Precision weight (0.0 to 1.0) representing reliability
+    /// - Returns: Precision-weighted surprise value
+    func computeSurprise(predictionError: [Float], precision: Float) -> Float {
         guard !predictionError.isEmpty else { return 0.0 }
         let absoluteError = predictionError.map { abs($0) }
         let meanError = absoluteError.reduce(0, +) / Float(absoluteError.count)
         return precision * meanError
     }
 
-/// Computes total surprise by combining exteroceptive and interoceptive sources
-///
-/// Implements the multi-modal surprise accumulation in APGI framework:
-/// S_total = S_extero + β · S_intero
-///
-/// Where:
-/// - S_extero = Π_extero · |ε_extero|: Precision-weighted exteroceptive (external sensory) surprise
-/// - S_intero = Π_intero · |ε_intero|: Precision-weighted interoceptive (internal bodily) surprise
-/// - β: Somatic marker that modulates interoceptive processing based on internal state
-///
-/// The somatic marker implements Damasio's somatic marker hypothesis,
-/// biasing interoceptive processing during metabolic stress, high cognitive load,
-/// or emotional arousal. This creates a context-dependent weighting of
-/// internal vs. external sensory information
-///
-/// - Parameters:
-///   - exteroError: Prediction errors from external sensory channels
-///   - interoError: Prediction errors from internal bodily channels
-///   - piExtero: Precision weight for exteroceptive information
-///   - piIntero: Precision weight for interoceptive information
-///   - somaticMarker: Modulation factor for interoceptive processing (typically 0.5-2.0)
-/// - Returns: Combined precision-weighted surprise
-func computeTotalSurprise(
+    /// Computes total surprise by combining exteroceptive and interoceptive sources
+    ///
+    /// Implements the multi-modal surprise accumulation in APGI framework:
+    /// S_total = S_extero + β · S_intero
+    ///
+    /// Where:
+    /// - S_extero = Π_extero · |ε_extero|: Precision-weighted exteroceptive (external sensory) surprise
+    /// - S_intero = Π_intero · |ε_intero|: Precision-weighted interoceptive (internal bodily) surprise
+    /// - β: Somatic marker that modulates interoceptive processing based on internal state
+    ///
+    /// The somatic marker implements Damasio's somatic marker hypothesis,
+    /// biasing interoceptive processing during metabolic stress, high cognitive load,
+    /// or emotional arousal. This creates a context-dependent weighting of
+    /// internal vs. external sensory information
+    ///
+    /// - Parameters:
+    ///   - exteroError: Prediction errors from external sensory channels
+    ///   - interoError: Prediction errors from internal bodily channels
+    ///   - piExtero: Precision weight for exteroceptive information
+    ///   - piIntero: Precision weight for interoceptive information
+    ///   - somaticMarker: Modulation factor for interoceptive processing (typically 0.5-2.0)
+    /// - Returns: Combined precision-weighted surprise
+    func computeTotalSurprise(
         exteroError: [Float],
         interoError: [Float],
         piExtero: Float,
         piIntero: Float,
         somaticMarker: Float
     ) -> Float {
-        let sExtero = computeSurprise(predictionError: exteroError, precision: piExtero)
+        let sExtero = self.computeSurprise(predictionError: exteroError, precision: piExtero)
         let modulatedPiIntero = piIntero * somaticMarker
-        let sIntero = computeSurprise(predictionError: interoError, precision: modulatedPiIntero)
+        let sIntero = self.computeSurprise(predictionError: interoError, precision: modulatedPiIntero)
         return sExtero + sIntero
     }
 
-/// Computes probability of conscious ignition using sigmoid function
-///
-/// Implements the threshold-based ignition decision from APGI framework:
-/// B_t = σ(α(S_t - θ_t))
-///
-/// Mathematical formulation:
-/// - B_t: Ignition probability (0.0 to 1.0)
-/// - S_t: Accumulated precision-weighted surprise
-/// - θ_t: Dynamic ignition threshold that adapts over time
-/// - α: Sigmoid steepness parameter (typically 5-10) controlling decision certainty
-/// - σ(x): Logistic sigmoid function 1/(1 + e^(-x))
-///
-/// This implements a stochastic decision rule where ignition probability
-/// increases sharply when surprise exceeds threshold. The α parameter
-/// controls the "sharpness" of this transition - higher values create
-/// more binary-like behavior, lower values create more graded responses
-///
-/// - Parameters:
-///   - surprise: Current accumulated surprise value
-///   - threshold: Current dynamic ignition threshold
-///   - alpha: Sigmoid steepness parameter (typically 5-10)
-/// - Returns: Probability of conscious ignition (0.0 to 1.0)
-func computeIgnitionProbability(surprise: Float, threshold: Float, alpha: Float) -> Float {
+    /// Computes probability of conscious ignition using sigmoid function
+    ///
+    /// Implements the threshold-based ignition decision from APGI framework:
+    /// B_t = σ(α(S_t - θ_t))
+    ///
+    /// Mathematical formulation:
+    /// - B_t: Ignition probability (0.0 to 1.0)
+    /// - S_t: Accumulated precision-weighted surprise
+    /// - θ_t: Dynamic ignition threshold that adapts over time
+    /// - α: Sigmoid steepness parameter (typically 5-10) controlling decision certainty
+    /// - σ(x): Logistic sigmoid function 1/(1 + e^(-x))
+    ///
+    /// This implements a stochastic decision rule where ignition probability
+    /// increases sharply when surprise exceeds threshold. The α parameter
+    /// controls the "sharpness" of this transition - higher values create
+    /// more binary-like behavior, lower values create more graded responses
+    ///
+    /// - Parameters:
+    ///   - surprise: Current accumulated surprise value
+    ///   - threshold: Current dynamic ignition threshold
+    ///   - alpha: Sigmoid steepness parameter (typically 5-10)
+    /// - Returns: Probability of conscious ignition (0.0 to 1.0)
+    func computeIgnitionProbability(surprise: Float, threshold: Float, alpha: Float) -> Float {
         let scaledValue = alpha * (surprise - threshold)
-        return sigmoid(scaledValue)
+        return self.sigmoid(scaledValue)
     }
 
-/// Standard logistic sigmoid activation function
-///
-/// Mathematical formulation: σ(x) = 1 / (1 + e^(-x))
-///
-/// Properties:
-/// - Maps any real-valued input to range [0, 1]
-/// - Symmetric around x=0 where σ(0) = 0.5
-/// - Monotonically increasing function
-/// - Derivative: σ'(x) = σ(x) · (1 - σ(x))
-///
-/// Used extensively in neural networks and computational neuroscience
-/// for probability computations and smooth thresholding operations
-///
-/// - Parameter x: Input value
-/// - Returns: Sigmoid activation in range [0, 1]
-func sigmoid(_ value: Float) -> Float {
+    /// Standard logistic sigmoid activation function
+    ///
+    /// Mathematical formulation: σ(x) = 1 / (1 + e^(-x))
+    ///
+    /// Properties:
+    /// - Maps any real-valued input to range [0, 1]
+    /// - Symmetric around x=0 where σ(0) = 0.5
+    /// - Monotonically increasing function
+    /// - Derivative: σ'(x) = σ(x) · (1 - σ(x))
+    ///
+    /// Used extensively in neural networks and computational neuroscience
+    /// for probability computations and smooth thresholding operations
+    ///
+    /// - Parameter x: Input value
+    /// - Returns: Sigmoid activation in range [0, 1]
+    func sigmoid(_ value: Float) -> Float {
         1.0 / (1.0 + exp(-value))
     }
 
-/// Computes somatic marker from metabolic, cognitive, and affective components
-///
-/// Implements Damasio's somatic marker hypothesis for biasing interoceptive processing:
-///
-/// Mathematical formulation:
-/// SM = scaling · (w_m · M + w_c · C + w_a · A)
-///
-/// Where:
-/// - M, C, A: Normalized metabolic, cognitive, and affective states (0.0 to 1.0)
-/// - w_m = 0.4: Metabolic weight (highest priority for survival)
-/// - w_c = 0.3: Cognitive weight (mental load, attention, working memory)
-/// - w_a = 0.3: Affective weight (emotional arousal, valence)
-/// - scaling = 2.0: Maps to range [0.5, 2.0] for interoceptive modulation
-///
-/// Biological rationale:
-/// - Metabolic processes weighted most heavily (energy homeostasis critical)
-/// - Cognitive and affective weighted equally (balanced top-down modulation)
-/// - Result > 1.0 enhances interoceptive processing during stress/arousal
-/// - Result < 1.0 suppresses interoceptive processing during calm states
-///
-/// This creates adaptive precision gating where the system prioritizes
-/// internal bodily signals when they're most behaviorally relevant
-///
-/// - Parameters:
-///   - metabolic: Current metabolic state (0.0 to 1.0)
-///   - cognitive: Current cognitive load/state (0.0 to 1.0)
-///   - affective: Current affective/emotional state (0.0 to 1.0)
-/// - Returns: Somatic marker for interoceptive modulation (0.5 to 2.0)
-func computeSomaticMarker(metabolic: Float, cognitive: Float, affective: Float) -> Float {
+    /// Computes somatic marker from metabolic, cognitive, and affective components
+    ///
+    /// Implements Damasio's somatic marker hypothesis for biasing interoceptive processing:
+    ///
+    /// Mathematical formulation:
+    /// SM = scaling · (w_m · M + w_c · C + w_a · A)
+    ///
+    /// Where:
+    /// - M, C, A: Normalized metabolic, cognitive, and affective states (0.0 to 1.0)
+    /// - w_m = 0.4: Metabolic weight (highest priority for survival)
+    /// - w_c = 0.3: Cognitive weight (mental load, attention, working memory)
+    /// - w_a = 0.3: Affective weight (emotional arousal, valence)
+    /// - scaling = 2.0: Maps to range [0.5, 2.0] for interoceptive modulation
+    ///
+    /// Biological rationale:
+    /// - Metabolic processes weighted most heavily (energy homeostasis critical)
+    /// - Cognitive and affective weighted equally (balanced top-down modulation)
+    /// - Result > 1.0 enhances interoceptive processing during stress/arousal
+    /// - Result < 1.0 suppresses interoceptive processing during calm states
+    ///
+    /// This creates adaptive precision gating where the system prioritizes
+    /// internal bodily signals when they're most behaviorally relevant
+    ///
+    /// - Parameters:
+    ///   - metabolic: Current metabolic state (0.0 to 1.0)
+    ///   - cognitive: Current cognitive load/state (0.0 to 1.0)
+    ///   - affective: Current affective/emotional state (0.0 to 1.0)
+    /// - Returns: Somatic marker for interoceptive modulation (0.5 to 2.0)
+    func computeSomaticMarker(metabolic: Float, cognitive: Float, affective: Float) -> Float {
         let marker = (metabolic * APGISimulatorConstants.metabolicWeight +
-                     cognitive * APGISimulatorConstants.cognitiveWeight +
-                     affective * APGISimulatorConstants.affectiveWeight)
+            cognitive * APGISimulatorConstants.cognitiveWeight +
+            affective * APGISimulatorConstants.affectiveWeight)
         let scaled = marker * APGISimulatorConstants.somaticMarkerScaling
-        return clamp(scaled, min: APGISimulatorConstants.somaticBiasFactor, max: 2.0)
+        return self.clamp(scaled, min: APGISimulatorConstants.somaticBiasFactor, max: 2.0)
     }
 
-/// Computes prediction errors between observations and predictions
-///
-/// Implements the core prediction error computation from predictive coding:
-/// ε = observation - prediction
-///
-/// Mathematical interpretation:
-/// - ε > 0: Under-prediction (observation exceeds prediction)
-/// - ε < 0: Over-prediction (prediction exceeds observation)
-/// - |ε|: Magnitude of prediction error (drives learning and surprise)
-///
-/// In predictive coding frameworks:
-/// - Prediction errors drive hierarchical message passing
-/// - Minimizing prediction errors is the primary computational goal
-/// - Precision weighting determines influence on higher levels
-///
-/// - Parameters:
-///   - observation: Actual sensory input values
-///   - prediction: Predicted sensory values from generative model
-/// - Returns: Array of prediction errors
-func computePredictionError(observation: [Float], prediction: [Float]) -> [Float] {
+    /// Computes prediction errors between observations and predictions
+    ///
+    /// Implements the core prediction error computation from predictive coding:
+    /// ε = observation - prediction
+    ///
+    /// Mathematical interpretation:
+    /// - ε > 0: Under-prediction (observation exceeds prediction)
+    /// - ε < 0: Over-prediction (prediction exceeds observation)
+    /// - |ε|: Magnitude of prediction error (drives learning and surprise)
+    ///
+    /// In predictive coding frameworks:
+    /// - Prediction errors drive hierarchical message passing
+    /// - Minimizing prediction errors is the primary computational goal
+    /// - Precision weighting determines influence on higher levels
+    ///
+    /// - Parameters:
+    ///   - observation: Actual sensory input values
+    ///   - prediction: Predicted sensory values from generative model
+    /// - Returns: Array of prediction errors
+    func computePredictionError(observation: [Float], prediction: [Float]) -> [Float] {
         let minCount = min(observation.count, prediction.count)
-        return (0..<minCount).map { observation[$0] - prediction[$0] }
+        return (0 ..< minCount).map { observation[$0] - prediction[$0] }
     }
 
     func updatePredictor(current: inout [Float], observation: [Float], learningRate: Float = 0.1) {
         let minCount = min(current.count, observation.count)
-        for index in 0..<minCount {
+        for index in 0 ..< minCount {
             current[index] = current[index] * (1.0 - learningRate) + observation[index] * learningRate
         }
     }
@@ -453,30 +453,30 @@ func computePredictionError(observation: [Float], prediction: [Float]) -> [Float
         let mean = allErrors.reduce(0, +) / Float(allErrors.count)
         let variance = allErrors.map { pow($0 - mean, 2) }.reduce(0, +) / Float(allErrors.count)
 
-        let precision = 1.0 / max(variance, config.eps)
-        return clamp(precision, min: config.precisionMin, max: config.precisionMax)
+        let precision = 1.0 / max(variance, self.config.eps)
+        return self.clamp(precision, min: self.config.precisionMin, max: self.config.precisionMax)
     }
 
-/// Updates dynamic ignition threshold based on homeostatic and urgency factors
-///
-/// Implements threshold adaptation dynamics:
-/// dθ_t/dt = γ(θ₀ − θ_t) + δ·B_{t-1} − λ·|dS_t/dt|
-///
-/// Where:
-/// - γ: Homeostatic recovery rate (returns threshold to baseline)
-/// - θ₀: Baseline threshold value
-/// - δ: Post-ignition refractory elevation
-/// - B_{t-1}: Previous ignition state
-/// - λ: Urgency gain factor (lowers threshold for rapidly increasing surprise)
-/// - |dS_t/dt|: Absolute rate of surprise change (urgency signal)
-///
-/// - Parameters:
-///   - currentTheta: Current threshold value
-///   - prevIgnition: Previous ignition state (0.0 or 1.0)
-///   - surpriseRate: Current rate of surprise change
-///   - dt: Time step for integration
-/// - Returns: Updated threshold value
-func updateThreshold(
+    /// Updates dynamic ignition threshold based on homeostatic and urgency factors
+    ///
+    /// Implements threshold adaptation dynamics:
+    /// dθ_t/dt = γ(θ₀ − θ_t) + δ·B_{t-1} − λ·|dS_t/dt|
+    ///
+    /// Where:
+    /// - γ: Homeostatic recovery rate (returns threshold to baseline)
+    /// - θ₀: Baseline threshold value
+    /// - δ: Post-ignition refractory elevation
+    /// - B_{t-1}: Previous ignition state
+    /// - λ: Urgency gain factor (lowers threshold for rapidly increasing surprise)
+    /// - |dS_t/dt|: Absolute rate of surprise change (urgency signal)
+    ///
+    /// - Parameters:
+    ///   - currentTheta: Current threshold value
+    ///   - prevIgnition: Previous ignition state (0.0 or 1.0)
+    ///   - surpriseRate: Current rate of surprise change
+    ///   - dt: Time step for integration
+    /// - Returns: Updated threshold value
+    func updateThreshold(
         current: Float,
         prevIgnition: Float,
         prevSurprise: Float,
@@ -485,10 +485,10 @@ func updateThreshold(
         allostaticLoad: Float,
         deltaTime: Float
     ) -> Float {
-        let theta0 = config.theta0
-        let gamma = config.gamma
-        let delta = config.delta
-        let lambdaUrg = config.lambdaUrg
+        let theta0 = self.config.theta0
+        let gamma = self.config.gamma
+        let delta = self.config.delta
+        let lambdaUrg = self.config.lambdaUrg
 
         let homeostasis = gamma * (theta0 - current)
         let refractoriness = -delta * prevIgnition
@@ -499,75 +499,75 @@ func updateThreshold(
         let dTheta = homeostasis + refractoriness + urgency + metabolicPenalty
         let newTheta = current + deltaTime * dTheta
 
-        return clamp(newTheta, min: config.thetaMin, max: config.thetaMax)
+        return self.clamp(newTheta, min: self.config.thetaMin, max: self.config.thetaMax)
     }
 
-/// Computes metabolic cost of broadcasting ignition signal
-///
-/// Implements quadratic cost model for global broadcasting:
-/// Cost = α × B_t²
-///
-/// Where:
-/// - α: Broadcast cost coefficient
-/// - B_t: Ignition probability
-///
-/// Quadratic scaling reflects the metabolic expense of widespread
-/// neural activation across multiple brain regions
-///
-/// - Parameter ignitionProb: Probability of ignition (0.0 to 1.0)
-/// - Returns: Metabolic cost of broadcasting
-func computeBroadcastCost(ignitionProb: Float) -> Float {
-        config.alphaBroadcast * pow(ignitionProb, 2)
+    /// Computes metabolic cost of broadcasting ignition signal
+    ///
+    /// Implements quadratic cost model for global broadcasting:
+    /// Cost = α × B_t²
+    ///
+    /// Where:
+    /// - α: Broadcast cost coefficient
+    /// - B_t: Ignition probability
+    ///
+    /// Quadratic scaling reflects the metabolic expense of widespread
+    /// neural activation across multiple brain regions
+    ///
+    /// - Parameter ignitionProb: Probability of ignition (0.0 to 1.0)
+    /// - Returns: Metabolic cost of broadcasting
+    func computeBroadcastCost(ignitionProb: Float) -> Float {
+        self.config.alphaBroadcast * pow(ignitionProb, 2)
     }
 
-/// Computes metabolic cost of maintaining current neural state
-///
-/// Implements linear maintenance cost model:
-/// Cost = β × |state|
-///
-/// Where:
-/// - β: Maintenance cost coefficient
-/// - state: Current neural activation level
-///
-/// Reflects ongoing ATP consumption for maintaining membrane potentials
-/// and neural firing patterns
-///
-/// - Parameter state: Current neural state activation level
-/// - Returns: Metabolic maintenance cost
-func computeMaintenanceCost(state: Float) -> Float {
-        config.betaMaintenance * abs(state)
+    /// Computes metabolic cost of maintaining current neural state
+    ///
+    /// Implements linear maintenance cost model:
+    /// Cost = β × |state|
+    ///
+    /// Where:
+    /// - β: Maintenance cost coefficient
+    /// - state: Current neural activation level
+    ///
+    /// Reflects ongoing ATP consumption for maintaining membrane potentials
+    /// and neural firing patterns
+    ///
+    /// - Parameter state: Current neural state activation level
+    /// - Returns: Metabolic maintenance cost
+    func computeMaintenanceCost(state: Float) -> Float {
+        self.config.betaMaintenance * abs(state)
     }
 
-/// Computes functional benefit from surprise reduction
-///
-/// Implements benefit model based on prediction error minimization:
-/// Benefit = λ × max(S_{t-1} - S_t, 0)
-///
-/// Where:
-/// - λ: Benefit scaling factor
-/// - S_{t-1}: Previous surprise level
-/// - S_t: Current surprise level
-///
-/// Benefit only accrues when surprise is actually reduced,
-/// reflecting improved predictive accuracy
-///
-/// - Parameters:
-///   - surprise: Current surprise level
-///   - prevSurprise: Previous surprise level
-/// - Returns: Functional benefit from prediction improvement
-func computeBenefit(surprise: Float, prevSurprise: Float) -> Float {
+    /// Computes functional benefit from surprise reduction
+    ///
+    /// Implements benefit model based on prediction error minimization:
+    /// Benefit = λ × max(S_{t-1} - S_t, 0)
+    ///
+    /// Where:
+    /// - λ: Benefit scaling factor
+    /// - S_{t-1}: Previous surprise level
+    /// - S_t: Current surprise level
+    ///
+    /// Benefit only accrues when surprise is actually reduced,
+    /// reflecting improved predictive accuracy
+    ///
+    /// - Parameters:
+    ///   - surprise: Current surprise level
+    ///   - prevSurprise: Previous surprise level
+    /// - Returns: Functional benefit from prediction improvement
+    func computeBenefit(surprise: Float, prevSurprise: Float) -> Float {
         let reduction = max(prevSurprise - surprise, 0.0)
         return reduction * APGISimulatorConstants.benefitScaling
     }
 
-/// Utility function to clamp values within specified range
-///
-/// - Parameters:
-///   - value: Value to clamp
-///   - minValue: Minimum allowed value
-///   - maxValue: Maximum allowed value
-/// - Returns: Clamped value within [minValue, maxValue]
-func clamp(_ value: Float, min minValue: Float, max maxValue: Float) -> Float {
+    /// Utility function to clamp values within specified range
+    ///
+    /// - Parameters:
+    ///   - value: Value to clamp
+    ///   - minValue: Minimum allowed value
+    ///   - maxValue: Maximum allowed value
+    /// - Returns: Clamped value within [minValue, maxValue]
+    func clamp(_ value: Float, min minValue: Float, max maxValue: Float) -> Float {
         Swift.max(minValue, Swift.min(maxValue, value))
     }
 }
@@ -624,30 +624,30 @@ final class SimpleAPGIModel {
         context: APGIContext
     ) -> (newState: APGIState, diagnostics: APGIDiagnostics) {
         // Convert time step from milliseconds to seconds for differential equations
-        let deltaTime = config.dtMs / 1000.0
+        let deltaTime = self.config.dtMs / 1000.0
 
         // Step 1: Compute prediction errors between observations and predictions
         // ε = observation - prediction (core predictive coding computation)
-        let epsilonIntero = core.computePredictionError(observation: interoInput, prediction: interoPredictor)
-        let epsilonExtero = core.computePredictionError(observation: exteroInput, prediction: exteroPredictor)
+        let epsilonIntero = self.core.computePredictionError(observation: interoInput, prediction: self.interoPredictor)
+        let epsilonExtero = self.core.computePredictionError(observation: exteroInput, prediction: self.exteroPredictor)
 
         // Step 2: Update error history for precision estimation
         // Maintains sliding window of recent prediction errors
-        interoErrorHistory.append(epsilonIntero)
-        exteroErrorHistory.append(epsilonExtero)
+        self.interoErrorHistory.append(epsilonIntero)
+        self.exteroErrorHistory.append(epsilonExtero)
 
         // Maintain fixed-length history window (FIFO buffer)
-        if interoErrorHistory.count > maxHistoryLength { interoErrorHistory.removeFirst() }
-        if exteroErrorHistory.count > maxHistoryLength { exteroErrorHistory.removeFirst() }
+        if self.interoErrorHistory.count > self.maxHistoryLength { self.interoErrorHistory.removeFirst() }
+        if self.exteroErrorHistory.count > self.maxHistoryLength { self.exteroErrorHistory.removeFirst() }
 
         // Step 3: Estimate precision from error history (inverse of variance)
         // High precision = low prediction error variance = reliable information
-        let piIntero = core.estimatePrecision(errorHistory: interoErrorHistory, baseline: Float(state.piIntero))
-        let piExtero = core.estimatePrecision(errorHistory: exteroErrorHistory, baseline: Float(state.piExtero))
+        let piIntero = self.core.estimatePrecision(errorHistory: self.interoErrorHistory, baseline: Float(state.piIntero))
+        let piExtero = self.core.estimatePrecision(errorHistory: self.exteroErrorHistory, baseline: Float(state.piExtero))
 
         // Step 4: Compute somatic marker for interoceptive modulation
         // Implements Damasio's somatic marker hypothesis
-        let somaticMarker = core.computeSomaticMarker(
+        let somaticMarker = self.core.computeSomaticMarker(
             metabolic: Float(context.metabolic),
             cognitive: Float(context.cognitive),
             affective: Float(context.affective)
@@ -655,7 +655,7 @@ final class SimpleAPGIModel {
 
         // Step 5: Calculate total precision-weighted surprise
         // S_total = S_extero + β·S_intero (multi-modal integration)
-        let sTotal = core.computeTotalSurprise(
+        let sTotal = self.core.computeTotalSurprise(
             exteroError: epsilonExtero,
             interoError: epsilonIntero,
             piExtero: piExtero,
@@ -664,12 +664,12 @@ final class SimpleAPGIModel {
         )
 
         // Calculate individual surprise components for diagnostics
-        let sExtero = core.computeSurprise(predictionError: epsilonExtero, precision: piExtero)
-        let sIntero = core.computeSurprise(predictionError: epsilonIntero, precision: piIntero * somaticMarker)
+        let sExtero = self.core.computeSurprise(predictionError: epsilonExtero, precision: piExtero)
+        let sIntero = self.core.computeSurprise(predictionError: epsilonIntero, precision: piIntero * somaticMarker)
 
         // Step 6: Update dynamic ignition threshold
         // θ_t evolves based on homeostatic recovery, post-ignition refractory, and urgency
-        let newTheta = core.updateThreshold(
+        let newTheta = self.core.updateThreshold(
             current: Float(state.theta),
             prevIgnition: Float(state.prevIgnition),
             prevSurprise: Float(state.prevS),
@@ -681,52 +681,52 @@ final class SimpleAPGIModel {
 
         // Step 7: Compute ignition probability using sigmoid decision rule
         // B_t = σ(α(S_t - θ_t)) - threshold-based stochastic ignition
-        let ignitionProb = core.computeIgnitionProbability(
+        let ignitionProb = self.core.computeIgnitionProbability(
             surprise: sTotal,
             threshold: newTheta,
-            alpha: config.betaTransition
+            alpha: self.config.betaTransition
         )
 
         // Step 8: Calculate metabolic costs and functional benefits
         // Cost-benefit analysis for energy allocation
-        let broadcastCost = core.computeBroadcastCost(ignitionProb: ignitionProb)
-        let maintenanceCost = core.computeMaintenanceCost(state: Float(state.energyReserves))
+        let broadcastCost = self.core.computeBroadcastCost(ignitionProb: ignitionProb)
+        let maintenanceCost = self.core.computeMaintenanceCost(state: Float(state.energyReserves))
         let totalCost = broadcastCost + maintenanceCost
 
         // Benefit accrues from prediction error reduction (improved model accuracy)
-        let benefit = core.computeBenefit(surprise: sTotal, prevSurprise: previousSurprise)
+        let benefit = self.core.computeBenefit(surprise: sTotal, prevSurprise: self.previousSurprise)
         let freeEnergy = totalCost - benefit
 
         // Step 9: Update energy reserves based on metabolic costs
         // Energy depletion proportional to total computational cost
-        let energyDelta = -totalCost * config.energyDepletionRate * deltaTime
-        let newEnergy = core.clamp(
+        let energyDelta = -totalCost * self.config.energyDepletionRate * deltaTime
+        let newEnergy = self.core.clamp(
             Float(state.energyReserves) + Float(energyDelta),
-            min: config.energyMin,
-            max: config.energyMax
+            min: self.config.energyMin,
+            max: self.config.energyMax
         )
 
         // Step 10: Update allostatic load (stress accumulation)
         // Increases with surprise, decreases with successful ignition (stress relief)
-        let allostaticIncrease = sTotal * config.allostaticIncreaseRate * deltaTime
-        let allostaticDecrease = ignitionProb * Float(state.allostaticLoad) * config.allostaticDecreaseRate * deltaTime
-        let newAllostatic = core.clamp(
+        let allostaticIncrease = sTotal * self.config.allostaticIncreaseRate * deltaTime
+        let allostaticDecrease = ignitionProb * Float(state.allostaticLoad) * self.config.allostaticDecreaseRate * deltaTime
+        let newAllostatic = self.core.clamp(
             Float(state.allostaticLoad) + Float(allostaticIncrease) - allostaticDecrease,
-            min: config.allostaticMin,
-            max: config.allostaticMax
+            min: self.config.allostaticMin,
+            max: self.config.allostaticMax
         )
 
         // Step 11: Update predictive models with new observations (learning)
         // Exponential moving average: prediction_new = (1-α)·prediction_old + α·observation
-        core.updatePredictor(current: &interoPredictor, observation: interoInput, learningRate: APGISimulatorConstants.defaultLearningRate)
-        core.updatePredictor(current: &exteroPredictor, observation: exteroInput, learningRate: APGISimulatorConstants.defaultLearningRate)
+        self.core.updatePredictor(current: &self.interoPredictor, observation: interoInput, learningRate: APGISimulatorConstants.defaultLearningRate)
+        self.core.updatePredictor(current: &self.exteroPredictor, observation: exteroInput, learningRate: APGISimulatorConstants.defaultLearningRate)
 
         // Step 12: Estimate neuromodulatory states from system variables
         // Volatility drives norepinephrine (arousal/attention)
-        let volatility = estimateVolatility(currentPrecision: piIntero)
-        let norepinephrine = core.sigmoid(volatility * APGISimulatorConstants.norepinephrineVolatilityScaling + Float(context.arousal) - APGISimulatorConstants.neuromodulatoryBaselineOffset)
+        let volatility = self.estimateVolatility(currentPrecision: piIntero)
+        let norepinephrine = self.core.sigmoid(volatility * APGISimulatorConstants.norepinephrineVolatilityScaling + Float(context.arousal) - APGISimulatorConstants.neuromodulatoryBaselineOffset)
         // Precision drives acetylcholine (attention/learning)
-        let acetylcholine = core.sigmoid(piIntero * APGISimulatorConstants.acetylcholinePrecisionScaling + Float(context.attention) - APGISimulatorConstants.neuromodulatoryBaselineOffset)
+        let acetylcholine = self.core.sigmoid(piIntero * APGISimulatorConstants.acetylcholinePrecisionScaling + Float(context.attention) - APGISimulatorConstants.neuromodulatoryBaselineOffset)
 
         var newState = state
         newState.piIntero = Double(piIntero)
@@ -737,7 +737,7 @@ final class SimpleAPGIModel {
         newState.energyReserves = Double(newEnergy)
         newState.allostaticLoad = Double(newAllostatic)
 
-        previousSurprise = sTotal
+        self.previousSurprise = sTotal
 
         let diagnostics = APGIDiagnostics(
             sTotal: Double(sTotal),
@@ -763,11 +763,11 @@ final class SimpleAPGIModel {
     private var precisionHistory: [Float] = []
 
     private func estimateVolatility(currentPrecision: Float) -> Float {
-        precisionHistory.append(currentPrecision)
-        if precisionHistory.count > 20 { precisionHistory.removeFirst() }
-        guard precisionHistory.count > 2 else { return 0.0 }
-        let mean = precisionHistory.reduce(0, +) / Float(precisionHistory.count)
-        let variance = precisionHistory.map { pow($0 - mean, 2) }.reduce(0, +) / Float(precisionHistory.count)
+        self.precisionHistory.append(currentPrecision)
+        if self.precisionHistory.count > 20 { self.precisionHistory.removeFirst() }
+        guard self.precisionHistory.count > 2 else { return 0.0 }
+        let mean = self.precisionHistory.reduce(0, +) / Float(self.precisionHistory.count)
+        let variance = self.precisionHistory.map { pow($0 - mean, 2) }.reduce(0, +) / Float(self.precisionHistory.count)
         return sqrt(variance)
     }
 }
@@ -784,7 +784,7 @@ actor StateManager {
     }
 
     func getSnapshot() -> APGIState {
-        currentState
+        self.currentState
     }
 
     func reset(configuration: APGIConfiguration) async {
@@ -813,7 +813,9 @@ final class APGIInferenceEngine: ObservableObject {
     private var inferenceQueue: DispatchQueue
     private var memoryPressureObserver: NSObjectProtocol?
 
-    var configuration: APGIConfiguration { config }
+    var configuration: APGIConfiguration {
+        self.config
+    }
 
     init(configuration: APGIConfiguration) {
         self.config = configuration
@@ -841,7 +843,7 @@ final class APGIInferenceEngine: ObservableObject {
             refractoryTimer: 0.0
         )
 
-        setupMemoryPressureObserver()
+        self.setupMemoryPressureObserver()
     }
 
     deinit {
@@ -858,13 +860,13 @@ final class APGIInferenceEngine: ObservableObject {
 
     private func handleMemoryPressure() {
         // Reduce model complexity under memory pressure
-        memoryManager.optimizeForMemoryPressure()
+        self.memoryManager.optimizeForMemoryPressure()
 
         // Clear non-essential caches
-        performanceMonitor.clearCaches()
+        self.performanceMonitor.clearCaches()
 
         // Reduce inference frequency
-        if isInferring {
+        if self.isInferring {
             Task {
                 try? await Task.sleep(nanoseconds: 100_000_000) // 100ms delay
             }
@@ -874,36 +876,38 @@ final class APGIInferenceEngine: ObservableObject {
     func loadModel() async throws {
         do {
             // Validate configuration before loading
-            guard config.inputSize > 0 && config.hiddenSize > 0 && config.numLevels > 0 else {
+            guard self.config.inputSize > 0, self.config.hiddenSize > 0, self.config.numLevels > 0 else {
                 throw APGIError.invalidInput("Invalid configuration parameters")
             }
 
-            self.simpleModel = SimpleAPGIModel(configuration: config)
+            self.simpleModel = SimpleAPGIModel(configuration: self.config)
 
             // Simulate model loading with validation
             try await Task.sleep(nanoseconds: 100_000_000)
 
             // Validate model initialization
-            guard simpleModel != nil else {
+            guard self.simpleModel != nil else {
                 throw APGIError.modelLoadFailed("Model initialization failed")
             }
 
-            isModelLoaded = true
-        } catch {
-            isModelLoaded = false
-            simpleModel = nil
+            self.isModelLoaded = true
+        }
+        catch {
+            self.isModelLoaded = false
+            self.simpleModel = nil
 
             if let apgiError = error as? APGIError {
                 throw apgiError
-            } else {
+            }
+            else {
                 throw APGIError.modelLoadFailed(error.localizedDescription)
             }
         }
     }
 
     func unloadModel() {
-        simpleModel = nil
-        isModelLoaded = false
+        self.simpleModel = nil
+        self.isModelLoaded = false
     }
 
     func runInference(interoInput: [Float], exteroInput: [Float], context: APGIContext) async throws {
@@ -912,10 +916,10 @@ final class APGIInferenceEngine: ObservableObject {
         }
 
         // Enhanced input validation
-        try validateInputs(interoInput: interoInput, exteroInput: exteroInput)
-        try validateContext(context: context)
+        try self.validateInputs(interoInput: interoInput, exteroInput: exteroInput)
+        try self.validateContext(context: context)
 
-        isInferring = true
+        self.isInferring = true
         defer {
             isInferring = false
         }
@@ -924,7 +928,7 @@ final class APGIInferenceEngine: ObservableObject {
 
         do {
             // Use memory-optimized configuration if under pressure
-            _ = memoryManager.getOptimizedConfiguration(for: config)
+            _ = self.memoryManager.getOptimizedConfiguration(for: self.config)
 
             let stateSnapshot = await stateManager.getSnapshot()
 
@@ -936,29 +940,31 @@ final class APGIInferenceEngine: ObservableObject {
             )
 
             let inferenceTime = Date().timeIntervalSince(startTime)
-            lastInferenceTime = inferenceTime
+            self.lastInferenceTime = inferenceTime
 
             // Validate inference results
-            try validateInferenceResult(result)
+            try self.validateInferenceResult(result)
 
-            performanceMonitor.recordInference(duration: inferenceTime)
-            updateFPS(inferenceTime: inferenceTime)
+            self.performanceMonitor.recordInference(duration: inferenceTime)
+            self.updateFPS(inferenceTime: inferenceTime)
 
-            await stateManager.updateState(result.newState)
+            await self.stateManager.updateState(result.newState)
 
-            currentState = result.newState
-            diagnostics = result.diagnostics
+            self.currentState = result.newState
+            self.diagnostics = result.diagnostics
 
             if let timer = fpsUpdateTimer, timer.isValid {
-            } else {
-                averageInferenceTime = performanceMonitor.averageInferenceTime
+            }
+            else {
+                self.averageInferenceTime = self.performanceMonitor.averageInferenceTime
             }
 
             // Memory cleanup after inference
-            if memoryManager.shouldBatchInferences() {
-                await performMemoryCleanup()
+            if self.memoryManager.shouldBatchInferences() {
+                await self.performMemoryCleanup()
             }
-        } catch {
+        }
+        catch {
             throw APGIError.inferenceFailed(error)
         }
     }
@@ -975,10 +981,10 @@ final class APGIInferenceEngine: ObservableObject {
         let values = [context.metabolic, context.cognitive, context.affective, context.arousal, context.attention]
 
         for value in values {
-            guard value >= 0.0 && value <= 1.0 else {
+            guard value >= 0.0, value <= 1.0 else {
                 throw APGIError.invalidInput("Context values must be between 0.0 and 1.0")
             }
-            guard !value.isNaN && !value.isInfinite else {
+            guard !value.isNaN, !value.isInfinite else {
                 throw APGIError.invalidInput("Context values contain NaN or Inf")
             }
         }
@@ -988,28 +994,28 @@ final class APGIInferenceEngine: ObservableObject {
         // Check for valid state values
         let stateValues = [
             result.newState.piIntero, result.newState.piExtero, result.newState.theta,
-            result.newState.energyReserves, result.newState.allostaticLoad
+            result.newState.energyReserves, result.newState.allostaticLoad,
         ]
 
         for value in stateValues {
-            guard !value.isNaN && !value.isInfinite else {
+            guard !value.isNaN, !value.isInfinite else {
                 throw APGIError.stateUpdateFailed("Invalid state values detected")
             }
         }
 
         // Check diagnostics validity
-        guard result.diagnostics.sTotal >= 0 && result.diagnostics.ignitionProb >= 0 && result.diagnostics.ignitionProb <= 1 else {
+        guard result.diagnostics.sTotal >= 0, result.diagnostics.ignitionProb >= 0, result.diagnostics.ignitionProb <= 1 else {
             throw APGIError.inferenceError("Invalid diagnostic values")
         }
     }
 
     private func validateInputs(interoInput: [Float], exteroInput: [Float]) throws {
-        if interoInput.count != config.inputSize {
-            throw APGIError.invalidInput("Interoceptive input size (\(interoInput.count)) doesn't match config (\(config.inputSize))")
+        if interoInput.count != self.config.inputSize {
+            throw APGIError.invalidInput("Interoceptive input size (\(interoInput.count)) doesn't match config (\(self.config.inputSize))")
         }
 
-        if exteroInput.count != config.inputSize {
-            throw APGIError.invalidInput("Exteroceptive input size (\(exteroInput.count)) doesn't match config (\(config.inputSize))")
+        if exteroInput.count != self.config.inputSize {
+            throw APGIError.invalidInput("Exteroceptive input size (\(exteroInput.count)) doesn't match config (\(self.config.inputSize))")
         }
 
         if interoInput.contains(where: { $0.isNaN || $0.isInfinite }) {
@@ -1023,13 +1029,13 @@ final class APGIInferenceEngine: ObservableObject {
 
     private func updateFPS(inferenceTime: TimeInterval) {
         if inferenceTime > 0 {
-            currentFPS = 1.0 / inferenceTime
+            self.currentFPS = 1.0 / inferenceTime
         }
     }
 
     func startFPSMonitoring() {
-        fpsUpdateTimer?.invalidate()
-        fpsUpdateTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] _ in
+        self.fpsUpdateTimer?.invalidate()
+        self.fpsUpdateTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] _ in
             Task { @MainActor [weak self] in
                 guard let self else { return }
                 self.averageInferenceTime = self.performanceMonitor.averageInferenceTime
@@ -1038,20 +1044,20 @@ final class APGIInferenceEngine: ObservableObject {
     }
 
     func stopFPSMonitoring() {
-        fpsUpdateTimer?.invalidate()
-        fpsUpdateTimer = nil
+        self.fpsUpdateTimer?.invalidate()
+        self.fpsUpdateTimer = nil
     }
 
     func resetState() async {
-        await stateManager.reset(configuration: config)
+        await self.stateManager.reset(configuration: self.config)
         let newState = await stateManager.getSnapshot()
-        currentState = newState
+        self.currentState = newState
 
-        diagnostics = APGIDiagnostics(
+        self.diagnostics = APGIDiagnostics(
             sTotal: 0.0,
             sIntero: 0.0,
             sExtero: 0.0,
-            theta: Double(config.theta0),
+            theta: Double(self.config.theta0),
             ignitionProb: 0.0,
             piIntero: 1.0,
             piExtero: 1.0,
@@ -1065,23 +1071,23 @@ final class APGIInferenceEngine: ObservableObject {
             refractoryTimer: 0.0
         )
 
-        performanceMonitor.reset()
-        currentFPS = 0.0
-        averageInferenceTime = 0.0
+        self.performanceMonitor.reset()
+        self.currentFPS = 0.0
+        self.averageInferenceTime = 0.0
     }
 
     func getIgnitionState() -> IgnitionState {
-        IgnitionState.from(probability: diagnostics.ignitionProb)
+        IgnitionState.from(probability: self.diagnostics.ignitionProb)
     }
 
     func getPerformanceMetrics() async -> PerformanceMetrics {
-        let stats = performanceMonitor.getStatistics()
+        let stats = self.performanceMonitor.getStatistics()
 
         return PerformanceMetrics(
             averageInferenceTime: stats.meanLatency / 1000.0,
             medianInferenceTime: stats.p50Latency / 1000.0,
-            currentFPS: currentFPS,
-            lastInferenceTime: lastInferenceTime
+            currentFPS: self.currentFPS,
+            lastInferenceTime: self.lastInferenceTime
         )
     }
 }
@@ -1092,9 +1098,17 @@ struct PerformanceMetrics {
     let currentFPS: Double
     let lastInferenceTime: TimeInterval
 
-    var formattedAverageTime: String { String(format: "%.2f ms", averageInferenceTime * 1000) }
-    var formattedMedianTime: String { String(format: "%.2f ms", medianInferenceTime * 1000) }
-    var formattedFPS: String { String(format: "%.1f FPS", currentFPS) }
+    var formattedAverageTime: String {
+        String(format: "%.2f ms", self.averageInferenceTime * 1000)
+    }
+
+    var formattedMedianTime: String {
+        String(format: "%.2f ms", self.medianInferenceTime * 1000)
+    }
+
+    var formattedFPS: String {
+        String(format: "%.1f FPS", self.currentFPS)
+    }
 }
 
 extension APGIState {
@@ -1128,11 +1142,14 @@ enum IgnitionState: String, Codable {
     static func from(probability: Double) -> IgnitionState {
         if probability >= 0.8 {
             return .high
-        } else if probability >= 0.5 {
+        }
+        else if probability >= 0.5 {
             return .moderate
-        } else if probability >= 0.2 {
+        }
+        else if probability >= 0.2 {
             return .low
-        } else {
+        }
+        else {
             return .refractory
         }
     }
@@ -1160,13 +1177,21 @@ struct APGIDiagnostics: Identifiable, Codable, Equatable {
     let acetylcholine: Double
     let refractoryTimer: Double
 
-    var ignitionState: IgnitionState { IgnitionState.from(probability: ignitionProb) }
-    var isIgnited: Bool { ignitionProb > 0.5 }
-    var surpriseAboveThreshold: Bool { sTotal > theta }
+    var ignitionState: IgnitionState {
+        IgnitionState.from(probability: self.ignitionProb)
+    }
+
+    var isIgnited: Bool {
+        self.ignitionProb > 0.5
+    }
+
+    var surpriseAboveThreshold: Bool {
+        self.sTotal > self.theta
+    }
 
     var metabolicEfficiency: Double {
-        guard broadcastCost > 0 else { return 1.0 }
-        return (1.0 - freeEnergy) / broadcastCost
+        guard self.broadcastCost > 0 else { return 1.0 }
+        return (1.0 - self.freeEnergy) / self.broadcastCost
     }
 
     static func == (lhs: APGIDiagnostics, rhs: APGIDiagnostics) -> Bool {
@@ -1181,12 +1206,13 @@ struct APGITimeSeriesView: View {
     var body: some View {
         if #available(macOS 13, *) {
             VStack(alignment: .leading, spacing: 10) {
-                if history.isEmpty {
+                if self.history.isEmpty {
                     Text("Awaiting diagnostic data...")
                         .foregroundColor(.secondary)
                         .frame(height: 200)
-                } else {
-                    Chart(history) { snapshot in
+                }
+                else {
+                    Chart(self.history) { snapshot in
                         LineMark(x: .value("Time", snapshot.timestamp), y: .value("Surprise", snapshot.sTotal))
                             .foregroundStyle(.blue)
                             .interpolationMethod(.catmullRom)
@@ -1209,13 +1235,14 @@ struct APGITimeSeriesView: View {
                 }
             }
             .padding()
-            .onChange(of: engine.diagnostics) { _, newDiag in
-                history.append(newDiag)
-                if history.count > engine.configuration.historyLength {
-                    history.removeFirst()
+            .onChange(of: self.engine.diagnostics) { _, newDiag in
+                self.history.append(newDiag)
+                if self.history.count > self.engine.configuration.historyLength {
+                    self.history.removeFirst()
                 }
             }
-        } else {
+        }
+        else {
             Text("Charts visualization requires macOS 13.0 or later.")
                 .foregroundColor(.red)
                 .padding()
@@ -1233,29 +1260,31 @@ struct APGISimulatorView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            headerView
+            self.headerView
             Divider()
 
             ScrollView {
                 VStack(spacing: 20) {
-                    if isLoading {
-                        loadingView
-                    } else if let error = loadError {
-                        errorView(error)
-                    } else {
-                        statusSection
-                        dynamicsChartSection
-                        controlsSection
-                        diagnosticsSection
+                    if self.isLoading {
+                        self.loadingView
+                    }
+                    else if let error = loadError {
+                        self.errorView(error)
+                    }
+                    else {
+                        self.statusSection
+                        self.dynamicsChartSection
+                        self.controlsSection
+                        self.diagnosticsSection
                     }
                 }
                 .padding()
             }
         }
         .task {
-            await loadModel()
+            await self.loadModel()
         }
-        .environmentObject(engine)
+        .environmentObject(self.engine)
     }
 
     private var headerView: some View {
@@ -1273,14 +1302,14 @@ struct APGISimulatorView: View {
             Spacer()
 
             VStack(alignment: .trailing) {
-                Text(String(format: "%.1f FPS", engine.currentFPS))
+                Text(String(format: "%.1f FPS", self.engine.currentFPS))
                     .font(.title2)
                     .fontWeight(.semibold)
                     .foregroundColor(.blue)
 
-                Text(isSimulating ? "Running" : "Stopped")
+                Text(self.isSimulating ? "Running" : "Stopped")
                     .font(.caption)
-                    .foregroundColor(isSimulating ? .green : .orange)
+                    .foregroundColor(self.isSimulating ? .green : .orange)
             }
         }
         .padding()
@@ -1315,7 +1344,7 @@ struct APGISimulatorView: View {
 
             Button("Retry") {
                 Task {
-                    await loadModel()
+                    await self.loadModel()
                 }
             }
             .buttonStyle(.borderedProminent)
@@ -1331,10 +1360,10 @@ struct APGISimulatorView: View {
                     Text("Ignition State")
                         .font(.headline)
                     Spacer()
-                    ignitionBadge
+                    self.ignitionBadge
                 }
 
-                let diag = engine.diagnostics
+                let diag = self.engine.diagnostics
                 HStack {
                     VStack(alignment: .leading, spacing: 5) {
                         Text("Surprise (S)")
@@ -1365,7 +1394,7 @@ struct APGISimulatorView: View {
                         Text(String(format: "%.1f%%", diag.ignitionProb * 100))
                             .font(.title3)
                             .fontWeight(.semibold)
-                            .foregroundColor(ignitionColor(diag.ignitionProb))
+                            .foregroundColor(self.ignitionColor(diag.ignitionProb))
                     }
                 }
             }
@@ -1376,7 +1405,7 @@ struct APGISimulatorView: View {
     }
 
     private var ignitionBadge: some View {
-        let diag = engine.diagnostics
+        let diag = self.engine.diagnostics
         let state = IgnitionState.from(probability: diag.ignitionProb)
         return Text(state.rawValue)
             .font(.headline)
@@ -1404,21 +1433,21 @@ struct APGISimulatorView: View {
     private var controlsSection: some View {
         GroupBox {
             VStack(spacing: 20) {
-                Button(action: toggleSimulation) {
-                    Label(isSimulating ? "Stop Simulation" : "Start Simulation", systemImage: isSimulating ? "stop.fill" : "play.fill")
+                Button(action: self.toggleSimulation) {
+                    Label(self.isSimulating ? "Stop Simulation" : "Start Simulation", systemImage: self.isSimulating ? "stop.fill" : "play.fill")
                         .frame(maxWidth: .infinity)
                 }
                 .buttonStyle(.borderedProminent)
-                .tint(isSimulating ? .red : .green)
+                .tint(self.isSimulating ? .red : .green)
 
                 Divider()
 
                 VStack(spacing: 15) {
-                    sliderControl("Metabolic", value: $context.metabolic, color: .red)
-                    sliderControl("Cognitive", value: $context.cognitive, color: .blue)
-                    sliderControl("Affective", value: $context.affective, color: .purple)
-                    sliderControl("Arousal", value: $context.arousal, color: .orange)
-                    sliderControl("Attention", value: $context.attention, color: .green)
+                    self.sliderControl("Metabolic", value: self.$context.metabolic, color: .red)
+                    self.sliderControl("Cognitive", value: self.$context.cognitive, color: .blue)
+                    self.sliderControl("Affective", value: self.$context.affective, color: .purple)
+                    self.sliderControl("Arousal", value: self.$context.arousal, color: .orange)
+                    self.sliderControl("Attention", value: self.$context.attention, color: .green)
                 }
             }
             .padding()
@@ -1440,21 +1469,21 @@ struct APGISimulatorView: View {
                     .foregroundColor(color)
             }
 
-            Slider(value: value, in: 0...1)
+            Slider(value: value, in: 0 ... 1)
                 .tint(color)
         }
     }
 
     private var diagnosticsSection: some View {
         GroupBox {
-            let diag = engine.diagnostics
+            let diag = self.engine.diagnostics
             LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 15) {
-                diagnosticCell("Π Intero", value: diag.piIntero, format: "%.3f")
-                diagnosticCell("Π Extero", value: diag.piExtero, format: "%.3f")
-                diagnosticCell("Cost", value: diag.broadcastCost, format: "%.4f")
-                diagnosticCell("Free Energy", value: diag.freeEnergy, format: "%.4f")
-                diagnosticCell("Energy", value: diag.energyReserves, format: "%.2f")
-                diagnosticCell("Load", value: diag.allostaticLoad, format: "%.3f")
+                self.diagnosticCell("Π Intero", value: diag.piIntero, format: "%.3f")
+                self.diagnosticCell("Π Extero", value: diag.piExtero, format: "%.3f")
+                self.diagnosticCell("Cost", value: diag.broadcastCost, format: "%.4f")
+                self.diagnosticCell("Free Energy", value: diag.freeEnergy, format: "%.4f")
+                self.diagnosticCell("Energy", value: diag.energyReserves, format: "%.2f")
+                self.diagnosticCell("Load", value: diag.allostaticLoad, format: "%.3f")
             }
             .padding()
         } label: {
@@ -1477,50 +1506,53 @@ struct APGISimulatorView: View {
     }
 
     private func loadModel() async {
-        isLoading = true
-        loadError = nil
+        self.isLoading = true
+        self.loadError = nil
 
         do {
-            try await engine.loadModel()
-            isLoading = false
-        } catch {
-            isLoading = false
-            loadError = error.localizedDescription
+            try await self.engine.loadModel()
+            self.isLoading = false
+        }
+        catch {
+            self.isLoading = false
+            self.loadError = error.localizedDescription
         }
     }
 
     private func toggleSimulation() {
-        isSimulating.toggle()
+        self.isSimulating.toggle()
 
-        if isSimulating {
-            startSimulation()
-        } else {
-            stopSimulation()
+        if self.isSimulating {
+            self.startSimulation()
+        }
+        else {
+            self.stopSimulation()
         }
     }
 
     private func startSimulation() {
-        simulationTimer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { _ in
+        self.simulationTimer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { _ in
             Task { @MainActor in
-                await runSimulationStep()
+                await self.runSimulationStep()
             }
         }
     }
 
     private func stopSimulation() {
-        simulationTimer?.invalidate()
-        simulationTimer = nil
+        self.simulationTimer?.invalidate()
+        self.simulationTimer = nil
     }
 
     private func runSimulationStep() async {
-        let interoInput = (0..<64).map { _ in Float.random(in: -1...1) }
-        let exteroInput = (0..<64).map { _ in Float.random(in: -1...1) }
+        let interoInput = (0 ..< 64).map { _ in Float.random(in: -1 ... 1) }
+        let exteroInput = (0 ..< 64).map { _ in Float.random(in: -1 ... 1) }
 
         do {
-            try await engine.runInference(interoInput: interoInput, exteroInput: exteroInput, context: context)
-        } catch {
+            try await self.engine.runInference(interoInput: interoInput, exteroInput: exteroInput, context: self.context)
+        }
+        catch {
             await MainActor.run {
-                stopSimulation()
+                self.stopSimulation()
             }
         }
     }
@@ -1528,9 +1560,11 @@ struct APGISimulatorView: View {
     private func ignitionColor(_ prob: Double) -> Color {
         if prob > 0.8 {
             return .green
-        } else if prob > 0.3 {
+        }
+        else if prob > 0.3 {
             return .orange
-        } else {
+        }
+        else {
             return .red
         }
     }

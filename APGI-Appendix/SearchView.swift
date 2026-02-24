@@ -41,50 +41,52 @@ struct SearchView: View {
     var body: some View {
         VStack(spacing: 0) {
             HStack(spacing: 12) {
-                Image(systemName: "magnifyingglass")
+                Image(systemName: SFSymbols.search)
                     .foregroundStyle(.secondary)
                     .font(.title3)
+                    .accessibilityLabel("Search")
+                    .accessibilityHint("Find information in the app")
 
-                TextField("Search framework...", text: $searchText)
+                TextField("Search framework...", text: self.$searchText)
                     .textFieldStyle(.plain)
                     .font(.title3)
                     .onSubmit {
-                        performSearch()
+                        self.performSearch()
                     }
-                    .onChange(of: searchText) { _, newValue in
+                    .onChange(of: self.searchText) { _, newValue in
                         // Cancel previous search and timer
-                        searchTask?.cancel()
-                        debounceTimer?.invalidate()
+                        self.searchTask?.cancel()
+                        self.debounceTimer?.invalidate()
 
                         // Clear results for empty search
                         if newValue.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                            searchResults = []
+                            self.searchResults = []
                             searchError = nil
-                            isSearching = false
+                            self.isSearching = false
                             return
                         }
 
                         // Check cache first
-                        let cacheKey = generateCacheKey(query: newValue, scope: searchScope, filters: selectedFilters)
+                        let cacheKey = self.generateCacheKey(query: newValue, scope: self.searchScope, filters: self.selectedFilters)
                         if let cachedResults = performanceManager.getCachedSearchResults(for: cacheKey) {
                             // Use cached results if they're less than 5 minutes old
                             if Date().timeIntervalSince(cachedResults.timestamp) < 300 {
-                                searchResults = cachedResults.results
+                                self.searchResults = cachedResults.results
                                 searchError = nil
-                                isSearching = false
+                                self.isSearching = false
                                 return
                             }
                         }
 
                         // Debounced search with adaptive delay
-                        let debounceDelay = performanceManager.shouldReduceAnimations ? 500 : 300
-                        debounceTimer = Timer.scheduledTimer(withTimeInterval: TimeInterval(debounceDelay) / 1000.0, repeats: false) { _ in
-                            performSearch()
+                        let debounceDelay = self.performanceManager.shouldReduceAnimations ? 500 : 300
+                        self.debounceTimer = Timer.scheduledTimer(withTimeInterval: TimeInterval(debounceDelay) / 1000.0, repeats: false) { _ in
+                            self.performSearch()
                         }
                     }
 
                 Menu {
-                    Picker("Scope", selection: $searchScope) {
+                    Picker("Scope", selection: self.$searchScope) {
                         Text("All").tag(SearchScope.all)
                         Text("Titles Only").tag(SearchScope.titles)
                         Text("Content").tag(SearchScope.content)
@@ -95,14 +97,14 @@ struct SearchView: View {
                 } label: {
                     Image(systemName: "line.3.horizontal.decrease.circle")
                 }
-                .onChange(of: searchScope) { _, _ in
-                    performSearch()
+                .onChange(of: self.searchScope) { _, _ in
+                    self.performSearch()
                 }
 
-                if !searchText.isEmpty {
+                if !self.searchText.isEmpty {
                     Button {
-                        searchText = ""
-                        searchResults = []
+                        self.searchText = ""
+                        self.searchResults = []
                     } label: {
                         Image(systemName: "xmark.circle.fill")
                             .foregroundStyle(.secondary)
@@ -111,7 +113,7 @@ struct SearchView: View {
                 }
 
                 Button("Cancel") {
-                    isPresented = false
+                    self.isPresented = false
                 }
                 .buttonStyle(.bordered)
             }
@@ -123,10 +125,10 @@ struct SearchView: View {
                     ForEach(SectionCategory.allCases, id: \.self) { category in
                         FilterChip(
                             title: category.rawValue,
-                            isSelected: selectedFilters.contains(category),
+                            isSelected: self.selectedFilters.contains(category),
                             tint: category.color
                         ) {
-                            toggleFilter(category)
+                            self.toggleFilter(category)
                         }
                     }
                 }
@@ -136,7 +138,7 @@ struct SearchView: View {
 
             Divider()
 
-            if isSearching {
+            if self.isSearching {
                 VStack(spacing: 16) {
                     ProgressView()
                         .scaleEffect(1.2)
@@ -145,7 +147,8 @@ struct SearchView: View {
                         .foregroundStyle(.secondary)
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
-            } else if let searchError = searchError {
+            }
+            else if let searchError = searchError {
                 VStack(spacing: 12) {
                     Image(systemName: "exclamationmark.triangle")
                         .font(.system(size: 48))
@@ -161,13 +164,14 @@ struct SearchView: View {
                         .multilineTextAlignment(.center)
 
                     Button("Retry") {
-                        performSearch()
+                        self.performSearch()
                     }
                     .buttonStyle(.bordered)
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .padding()
-            } else if searchResults.isEmpty && !searchText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            }
+            else if self.searchResults.isEmpty && !self.searchText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
                 VStack(spacing: 12) {
                     Image(systemName: "doc.text.magnifyingglass")
                         .font(.system(size: 48))
@@ -182,13 +186,14 @@ struct SearchView: View {
                         .foregroundStyle(.tertiary)
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
-            } else {
-                List(searchResults) { result in
+            }
+            else {
+                List(self.searchResults) { result in
                     SearchResultRow(result: result)
                         .contentShape(Rectangle())
                         .onTapGesture {
-                            onSelectTab(result.section)
-                            isPresented = false
+                            self.onSelectTab(result.section)
+                            self.isPresented = false
                         }
                         .transition(.asymmetric(
                             insertion: .scale.combined(with: .opacity),
@@ -196,34 +201,34 @@ struct SearchView: View {
                         ))
                 }
                 .listStyle(.plain)
-                .animation(.easeInOut(duration: 0.3), value: searchResults.count)
+                .animation(.easeInOut(duration: 0.3), value: self.searchResults.count)
             }
         }
         .frame(width: 720, height: 560)
     }
 
     private func performSearch() {
-        let query = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
+        let query = self.searchText.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !query.isEmpty else {
-            searchResults = []
-            searchError = nil
+            self.searchResults = []
+            self.searchError = nil
             return
         }
 
         // Cancel previous search task
-        searchTask?.cancel()
+        self.searchTask?.cancel()
 
-        isSearching = true
-        searchError = nil
+        self.isSearching = true
+        self.searchError = nil
 
-        searchTask = Task {
+        self.searchTask = Task {
             do {
                 let results = try await performAsyncSearch(query: query)
 
                 // Cache the results
-                let cacheKey = generateCacheKey(query: query, scope: searchScope, filters: selectedFilters)
+                let cacheKey = self.generateCacheKey(query: query, scope: self.searchScope, filters: self.selectedFilters)
                 let cachedResults = CachedSearchResults(results: results, cost: results.count)
-                performanceManager.setCachedSearchResults(cachedResults, for: cacheKey)
+                self.performanceManager.setCachedSearchResults(cachedResults, for: cacheKey)
 
                 await MainActor.run {
                     if !Task.isCancelled {
@@ -232,7 +237,8 @@ struct SearchView: View {
                         self.searchError = nil
                     }
                 }
-            } catch {
+            }
+            catch {
                 await MainActor.run {
                     if !Task.isCancelled {
                         self.searchResults = []
@@ -251,7 +257,7 @@ struct SearchView: View {
 
     private func performAsyncSearch(query: String) async throws -> [SearchResult] {
         let effectiveTabs: [Tab] = {
-            switch searchScope {
+            switch self.searchScope {
             case .references:
                 return [.bibliography]
             case .glossary:
@@ -261,7 +267,7 @@ struct SearchView: View {
             }
         }()
 
-        let allowedCategories: Set<SectionCategory> = selectedFilters
+        let allowedCategories: Set<SectionCategory> = self.selectedFilters
         var results: [SearchResult] = []
 
         for tab in effectiveTabs {
@@ -269,17 +275,18 @@ struct SearchView: View {
                 continue
             }
 
-            let (titleHaystack, contentHaystack) = searchableText(for: tab)
-            let candidates = matchingCandidates(title: titleHaystack, content: contentHaystack, query: query)
+            let (titleHaystack, contentHaystack) = self.searchableText(for: tab)
+            let candidates = self.matchingCandidates(title: titleHaystack, content: contentHaystack, query: query)
             results.append(contentsOf: candidates)
         }
 
-        if searchScope == .glossary || searchScope == .all {
-            let glossaryMatches = searchGlossary(query: query)
+        if self.searchScope == .glossary || self.searchScope == .all {
+            let glossaryMatches = self.searchGlossary(query: query)
             let filteredGlossaryMatches: [SearchResult]
             if allowedCategories.isEmpty {
                 filteredGlossaryMatches = glossaryMatches
-            } else {
+            }
+            else {
                 filteredGlossaryMatches = glossaryMatches.filter { allowedCategories.contains($0.category) }
             }
             results.append(contentsOf: filteredGlossaryMatches)
@@ -294,12 +301,13 @@ struct SearchView: View {
     }
 
     private func toggleFilter(_ category: SectionCategory) {
-        if selectedFilters.contains(category) {
-            selectedFilters.remove(category)
-        } else {
-            selectedFilters.insert(category)
+        if self.selectedFilters.contains(category) {
+            self.selectedFilters.remove(category)
         }
-        performSearch()
+        else {
+            self.selectedFilters.insert(category)
+        }
+        self.performSearch()
     }
 
     private func searchableText(for tab: Tab) -> (title: String, content: String) {
@@ -316,15 +324,15 @@ struct SearchView: View {
         let titleMatches = titleLower.components(separatedBy: lowerQuery).count - 1
         let contentMatches = contentLower.components(separatedBy: lowerQuery).count - 1
 
-        let shouldSearchTitles: Bool = (searchScope == .all || searchScope == .titles)
-        let shouldSearchContent: Bool = (searchScope == .all || searchScope == .content)
-        let shouldSearchFormulas: Bool = (searchScope == .all || searchScope == .formulas)
-        let shouldSearchReferences: Bool = (searchScope == .all || searchScope == .references)
+        let shouldSearchTitles: Bool = (searchScope == .all || self.searchScope == .titles)
+        let shouldSearchContent: Bool = (searchScope == .all || self.searchScope == .content)
+        let shouldSearchFormulas: Bool = (searchScope == .all || self.searchScope == .formulas)
+        let shouldSearchReferences: Bool = (searchScope == .all || self.searchScope == .references)
 
         let matchedInTitle = shouldSearchTitles && titleMatches > 0
         let matchedInContent = shouldSearchContent && contentMatches > 0
-        let matchedInFormulas = shouldSearchFormulas && containsFormulas(content: content, query: lowerQuery)
-        let matchedInReferences = shouldSearchReferences && containsReferences(content: content, query: lowerQuery)
+        let matchedInFormulas = shouldSearchFormulas && self.containsFormulas(content: content, query: lowerQuery)
+        let matchedInReferences = shouldSearchReferences && self.containsReferences(content: content, query: lowerQuery)
 
         guard matchedInTitle || matchedInContent || matchedInFormulas || matchedInReferences else {
             return []
@@ -333,22 +341,22 @@ struct SearchView: View {
         var results: [SearchResult] = []
 
         if matchedInTitle {
-            let excerpt = makeHighlightedExcerpt(from: title, query: query)
+            let excerpt = self.makeHighlightedExcerpt(from: title, query: query)
             results.append(
                 SearchResult(
                     title: title,
                     excerpt: excerpt,
-                    category: tabForTitle(title).category,
-                    section: tabForTitle(title),
-                    relevance: 10_000 + Double(titleMatches) * 100
+                    category: self.tabForTitle(title).category,
+                    section: self.tabForTitle(title),
+                    relevance: 10000 + Double(titleMatches) * 100
                 )
             )
         }
 
         if matchedInContent || matchedInFormulas || matchedInReferences {
-            let sectionTab = tabForTitle(title)
-            let snippet = makeContextSnippet(from: content, query: query)
-            let excerpt = makeHighlightedExcerpt(from: snippet, query: query)
+            let sectionTab = self.tabForTitle(title)
+            let snippet = self.makeContextSnippet(from: content, query: query)
+            let excerpt = self.makeHighlightedExcerpt(from: snippet, query: query)
 
             var relevanceScore = Double(contentMatches) * 10
             if matchedInFormulas {
@@ -374,11 +382,11 @@ struct SearchView: View {
 
     private func containsFormulas(content: String, query: String) -> Bool {
         let formulaPatterns = [
-            "\\$[^$]+\\$",  // LaTeX math mode
+            "\\$[^$]+\\$", // LaTeX math mode
             "\\[[^\\]]+\\]", // Bracket formulas
             "α|β|γ|δ|ε|ζ|η|θ|λ|μ|π|σ|τ|φ|χ|ψ|ω", // Greek letters
             "\\b[A-Z][a-z]*\\([a-zA-Z,\\s]*\\)", // Function notation
-            "\\b\\d+\\.?\\d*\\s*[×÷±=<>≤≥]\\s*\\d+\\.?\\d*" // Mathematical expressions
+            "\\b\\d+\\.?\\d*\\s*[×÷±=<>≤≥]\\s*\\d+\\.?\\d*", // Mathematical expressions
         ]
 
         for pattern in formulaPatterns {
@@ -404,7 +412,7 @@ struct SearchView: View {
             "\\bTable\\s*\\d+", // Table references
             "\\bChapter\\s*\\d+", // Chapter references
             "\\bSection\\s*\\d+", // Section references
-            "\\bPage\\s*\\d+" // Page references
+            "\\bPage\\s*\\d+", // Page references
         ]
 
         for pattern in referencePatterns {
@@ -436,7 +444,7 @@ struct SearchView: View {
         let start = text.index(range.lowerBound, offsetBy: -leadingCount, limitedBy: text.startIndex) ?? text.startIndex
         let end = text.index(range.upperBound, offsetBy: trailingCount, limitedBy: text.endIndex) ?? text.endIndex
 
-        var snippet = String(text[start..<end])
+        var snippet = String(text[start ..< end])
         snippet = snippet.replacingOccurrences(of: "\n", with: " ")
         while snippet.contains("  ") {
             snippet = snippet.replacingOccurrences(of: "  ", with: " ")
@@ -474,8 +482,8 @@ struct SearchView: View {
         }
 
         return matches.map { entry in
-            let snippet = makeContextSnippet(from: entry.definition, query: trimmed)
-            let excerpt = makeHighlightedExcerpt(from: "\(entry.term): \(snippet)", query: trimmed)
+            let snippet = self.makeContextSnippet(from: entry.definition, query: trimmed)
+            let excerpt = self.makeHighlightedExcerpt(from: "\(entry.term): \(snippet)", query: trimmed)
             return SearchResult(
                 title: entry.term,
                 excerpt: excerpt,
@@ -496,23 +504,23 @@ private struct FilterChip: View {
     @State private var isHovered = false
 
     var body: some View {
-        Button(action: action) {
-            Text(title)
+        Button(action: self.action) {
+            Text(self.title)
                 .font(.footnote.weight(.medium))
                 .padding(.horizontal, 10)
                 .padding(.vertical, 6)
-                .foregroundStyle(isSelected ? .white : .primary)
+                .foregroundStyle(self.isSelected ? .white : .primary)
                 .background {
                     Capsule()
-                        .fill(isSelected ? tint : Color.secondary.opacity(isHovered ? 0.25 : 0.15))
+                        .fill(self.isSelected ? self.tint : Color.secondary.opacity(self.isHovered ? 0.25 : 0.15))
                 }
-                .scaleEffect(isSelected ? 1.05 : (isHovered ? 1.02 : 1.0))
-                .animation(.easeInOut(duration: 0.2), value: isSelected)
-                .animation(.easeInOut(duration: 0.15), value: isHovered)
+                .scaleEffect(self.isSelected ? 1.05 : (self.isHovered ? 1.02 : 1.0))
+                .animation(.easeInOut(duration: 0.2), value: self.isSelected)
+                .animation(.easeInOut(duration: 0.15), value: self.isHovered)
         }
         .buttonStyle(.plain)
         .onHover { hovering in
-            isHovered = hovering
+            self.isHovered = hovering
         }
     }
 }
@@ -524,20 +532,20 @@ private struct SearchResultRow: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack(spacing: 8) {
-                Image(systemName: result.section.icon)
-                    .foregroundStyle(result.category.color)
+                Image(systemName: self.result.section.icon)
+                    .foregroundStyle(self.result.category.color)
 
-                Text(result.title)
+                Text(self.result.title)
                     .font(.headline)
 
                 Spacer()
 
-                Text(result.category.rawValue)
+                Text(self.result.category.rawValue)
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
 
-            Text(result.excerpt)
+            Text(self.result.excerpt)
                 .font(.body)
                 .foregroundStyle(.secondary)
                 .lineLimit(3)
@@ -545,17 +553,17 @@ private struct SearchResultRow: View {
         .padding(.vertical, 6)
         .background {
             RoundedRectangle(cornerRadius: 8)
-                .fill(isHovered ? Color.primary.opacity(0.05) : Color.clear)
+                .fill(self.isHovered ? Color.primary.opacity(0.05) : Color.clear)
         }
         .contentShape(Rectangle())
         .onHover { hovering in
-            isHovered = hovering
+            self.isHovered = hovering
         }
         .transition(.asymmetric(
             insertion: .scale.combined(with: .opacity),
             removal: .opacity
         ))
-        .animation(.easeInOut(duration: 0.15), value: isHovered)
+        .animation(.easeInOut(duration: 0.15), value: self.isHovered)
     }
 }
 

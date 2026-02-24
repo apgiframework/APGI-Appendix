@@ -1,6 +1,6 @@
-import SwiftUI
 import AppKit
 import PDFKit
+import SwiftUI
 
 enum APGIDiagramSource: Equatable {
     case pngAsset(name: String)
@@ -13,13 +13,13 @@ struct APGIConceptDiagram: View {
 
     var body: some View {
         Group {
-            switch source {
-            case .pngAsset(let name):
+            switch self.source {
+            case let .pngAsset(name):
                 Image(name)
                     .resizable()
-                    .aspectRatio(contentMode: contentMode)
+                    .aspectRatio(contentMode: self.contentMode)
 
-            case .pdfBundle(let resourceName):
+            case let .pdfBundle(resourceName):
                 APGIPDFDiagramView(resourceName: resourceName)
             }
         }
@@ -30,7 +30,7 @@ struct APGIConceptDiagram: View {
 struct APGIPDFDiagramView: NSViewRepresentable {
     let resourceName: String
 
-    func makeNSView(context: Context) -> PDFView {
+    func makeNSView(context _: Context) -> PDFView {
         let pdfView = PDFView()
         pdfView.autoScales = true
         pdfView.displayMode = .singlePage
@@ -40,7 +40,7 @@ struct APGIPDFDiagramView: NSViewRepresentable {
         return pdfView
     }
 
-    func updateNSView(_ nsView: PDFView, context: Context) {
+    func updateNSView(_ nsView: PDFView, context _: Context) {
         guard let url = Bundle.main.url(forResource: resourceName, withExtension: "pdf") else {
             nsView.document = nil
             return

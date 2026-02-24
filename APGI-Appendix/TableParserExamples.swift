@@ -21,7 +21,7 @@ struct TableParserExamples: View {
     var body: some View {
         VStack(spacing: 20) {
             // Example Selector
-            Picker("Table Format", selection: $selectedExample) {
+            Picker("Table Format", selection: self.$selectedExample) {
                 ForEach(ExampleType.allCases, id: \.self) { example in
                     Text(example.rawValue).tag(example)
                 }
@@ -43,7 +43,8 @@ struct TableParserExamples: View {
 
                     table.toSwiftUIView()
                 }
-            } else if let error = parseError {
+            }
+            else if let error = parseError {
                 VStack {
                     Text("Parse Error")
                         .font(.headline)
@@ -54,41 +55,43 @@ struct TableParserExamples: View {
                         .multilineTextAlignment(.center)
                 }
                 .padding()
-            } else {
+            }
+            else {
                 ProgressView("Parsing table...")
                     .padding()
             }
         }
-        .onChange(of: selectedExample) { _, _ in
-            parseExample()
+        .onChange(of: self.selectedExample) { _, _ in
+            self.parseExample()
         }
         .onAppear {
-            parseExample()
+            self.parseExample()
         }
     }
 
     private func parseExample() {
-        let content = getContentForExample(selectedExample)
+        let content = self.getContentForExample(self.selectedExample)
 
         do {
-            switch selectedExample {
+            switch self.selectedExample {
             case .markdown:
-                parsedTable = try tableParser.parseMarkdownTable(content)
+                self.parsedTable = try self.tableParser.parseMarkdownTable(content)
             case .csv:
-                parsedTable = try tableParser.parseTable(from: content, format: TableFormat.csv)
+                self.parsedTable = try self.tableParser.parseTable(from: content, format: TableFormat.csv)
             case .tsv:
-                parsedTable = try tableParser.parseTable(from: content, format: TableFormat.tsv)
+                self.parsedTable = try self.tableParser.parseTable(from: content, format: TableFormat.tsv)
             case .json:
-                parsedTable = try tableParser.parseTable(from: content, format: TableFormat.json)
+                self.parsedTable = try self.tableParser.parseTable(from: content, format: TableFormat.json)
             case .structured:
-                parsedTable = try tableParser.parseTable(from: content, format: TableFormat.structured)
+                self.parsedTable = try self.tableParser.parseTable(from: content, format: TableFormat.structured)
             case .keyValue:
-                parsedTable = try tableParser.parseTable(from: content, format: TableFormat.structured)
+                self.parsedTable = try self.tableParser.parseTable(from: content, format: TableFormat.structured)
             }
-            parseError = nil
-        } catch {
-            parseError = error.localizedDescription
-            parsedTable = nil
+            self.parseError = nil
+        }
+        catch {
+            self.parseError = error.localizedDescription
+            self.parsedTable = nil
         }
     }
 
@@ -180,9 +183,9 @@ struct AdvancedTableUsage: View {
     var body: some View {
         VStack(spacing: 20) {
             // Table Selector
-            if !tables.isEmpty {
-                Picker("Select Table", selection: $selectedTableIndex) {
-                    ForEach(Array(tables.enumerated()), id: \.offset) { index, table in
+            if !self.tables.isEmpty {
+                Picker("Select Table", selection: self.$selectedTableIndex) {
+                    ForEach(Array(self.tables.enumerated()), id: \.offset) { index, table in
                         Text(table.metadata.title ?? "Table \(index + 1)")
                             .tag(index)
                     }
@@ -193,23 +196,23 @@ struct AdvancedTableUsage: View {
                 // Export Options
                 HStack {
                     Button("Export as Markdown") {
-                        exportTableAsMarkdown()
+                        self.exportTableAsMarkdown()
                     }
 
                     Button("Export as CSV") {
-                        exportTableAsCSV()
+                        self.exportTableAsCSV()
                     }
 
                     Button("Export as JSON") {
-                        exportTableAsJSON()
+                        self.exportTableAsJSON()
                     }
                 }
                 .padding()
             }
 
             // Table Display
-            if selectedTableIndex < tables.count {
-                let table = tables[selectedTableIndex]
+            if self.selectedTableIndex < self.tables.count {
+                let table = self.tables[self.selectedTableIndex]
                 VStack(alignment: .leading, spacing: 12) {
                     if let title = table.metadata.title {
                         Text(title)
@@ -224,13 +227,14 @@ struct AdvancedTableUsage: View {
 
                     table.toSwiftUIView()
                 }
-            } else {
+            }
+            else {
                 ProgressView("Loading tables...")
                     .padding()
             }
         }
         .onAppear {
-            loadMultipleTables()
+            self.loadMultipleTables()
         }
     }
 
@@ -255,18 +259,19 @@ struct AdvancedTableUsage: View {
             let markdownTable = try tableParser.parseMarkdownTable(markdownContent)
             let csvTable = try tableParser.parseTable(from: csvContent, format: TableFormat.csv)
 
-            tables = [
+            self.tables = [
                 markdownTable,
-                csvTable
+                csvTable,
             ]
-        } catch {
+        }
+        catch {
             print("Error loading tables: \(error)")
         }
     }
 
     private func exportTableAsMarkdown() {
-        guard selectedTableIndex < tables.count else { return }
-        let table = tables[selectedTableIndex]
+        guard self.selectedTableIndex < self.tables.count else { return }
+        let table = self.tables[self.selectedTableIndex]
         let markdown = table.toMarkdown()
 
         let pasteboard = NSPasteboard.general
@@ -275,8 +280,8 @@ struct AdvancedTableUsage: View {
     }
 
     private func exportTableAsCSV() {
-        guard selectedTableIndex < tables.count else { return }
-        let table = tables[selectedTableIndex]
+        guard self.selectedTableIndex < self.tables.count else { return }
+        let table = self.tables[self.selectedTableIndex]
         let csv = table.toCSV()
 
         let pasteboard = NSPasteboard.general
@@ -285,14 +290,14 @@ struct AdvancedTableUsage: View {
     }
 
     private func exportTableAsJSON() {
-        guard selectedTableIndex < tables.count else { return }
-        let table = tables[selectedTableIndex]
+        guard self.selectedTableIndex < self.tables.count else { return }
+        let table = self.tables[self.selectedTableIndex]
 
         let jsonDict: [String: Any] = [
             "title": table.metadata.title ?? "",
             "format": String(describing: table.metadata.format),
             "headers": table.headers,
-            "rows": table.rows
+            "rows": table.rows,
         ]
 
         do {
@@ -302,7 +307,8 @@ struct AdvancedTableUsage: View {
                 pasteboard.clearContents()
                 pasteboard.setString(jsonString, forType: .string)
             }
-        } catch {
+        }
+        catch {
             print("Error converting to JSON: \(error)")
         }
     }
@@ -320,7 +326,7 @@ struct FileBasedTableLoader: View {
     var body: some View {
         VStack(spacing: 20) {
             Button("Load Table File") {
-                isFileImporterPresented = true
+                self.isFileImporterPresented = true
             }
             .buttonStyle(.borderedProminent)
 
@@ -332,7 +338,7 @@ struct FileBasedTableLoader: View {
 
             if let table = parsedTable {
                 VStack(alignment: .leading, spacing: 12) {
-                    Text("Table from \(selectedFileURL?.lastPathComponent ?? "file")")
+                    Text("Table from \(self.selectedFileURL?.lastPathComponent ?? "file")")
                         .font(.headline)
 
                     Text("Format: \(String(describing: table.metadata.format))")
@@ -345,7 +351,8 @@ struct FileBasedTableLoader: View {
 
                     table.toSwiftUIView()
                 }
-            } else if let error = parseError {
+            }
+            else if let error = parseError {
                 VStack {
                     Text("File Parse Error")
                         .font(.headline)
@@ -359,29 +366,30 @@ struct FileBasedTableLoader: View {
             }
         }
         .fileImporter(
-            isPresented: $isFileImporterPresented,
+            isPresented: self.$isFileImporterPresented,
             allowedContentTypes: [.plainText, .commaSeparatedText],
             allowsMultipleSelection: false
         ) { result in
             switch result {
-            case .success(let urls):
+            case let .success(urls):
                 if let url = urls.first {
-                    selectedFileURL = url
-                    loadTableFromFile(url)
+                    self.selectedFileURL = url
+                    self.loadTableFromFile(url)
                 }
-            case .failure(let error):
-                parseError = "File selection failed: \(error.localizedDescription)"
+            case let .failure(error):
+                self.parseError = "File selection failed: \(error.localizedDescription)"
             }
         }
     }
 
     private func loadTableFromFile(_ url: URL) {
         do {
-            parsedTable = try tableParser.parseTableFromFile(at: url)
-            parseError = nil
-        } catch {
-            parseError = error.localizedDescription
-            parsedTable = nil
+            self.parsedTable = try self.tableParser.parseTableFromFile(at: url)
+            self.parseError = nil
+        }
+        catch {
+            self.parseError = error.localizedDescription
+            self.parsedTable = nil
         }
     }
 }

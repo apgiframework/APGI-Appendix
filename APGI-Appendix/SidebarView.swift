@@ -37,7 +37,7 @@ struct SidebarView: View {
                     Image(systemName: "magnifyingglass")
                         .foregroundStyle(.secondary)
 
-                    TextField("Search topics...", text: $searchText)
+                    TextField("Search topics...", text: self.$searchText)
                         .textFieldStyle(.plain)
                 }
                 .padding(APGISpacing.sm)
@@ -51,13 +51,13 @@ struct SidebarView: View {
 
             ScrollView {
                 LazyVStack(alignment: .leading, spacing: APGISpacing.xs) {
-                    ForEach(filteredSections) { (section: SidebarSection) in
+                    ForEach(self.filteredSections) { (section: SidebarSection) in
                         NavigationSectionView(
                             section: section,
-                            selection: $selectedTab,
-                            isExpanded: isExpanded(for: section.section)
+                            selection: self.$selectedTab,
+                            isExpanded: self.isExpanded(for: section.section)
                         ) {
-                            toggleSection(section.section)
+                            self.toggleSection(section.section)
                         }
                     }
                 }
@@ -67,14 +67,16 @@ struct SidebarView: View {
             Divider()
 
             HStack(spacing: APGISpacing.md) {
-                Button(action: {}) {
+                Button(action: {
+                }) {
                     Label("Settings", systemImage: "gear")
                 }
                 .buttonStyle(.plain)
 
                 Spacer()
 
-                Button(action: {}) {
+                Button(action: {
+                }) {
                     Label("Help", systemImage: "questionmark.circle")
                 }
                 .buttonStyle(.plain)
@@ -101,23 +103,24 @@ struct SidebarView: View {
     }
 
     private var filteredSections: [SidebarSection] {
-        let query = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
+        let query = self.searchText.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !query.isEmpty else {
-            return allSections
+            return self.allSections
         }
 
-        return allSections.compactMap { section in
+        return self.allSections.compactMap { section in
             let sectionMatches = section.title.localizedCaseInsensitiveContains(query)
 
             let matchingTabs = section.tabs.filter { tab in
                 tab.shortTitle.localizedCaseInsensitiveContains(query) ||
-                tab.rawValue.localizedCaseInsensitiveContains(query) ||
-                tab.searchIndexText.localizedCaseInsensitiveContains(query)
+                    tab.rawValue.localizedCaseInsensitiveContains(query) ||
+                    tab.searchIndexText.localizedCaseInsensitiveContains(query)
             }
 
             if sectionMatches {
                 return section
-            } else if !matchingTabs.isEmpty {
+            }
+            else if !matchingTabs.isEmpty {
                 return SidebarSection(
                     section: section.section,
                     title: section.title,
@@ -125,25 +128,28 @@ struct SidebarView: View {
                     color: section.color,
                     tabs: matchingTabs
                 )
-            } else {
+            }
+            else {
                 return nil
             }
         }
     }
 
     private func isExpanded(for section: NavigationSection) -> Bool {
-        if searchText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-            return expandedSections.contains(section)
-        } else {
+        if self.searchText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            return self.expandedSections.contains(section)
+        }
+        else {
             return true
         }
     }
 
     private func toggleSection(_ section: NavigationSection) {
-        if expandedSections.contains(section) {
-            expandedSections.remove(section)
-        } else {
-            expandedSections.insert(section)
+        if self.expandedSections.contains(section) {
+            self.expandedSections.remove(section)
+        }
+        else {
+            self.expandedSections.insert(section)
         }
     }
 }
@@ -155,7 +161,9 @@ struct SidebarSection: Identifiable {
     let color: Color
     let tabs: [Tab]
 
-    var id: NavigationSection { section }
+    var id: NavigationSection {
+        self.section
+    }
 }
 
 struct NavigationSectionView: View {
@@ -167,15 +175,15 @@ struct NavigationSectionView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: APGISpacing.xs) {
             Button {
-                onToggle()
+                self.onToggle()
             } label: {
                 HStack {
-                    Image(systemName: section.icon)
+                    Image(systemName: self.section.icon)
                         .font(.body)
-                        .foregroundStyle(section.color)
+                        .foregroundStyle(self.section.color)
                         .frame(width: 24)
 
-                    Text(section.title)
+                    Text(self.section.title)
                         .font(APGITypography.labelLarge)
                         .foregroundStyle(.primary)
 
@@ -184,7 +192,7 @@ struct NavigationSectionView: View {
                     Image(systemName: "chevron.right")
                         .font(.caption)
                         .foregroundStyle(.secondary)
-                        .rotationEffect(.degrees(isExpanded ? 90 : 0))
+                        .rotationEffect(.degrees(self.isExpanded ? 90 : 0))
                 }
                 .padding(.vertical, APGISpacing.sm)
                 .padding(.horizontal, APGISpacing.md)
@@ -195,14 +203,14 @@ struct NavigationSectionView: View {
             }
             .buttonStyle(.plain)
 
-            if isExpanded {
+            if self.isExpanded {
                 VStack(alignment: .leading, spacing: 2) {
-                    ForEach(section.tabs, id: \.self) { tab in
+                    ForEach(self.section.tabs, id: \.self) { tab in
                         NavigationItemRow(
                             item: tab,
-                            isSelected: selection == tab
+                            isSelected: self.selection == tab
                         ) {
-                            selection = tab
+                            self.selection = tab
                         }
                     }
                 }
@@ -221,20 +229,20 @@ struct NavigationItemRow: View {
 
     var body: some View {
         Button {
-            onSelect()
+            self.onSelect()
         } label: {
             HStack(spacing: APGISpacing.sm) {
                 Circle()
-                    .fill(isSelected ? item.category.color : .secondary.opacity(0.3))
+                    .fill(self.isSelected ? self.item.category.color : .secondary.opacity(0.3))
                     .frame(width: 6, height: 6)
 
-                Text(item.shortTitle)
+                Text(self.item.shortTitle)
                     .font(APGITypography.bodyMedium)
-                    .foregroundStyle(isSelected ? .primary : .secondary)
+                    .foregroundStyle(self.isSelected ? .primary : .secondary)
 
                 Spacer()
 
-                if item.hasTables {
+                if self.item.hasTables {
                     Circle()
                         .fill(Color.apgiAccent)
                         .frame(width: 8, height: 8)
@@ -245,15 +253,15 @@ struct NavigationItemRow: View {
             .background {
                 RoundedRectangle(cornerRadius: APGIRadius.sm)
                     .fill(
-                        isSelected
-                            ? item.category.color.opacity(0.15)
-                            : (isHovered ? Color.secondary.opacity(0.3) : Color.clear)
+                        self.isSelected
+                            ? self.item.category.color.opacity(0.15)
+                            : (self.isHovered ? Color.secondary.opacity(0.3) : Color.clear)
                     )
             }
         }
         .buttonStyle(.plain)
         .onHover { hovering in
-            isHovered = hovering
+            self.isHovered = hovering
         }
     }
 }

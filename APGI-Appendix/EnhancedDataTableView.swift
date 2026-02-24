@@ -31,24 +31,24 @@ struct EnhancedDataTableView: View {
     @State private var searchText: String = ""
 
     private var filteredRows: [Row] {
-        guard !searchText.isEmpty else { return rows }
+        guard !self.searchText.isEmpty else { return self.rows }
 
-        return rows.filter { row in
+        return self.rows.filter { row in
             row.cells.contains { cell in
-                cell.localizedCaseInsensitiveContains(searchText)
+                cell.localizedCaseInsensitiveContains(self.searchText)
             }
         }
     }
 
     private var sortedRows: [Row] {
-        guard columns.indices.contains(sortColumn) else { return filteredRows }
+        guard self.columns.indices.contains(self.sortColumn) else { return self.filteredRows }
 
-        return filteredRows.sorted { lhs, rhs in
-            let lhsValue = lhs.cells.indices.contains(sortColumn) ? lhs.cells[sortColumn] : ""
-            let rhsValue = rhs.cells.indices.contains(sortColumn) ? rhs.cells[sortColumn] : ""
+        return self.filteredRows.sorted { lhs, rhs in
+            let lhsValue = lhs.cells.indices.contains(self.sortColumn) ? lhs.cells[self.sortColumn] : ""
+            let rhsValue = rhs.cells.indices.contains(self.sortColumn) ? rhs.cells[self.sortColumn] : ""
 
             let comparison = lhsValue.localizedStandardCompare(rhsValue)
-            if sortAscending {
+            if self.sortAscending {
                 return comparison == .orderedAscending
             }
             return comparison == .orderedDescending
@@ -72,12 +72,12 @@ struct EnhancedDataTableView: View {
                 Image(systemName: "magnifyingglass")
                     .foregroundStyle(.secondary)
 
-                TextField("Search table...", text: $searchText)
+                TextField("Search table...", text: self.$searchText)
                     .textFieldStyle(.plain)
 
-                if !searchText.isEmpty {
+                if !self.searchText.isEmpty {
                     Button {
-                        searchText = ""
+                        self.searchText = ""
                     } label: {
                         Image(systemName: "xmark.circle.fill")
                             .foregroundStyle(.secondary)
@@ -90,13 +90,14 @@ struct EnhancedDataTableView: View {
             .clipShape(RoundedRectangle(cornerRadius: 8))
 
             HStack(spacing: 0) {
-                ForEach(Array(columns.enumerated()), id: \.offset) { index, column in
+                ForEach(Array(self.columns.enumerated()), id: \.offset) { index, column in
                     Button {
-                        if sortColumn == index {
-                            sortAscending.toggle()
-                        } else {
-                            sortColumn = index
-                            sortAscending = true
+                        if self.sortColumn == index {
+                            self.sortAscending.toggle()
+                        }
+                        else {
+                            self.sortColumn = index
+                            self.sortAscending = true
                         }
                     } label: {
                         HStack(spacing: 4) {
@@ -104,15 +105,15 @@ struct EnhancedDataTableView: View {
                                 .font(.system(size: 13, weight: .semibold))
                                 .lineLimit(1)
 
-                            if sortColumn == index {
-                                Image(systemName: sortAscending ? "chevron.up" : "chevron.down")
+                            if self.sortColumn == index {
+                                Image(systemName: self.sortAscending ? "chevron.up" : "chevron.down")
                                     .font(.system(size: 10, weight: .bold))
                             }
                         }
                         .foregroundStyle(.primary)
                         .frame(
                             maxWidth: column.width == nil ? .infinity : column.width,
-                            alignment: frameAlignment(for: column.alignment)
+                            alignment: self.frameAlignment(for: column.alignment)
                         )
                     }
                     .buttonStyle(.plain)
@@ -120,7 +121,7 @@ struct EnhancedDataTableView: View {
                     .padding(.vertical, 10)
                     .background(.quaternary)
 
-                    if index < columns.count - 1 {
+                    if index < self.columns.count - 1 {
                         Divider()
                     }
                 }
@@ -129,17 +130,17 @@ struct EnhancedDataTableView: View {
 
             ScrollView {
                 LazyVStack(spacing: 0) {
-                    ForEach(Array(sortedRows.enumerated()), id: \.offset) { index, row in
+                    ForEach(Array(self.sortedRows.enumerated()), id: \.offset) { index, row in
                         HStack(spacing: 0) {
                             ForEach(Array(row.cells.enumerated()), id: \.offset) { cellIndex, cell in
                                 Text(cell)
                                     .font(.system(size: 13))
                                     .foregroundStyle(.primary)
                                     .frame(
-                                        maxWidth: columns.indices.contains(cellIndex) && columns[cellIndex].width == nil
+                                        maxWidth: self.columns.indices.contains(cellIndex) && self.columns[cellIndex].width == nil
                                             ? .infinity
-                                            : (columns.indices.contains(cellIndex) ? columns[cellIndex].width : nil),
-                                        alignment: columns.indices.contains(cellIndex) ? frameAlignment(for: columns[cellIndex].alignment) : .leading
+                                            : (self.columns.indices.contains(cellIndex) ? self.columns[cellIndex].width : nil),
+                                        alignment: self.columns.indices.contains(cellIndex) ? self.frameAlignment(for: self.columns[cellIndex].alignment) : .leading
                                     )
                                     .padding(.horizontal, 12)
                                     .padding(.vertical, 8)
@@ -151,7 +152,7 @@ struct EnhancedDataTableView: View {
                         }
                         .background(index % 2 == 0 ? Color.clear : Color.primary.opacity(0.02))
 
-                        if index < sortedRows.count - 1 {
+                        if index < self.sortedRows.count - 1 {
                             Divider()
                         }
                     }

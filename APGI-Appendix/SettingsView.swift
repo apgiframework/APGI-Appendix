@@ -1,5 +1,5 @@
-import SwiftUI
 import Combine
+import SwiftUI
 
 extension Optional {
     var isNil: Bool {
@@ -12,7 +12,7 @@ struct EnhancedSettingsView: View {
 
     var body: some View {
         SettingsView()
-            .environmentObject(themeManager)
+            .environmentObject(self.themeManager)
     }
 }
 
@@ -33,20 +33,20 @@ struct SettingsView: View {
                         .font(.headline)
 
                     HStack {
-                        Slider(value: $themeManager.fontSize, in: 10...24, step: 1)
-                        Text("\(Int(themeManager.fontSize))pt")
+                        Slider(value: self.$themeManager.fontSize, in: 10 ... 24, step: 1)
+                        Text("\(Int(self.themeManager.fontSize))pt")
                             .frame(width: 40, alignment: .trailing)
                     }
                 }
 
                 // Sidebar
-                Toggle("Show Sidebar by Default", isOn: $themeManager.sidebarVisible)
+                Toggle("Show Sidebar by Default", isOn: self.$themeManager.sidebarVisible)
 
                 // Focus Mode
-                Toggle("Enable Focus Mode", isOn: $themeManager.focusModeEnabled)
+                Toggle("Enable Focus Mode", isOn: self.$themeManager.focusModeEnabled)
 
                 // Animations
-                Toggle("Enable Animations", isOn: $themeManager.enableAnimations)
+                Toggle("Enable Animations", isOn: self.$themeManager.enableAnimations)
 
                 Spacer()
             }
@@ -66,7 +66,7 @@ struct SettingsView: View {
                     Text("Theme")
                         .font(.headline)
 
-                    Picker("Theme", selection: $themeManager.selectedTheme) {
+                    Picker("Theme", selection: self.$themeManager.selectedTheme) {
                         ForEach(AppTheme.allCases) { theme in
                             Text(theme.rawValue).tag(theme)
                         }
@@ -75,7 +75,7 @@ struct SettingsView: View {
                 }
 
                 // High Contrast
-                Toggle("High Contrast Mode", isOn: $themeManager.highContrastMode)
+                Toggle("High Contrast Mode", isOn: self.$themeManager.highContrastMode)
 
                 Spacer()
             }
@@ -90,17 +90,17 @@ struct SettingsView: View {
                     .font(.title2.bold())
                     .padding(.bottom)
 
-                Toggle("Auto-save Bookmarks", isOn: $themeManager.autoSaveBookmarks)
+                Toggle("Auto-save Bookmarks", isOn: self.$themeManager.autoSaveBookmarks)
 
                 Button("Clear All Bookmarks") {
-                    clearAllBookmarks()
+                    self.clearAllBookmarks()
                 }
                 .foregroundColor(.red)
 
                 Divider()
 
                 Button("Reset to Defaults") {
-                    themeManager.resetToDefaults()
+                    self.themeManager.resetToDefaults()
                 }
                 .foregroundColor(.orange)
 
@@ -142,8 +142,8 @@ struct SettingsView: View {
                 Divider()
 
                 Text("The Adaptive Precision-Gated Ignition (APGI) Framework provides a comprehensive computational model " +
-                     "of conscious access, integrating predictive coding, precision weighting, " +
-                     "and metabolic constraints.")
+                    "of conscious access, integrating predictive coding, precision weighting, " +
+                    "and metabolic constraints.")
                     .font(.body)
                     .foregroundStyle(.secondary)
 

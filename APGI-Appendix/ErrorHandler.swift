@@ -1,6 +1,6 @@
+import Combine
 import Foundation
 import SwiftUI
-import Combine
 
 // MARK: - App Error Types
 
@@ -15,19 +15,19 @@ enum AppError: LocalizedError {
 
     var errorDescription: String? {
         switch self {
-        case .fileNotFound(let filename):
+        case let .fileNotFound(filename):
             return "File not found: \(filename)"
-        case .fileCorrupted(let filename):
+        case let .fileCorrupted(filename):
             return "File appears to be corrupted: \(filename)"
-        case .parsingError(let details):
+        case let .parsingError(details):
             return "Failed to parse content: \(details)"
-        case .searchError(let details):
+        case let .searchError(details):
             return "Search failed: \(details)"
-        case .bookmarkError(let details):
+        case let .bookmarkError(details):
             return "Bookmark operation failed: \(details)"
-        case .settingsError(let details):
+        case let .settingsError(details):
             return "Settings error: \(details)"
-        case .unknown(let error):
+        case let .unknown(error):
             return "An unexpected error occurred: \(error.localizedDescription)"
         }
     }
@@ -61,27 +61,29 @@ final class ErrorHandler: ObservableObject {
     @Published var lastError: AppError?
     @Published var showError = false
 
-    private init() {}
+    private init() {
+    }
 
     func handle(_ error: Error) {
         let appError: AppError
 
         if let appErr = error as? AppError {
             appError = appErr
-        } else {
+        }
+        else {
             appError = .unknown(error)
         }
 
-        lastError = appError
-        showError = true
+        self.lastError = appError
+        self.showError = true
 
         // Log error for debugging
         print("App Error: \(appError.errorDescription ?? "Unknown error")")
     }
 
     func clearError() {
-        lastError = nil
-        showError = false
+        self.lastError = nil
+        self.showError = false
     }
 }
 
@@ -92,9 +94,9 @@ struct ErrorHandlingModifier: ViewModifier {
 
     func body(content: Content) -> some View {
         content
-            .alert("Error", isPresented: $errorHandler.showError) {
+            .alert("Error", isPresented: self.$errorHandler.showError) {
                 Button("OK") {
-                    errorHandler.clearError()
+                    self.errorHandler.clearError()
                 }
             } message: {
                 if let error = errorHandler.lastError {
@@ -125,7 +127,7 @@ extension Result {
         switch self {
         case .success:
             return nil
-        case .failure(let error):
+        case let .failure(error):
             return error as? AppError ?? .unknown(error)
         }
     }

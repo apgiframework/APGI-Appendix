@@ -33,7 +33,7 @@ struct QuickStartPanel: View {
             title: "Access Help Resources",
             description: "Use the Help menu to access documentation, report issues, and check for updates.",
             icon: "questionmark.circle"
-        )
+        ),
     ]
 
     var body: some View {
@@ -41,7 +41,7 @@ struct QuickStartPanel: View {
             HStack {
                 Spacer()
                 Button("Done") {
-                    dismiss()
+                    self.dismiss()
                 }
                 .buttonStyle(.bordered)
             }
@@ -49,8 +49,8 @@ struct QuickStartPanel: View {
 
             ScrollView {
                 VStack(spacing: 24) {
-                    header
-                    stepsList
+                    self.header
+                    self.stepsList
                 }
                 .padding()
             }
@@ -77,7 +77,7 @@ struct QuickStartPanel: View {
 
     private var stepsList: some View {
         VStack(spacing: 16) {
-            ForEach(steps) { step in
+            ForEach(self.steps) { step in
                 StepCard(step: step)
             }
         }
@@ -115,7 +115,7 @@ struct StepCard: View {
     var body: some View {
         HStack(alignment: .top, spacing: 16) {
             // Step number
-            Text("\(step.number)")
+            Text("\(self.step.number)")
                 .font(.title2.bold())
                 .foregroundColor(.white)
                 .frame(width: 32, height: 32)
@@ -124,14 +124,14 @@ struct StepCard: View {
 
             VStack(alignment: .leading, spacing: 8) {
                 HStack {
-                    Image(systemName: step.icon)
+                    Image(systemName: self.step.icon)
                         .foregroundColor(.blue)
 
-                    Text(step.title)
+                    Text(self.step.title)
                         .font(.headline.bold())
                 }
 
-                Text(step.description)
+                Text(self.step.description)
                     .font(.body)
                     .foregroundColor(.secondary)
                     .fixedSize(horizontal: false, vertical: true)

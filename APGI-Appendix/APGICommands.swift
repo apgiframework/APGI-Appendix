@@ -6,45 +6,45 @@ struct APGICommands: Commands {
     var body: some Commands {
         CommandGroup(after: .newItem) {
             Button("Open Glossary") {
-                openGlossaryWindow()
+                self.openGlossaryWindow()
             }
             .keyboardShortcut("g", modifiers: [.command])
 
             Button("Search Framework") {
-                focusSearch()
+                self.focusSearch()
             }
             .keyboardShortcut("f", modifiers: [.command])
         }
 
         CommandMenu("Demonstrations") {
             Button("APGI Simulator") {
-                navigateToTab(.apgiSimulator)
+                self.navigateToTab(.apgiSimulator)
             }
 
             Button("Ignition Timeline") {
-                navigateToTab(.ignitionTimeline)
+                self.navigateToTab(.ignitionTimeline)
             }
 
             Divider()
 
             Button("Open Timeline Window") {
-                openTimelineWindow()
+                self.openTimelineWindow()
             }
             .keyboardShortcut("t", modifiers: [.command, .shift])
 
             Button("Open Simulator Window") {
-                openSimulatorWindow()
+                self.openSimulatorWindow()
             }
             .keyboardShortcut("m", modifiers: [.command, .shift])
         }
 
         CommandMenu("Navigate") {
             Button("Biological Implementation") {
-                navigateToBiological()
+                self.navigateToBiological()
             }
             .keyboardShortcut("1", modifiers: [.command])
             Button("Neuromodulators") {
-                navigateToNeuromodulators()
+                self.navigateToNeuromodulators()
             }
             .keyboardShortcut("2", modifiers: [.command])
             Button("Clinical Translations") {
@@ -75,85 +75,85 @@ struct APGICommands: Commands {
 
         CommandMenu("View") {
             Button("Toggle Sidebar") {
-                toggleSidebar()
+                self.toggleSidebar()
             }
             .keyboardShortcut("s", modifiers: [.command, .option])
 
             Button("Toggle Inspector") {
-                toggleInspector()
+                self.toggleInspector()
             }
             .keyboardShortcut("i", modifiers: [.command, .option])
 
             Divider()
 
             Button("Zoom In") {
-                zoomIn()
+                self.zoomIn()
             }
             .keyboardShortcut("+", modifiers: [.command])
 
             Button("Zoom Out") {
-                zoomOut()
+                self.zoomOut()
             }
             .keyboardShortcut("-", modifiers: [.command])
 
             Button("Reset Zoom") {
-                zoomReset()
+                self.zoomReset()
             }
             .keyboardShortcut("0", modifiers: [.command])
         }
 
         CommandMenu("Export") {
             Button("Export as PDF") {
-                exportPDF()
+                self.exportPDF()
             }
             .keyboardShortcut("p", modifiers: [.command, .shift])
 
             Button("Export Current Section") {
-                exportCurrentSection()
+                self.exportCurrentSection()
             }
             .keyboardShortcut("e", modifiers: [.command])
 
             Divider()
 
             Button("Copy Citation") {
-                copyCitation()
+                self.copyCitation()
             }
             .keyboardShortcut("c", modifiers: [.command, .option])
         }
 
         CommandMenu("Help") {
             Button("APGI Help Guide") {
-                openHelpGuide()
+                self.openHelpGuide()
             }
             .keyboardShortcut("?", modifiers: [.command])
 
             Button("Online Documentation") {
-                openOnlineHelp()
+                self.openOnlineHelp()
             }
 
             Divider()
 
             Button("Check for Updates") {
-                checkForUpdates()
+                self.checkForUpdates()
             }
 
             Divider()
 
             Button("Report Issue") {
-                reportIssue()
+                self.reportIssue()
             }
         }
 
         CommandGroup(replacing: .help) {
             Button("APGI Help Guide") {
-                openHelpGuide()
+                self.openHelpGuide()
             }
             .keyboardShortcut("?", modifiers: [.command])
         }
 
         CommandGroup(after: .help) {
             Button("APGI Framework Guide") {
-                openHelpGuide()
+                self.openHelpGuide()
             }
             .keyboardShortcut("?", modifiers: [.command])
         }
@@ -162,15 +162,15 @@ struct APGICommands: Commands {
     // MARK: - Window Management Actions
 
     private func openTimelineWindow() {
-        openWindow(id: "timeline")
+        self.openWindow(id: "timeline")
     }
 
     private func openGlossaryWindow() {
-        openWindow(id: "glossary")
+        self.openWindow(id: "glossary")
     }
 
     private func openSimulatorWindow() {
-        openWindow(id: "simulator")
+        self.openWindow(id: "simulator")
     }
 
     private func focusSearch() {

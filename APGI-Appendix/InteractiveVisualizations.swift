@@ -1,5 +1,5 @@
-import SwiftUI
 import SceneKit
+import SwiftUI
 
 struct InteractiveVisualizationsView: View {
     var body: some View {
@@ -34,7 +34,9 @@ enum Neuromodulator: String, CaseIterable, Identifiable {
     case serotonin
     case dopamine
 
-    var id: String { rawValue }
+    var id: String {
+        rawValue
+    }
 
     var name: String {
         switch self {
@@ -63,22 +65,22 @@ enum Neuromodulator: String, CaseIterable, Identifiable {
         case .norepinephrine:
             return [
                 ParameterValue(name: "κ_NE", min: 0.25, max: 0.35, unit: ""),
-                ParameterValue(name: "Πᵢ gain", min: 1.0, max: 5.0, unit: "×")
+                ParameterValue(name: "Πᵢ gain", min: 1.0, max: 5.0, unit: "×"),
             ]
         case .acetylcholine:
             return [
                 ParameterValue(name: "κ_ACh", min: 0.10, max: 0.20, unit: ""),
-                ParameterValue(name: "Πₑ gain", min: 1.0, max: 3.0, unit: "×")
+                ParameterValue(name: "Πₑ gain", min: 1.0, max: 3.0, unit: "×"),
             ]
         case .serotonin:
             return [
                 ParameterValue(name: "κ_5-HT", min: 0.35, max: 0.50, unit: ""),
-                ParameterValue(name: "δ refractoriness", min: 1.0, max: 2.0, unit: "×")
+                ParameterValue(name: "δ refractoriness", min: 1.0, max: 2.0, unit: "×"),
             ]
         case .dopamine:
             return [
                 ParameterValue(name: "θₜ tonic", min: 0.8, max: 1.3, unit: "×"),
-                ParameterValue(name: "reward salience", min: 0.0, max: 1.0, unit: "")
+                ParameterValue(name: "reward salience", min: 0.0, max: 1.0, unit: ""),
             ]
         }
     }
@@ -94,7 +96,9 @@ enum BrainRegion: String, CaseIterable, Hashable, Identifiable {
     case prefrontalCortex
     case striatum
 
-    var id: String { rawValue }
+    var id: String {
+        rawValue
+    }
 
     var label: String {
         switch self {
@@ -118,7 +122,7 @@ struct ParameterValue: Identifiable, Hashable {
     let unit: String
 
     func value(progress: Double) -> Double {
-        min + (max - min) * progress
+        self.min + (self.max - self.min) * progress
     }
 }
 
@@ -129,15 +133,15 @@ struct InteractiveNeuralVisualization: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            BrainModelView(highlighted: selectedNeuromodulator?.affectedRegions ?? [])
+            BrainModelView(highlighted: self.selectedNeuromodulator?.affectedRegions ?? [])
                 .frame(height: 400)
                 .overlay(alignment: .topLeading) {
-                    RegionLabels(highlighted: selectedNeuromodulator?.affectedRegions ?? [])
+                    RegionLabels(highlighted: self.selectedNeuromodulator?.affectedRegions ?? [])
                         .padding(12)
                 }
 
             HStack(spacing: 14) {
-                Picker("Neuromodulator", selection: $selectedNeuromodulator) {
+                Picker("Neuromodulator", selection: self.$selectedNeuromodulator) {
                     Text("None").tag(nil as Neuromodulator?)
                     ForEach(Neuromodulator.allCases) { nm in
                         Text(nm.name).tag(nm as Neuromodulator?)
@@ -146,15 +150,15 @@ struct InteractiveNeuralVisualization: View {
                 .frame(maxWidth: 320)
 
                 Button {
-                    animateEffect()
+                    self.animateEffect()
                 } label: {
                     Label("Animate Effect", systemImage: "play.fill")
                 }
 
-                Slider(value: $animationProgress, in: 0...1)
+                Slider(value: self.$animationProgress, in: 0 ... 1)
                     .frame(width: 200)
 
-                Toggle("Parameters", isOn: $showingParameters)
+                Toggle("Parameters", isOn: self.$showingParameters)
                     .toggleStyle(.switch)
 
                 Spacer()
@@ -163,15 +167,15 @@ struct InteractiveNeuralVisualization: View {
             .background(.regularMaterial)
             .clipShape(RoundedRectangle(cornerRadius: 12))
 
-            if showingParameters, let nm = selectedNeuromodulator {
-                ParameterDashboard(neuromodulator: nm, progress: animationProgress)
+            if self.showingParameters, let nm = selectedNeuromodulator {
+                ParameterDashboard(neuromodulator: nm, progress: self.animationProgress)
             }
         }
     }
 
     private func animateEffect() {
         withAnimation(.easeInOut(duration: 1.4)) {
-            animationProgress = animationProgress < 1 ? 1 : 0
+            self.animationProgress = self.animationProgress < 1 ? 1 : 0
         }
     }
 }
@@ -181,7 +185,7 @@ private struct BrainModelView: View {
 
     var body: some View {
         ZStack {
-            BrainRegionsSceneView(highlighted: highlighted)
+            BrainRegionsSceneView(highlighted: self.highlighted)
 
             if !BrainRegionsSceneLoader.canLoadScene {
                 BrainModelFallbackView()
@@ -210,7 +214,7 @@ private enum BrainRegionsSceneLoader {
     static let assetCandidates: [String] = [
         "BrainRegions.scn",
         "BrainRegions.usdz",
-        "BrainRegions.dae"
+        "BrainRegions.dae",
     ]
 
     private static let cachedScene: SCNScene? = {
@@ -251,7 +255,7 @@ private enum BrainRegionsSceneLoader {
             .basalForebrain: SCNVector3(0.20, -0.45, 0.55),
             .rapheNuclei: SCNVector3(0.00, -0.25, -0.15),
             .prefrontalCortex: SCNVector3(0.35, 0.75, 0.75),
-            .striatum: SCNVector3(0.65, -0.05, 0.35)
+            .striatum: SCNVector3(0.65, -0.05, 0.35),
         ]
 
         for (region, position) in locations {
@@ -275,7 +279,7 @@ private enum BrainRegionsSceneLoader {
     }
 
     static func loadScene() -> SCNScene? {
-        cachedScene ?? placeholderScene
+        self.cachedScene ?? self.placeholderScene
     }
 }
 
@@ -294,7 +298,7 @@ private struct BrainRegionsSceneView: NSViewRepresentable {
             view.scene = scene
             context.coordinator.captureBaseMaterials(from: scene)
             context.coordinator.configureSceneIfNeeded(scene, in: view)
-            context.coordinator.applyHighlight(highlighted, in: scene)
+            context.coordinator.applyHighlight(self.highlighted, in: scene)
         }
 
         return view
@@ -306,13 +310,13 @@ private struct BrainRegionsSceneView: NSViewRepresentable {
                 nsView.scene = scene
                 context.coordinator.captureBaseMaterials(from: scene)
                 context.coordinator.configureSceneIfNeeded(scene, in: nsView)
-                context.coordinator.applyHighlight(highlighted, in: scene)
+                context.coordinator.applyHighlight(self.highlighted, in: scene)
             }
             return
         }
 
         context.coordinator.configureSceneIfNeeded(scene, in: nsView)
-        context.coordinator.applyHighlight(highlighted, in: scene)
+        context.coordinator.applyHighlight(self.highlighted, in: scene)
     }
 
     func makeCoordinator() -> Coordinator {
@@ -324,22 +328,23 @@ private struct BrainRegionsSceneView: NSViewRepresentable {
         private var didConfigureScene = false
 
         func captureBaseMaterials(from scene: SCNScene) {
-            guard baseMaterialsByNodeName.isEmpty else { return }
+            guard self.baseMaterialsByNodeName.isEmpty else { return }
 
             scene.rootNode.enumerateChildNodes { node, _ in
                 guard let name = node.name, let materials = node.geometry?.materials else {
                     return
                 }
-                baseMaterialsByNodeName[name] = materials.map { $0.copy() as? SCNMaterial ?? $0 }
+                self.baseMaterialsByNodeName[name] = materials.map { $0.copy() as? SCNMaterial ?? $0 }
             }
         }
 
         func configureSceneIfNeeded(_ scene: SCNScene, in view: SCNView) {
-            guard !didConfigureScene else { return }
+            guard !self.didConfigureScene else { return }
 
             if let cameraNode = scene.rootNode.enumerateHierarchyFirst(where: { $0.camera != nil }) {
                 view.pointOfView = cameraNode
-            } else {
+            }
+            else {
                 let (center, radius) = scene.rootNode.approximateBounds()
                 let cameraNode = SCNNode()
                 cameraNode.camera = SCNCamera()
@@ -378,7 +383,7 @@ private struct BrainRegionsSceneView: NSViewRepresentable {
                 scene.rootNode.addChildNode(ambient)
             }
 
-            didConfigureScene = true
+            self.didConfigureScene = true
         }
 
         func applyHighlight(_ regions: [BrainRegion], in scene: SCNScene) {
@@ -397,7 +402,8 @@ private struct BrainRegionsSceneView: NSViewRepresentable {
                         updated.lightingModel = .physicallyBased
                         return updated
                     }
-                } else if let base = baseMaterialsByNodeName[name] {
+                }
+                else if let base = baseMaterialsByNodeName[name] {
                     geometry.materials = base.map { $0.copy() as? SCNMaterial ?? $0 }
                 }
             }
@@ -444,7 +450,7 @@ private extension SCNNode {
                 SCNVector3(localMax.x, localMin.y, localMin.z),
                 SCNVector3(localMax.x, localMin.y, localMax.z),
                 SCNVector3(localMax.x, localMax.y, localMin.z),
-                SCNVector3(localMax.x, localMax.y, localMax.z)
+                SCNVector3(localMax.x, localMax.y, localMax.z),
             ]
 
             for corner in corners {
@@ -491,12 +497,12 @@ struct RegionLabels: View {
             ForEach(BrainRegion.allCases) { region in
                 HStack(spacing: 8) {
                     Circle()
-                        .fill(highlighted.contains(region) ? Color.accentColor : Color.secondary.opacity(0.25))
+                        .fill(self.highlighted.contains(region) ? Color.accentColor : Color.secondary.opacity(0.25))
                         .frame(width: 8, height: 8)
 
                     Text(region.label)
                         .font(.caption.weight(.semibold))
-                        .foregroundStyle(highlighted.contains(region) ? .primary : .secondary)
+                        .foregroundStyle(self.highlighted.contains(region) ? .primary : .secondary)
                 }
             }
         }
@@ -515,12 +521,12 @@ struct ParameterDashboard: View {
             Text("Live Parameters")
                 .font(.headline)
 
-            ForEach(neuromodulator.parameters) { p in
+            ForEach(self.neuromodulator.parameters) { p in
                 HStack {
                     Text(p.name)
                         .font(.subheadline)
                     Spacer()
-                    Text(formatted(p.value(progress: progress), unit: p.unit))
+                    Text(self.formatted(p.value(progress: self.progress), unit: p.unit))
                         .font(.subheadline.monospacedDigit())
                         .foregroundStyle(.secondary)
                 }
@@ -562,33 +568,33 @@ struct NetworkGraphView: View {
         GeometryReader { proxy in
             Canvas { context, size in
                 let center = CGPoint(x: size.width / 2, y: size.height / 2)
-                let offset = CGSize(width: pan.width + dragOffset.width, height: pan.height + dragOffset.height)
-                let effectiveZoom = clampedZoom(zoom * gestureZoom)
+                let offset = CGSize(width: pan.width + self.dragOffset.width, height: self.pan.height + self.dragOffset.height)
+                let effectiveZoom = self.clampedZoom(self.zoom * self.gestureZoom)
 
-                for node in nodes {
+                for node in self.nodes {
                     for connectionId in node.connections {
                         if let target = nodes.first(where: { $0.id == connectionId }) {
-                            drawConnection(context, from: node, to: target, center: center, offset: offset, zoom: effectiveZoom)
+                            self.drawConnection(context, from: node, to: target, center: center, offset: offset, zoom: effectiveZoom)
                         }
                     }
                 }
 
-                for node in nodes {
-                    drawNode(context, node: node, center: center, offset: offset, zoom: effectiveZoom, isSelected: node.id == selectedNode?.id)
+                for node in self.nodes {
+                    self.drawNode(context, node: node, center: center, offset: offset, zoom: effectiveZoom, isSelected: node.id == self.selectedNode?.id)
                 }
             }
             .onAppear {
-                canvasSize = proxy.size
+                self.canvasSize = proxy.size
             }
             .onChange(of: proxy.size) {
-                canvasSize = proxy.size
+                self.canvasSize = proxy.size
             }
         }
         .background(.quaternary.opacity(0.3))
         .clipShape(RoundedRectangle(cornerRadius: 14))
-        .simultaneousGesture(magnificationGesture)
-        .simultaneousGesture(dragGesture)
-        .simultaneousGesture(tapGesture)
+        .simultaneousGesture(self.magnificationGesture)
+        .simultaneousGesture(self.dragGesture)
+        .simultaneousGesture(self.tapGesture)
         .overlay(alignment: .topTrailing) {
             if let node = selectedNode {
                 NodeDetailPopover(node: node)
@@ -596,26 +602,26 @@ struct NetworkGraphView: View {
                     .transition(.scale.combined(with: .opacity))
             }
         }
-        .animation(.easeInOut(duration: 0.2), value: selectedNode)
+        .animation(.easeInOut(duration: 0.2), value: self.selectedNode)
     }
 
     private var magnificationGesture: some Gesture {
         MagnificationGesture()
-            .updating($gestureZoom) { value, state, _ in
+            .updating(self.$gestureZoom) { value, state, _ in
                 state = value
             }
             .onEnded { value in
-                zoom = clampedZoom(zoom * value)
+                self.zoom = self.clampedZoom(self.zoom * value)
             }
     }
 
     private var dragGesture: some Gesture {
         DragGesture()
-            .updating($dragOffset) { value, state, _ in
+            .updating(self.$dragOffset) { value, state, _ in
                 state = value.translation
             }
             .onEnded { value in
-                pan = CGSize(width: pan.width + value.translation.width, height: pan.height + value.translation.height)
+                self.pan = CGSize(width: self.pan.width + value.translation.width, height: self.pan.height + value.translation.height)
             }
     }
 
@@ -623,17 +629,17 @@ struct NetworkGraphView: View {
         DragGesture(minimumDistance: 0)
             .onEnded { value in
                 let point = value.location
-                selectedNode = node(at: point, canvasSize: canvasSize)
+                self.selectedNode = self.node(at: point, canvasSize: self.canvasSize)
             }
     }
 
     private func node(at point: CGPoint, canvasSize: CGSize) -> GraphNode? {
         let hitRadius: CGFloat = 18
         let center = CGPoint(x: canvasSize.width / 2, y: canvasSize.height / 2)
-        let offset = CGSize(width: pan.width, height: pan.height)
-        let effectiveZoom = clampedZoom(zoom)
+        let offset = CGSize(width: pan.width, height: self.pan.height)
+        let effectiveZoom = self.clampedZoom(self.zoom)
 
-        return nodes.first(where: { node in
+        return self.nodes.first(where: { node in
             let p = CGPoint(
                 x: center.x + (node.position.x * effectiveZoom) + offset.width,
                 y: center.y + (node.position.y * effectiveZoom) + offset.height
@@ -695,7 +701,7 @@ struct NetworkGraphView: View {
             GraphNode(title: b.title, position: b.position, strength: b.strength, connections: [ids[0], ids[2]]),
             GraphNode(title: c.title, position: c.position, strength: c.strength, connections: [ids[1], ids[4]]),
             GraphNode(title: d.title, position: d.position, strength: d.strength, connections: [ids[0], ids[4]]),
-            GraphNode(title: e.title, position: e.position, strength: e.strength, connections: [ids[2], ids[3]])
+            GraphNode(title: e.title, position: e.position, strength: e.strength, connections: [ids[2], ids[3]]),
         ]
     }
 }
@@ -705,14 +711,14 @@ struct NodeDetailPopover: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text(node.title)
+            Text(self.node.title)
                 .font(.headline)
 
             HStack {
                 Text("Strength")
                     .foregroundStyle(.secondary)
                 Spacer()
-                Text(String(format: "%.2f", node.strength))
+                Text(String(format: "%.2f", self.node.strength))
                     .font(.subheadline.monospacedDigit())
             }
 
@@ -720,7 +726,7 @@ struct NodeDetailPopover: View {
                 Text("Connections")
                     .foregroundStyle(.secondary)
                 Spacer()
-                Text("\(node.connections.count)")
+                Text("\(self.node.connections.count)")
                     .font(.subheadline.monospacedDigit())
             }
         }

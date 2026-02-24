@@ -1,6 +1,7 @@
 import SwiftUI
 
 // MARK: - Accessibility Models
+
 struct AccessibilityPreferences {
     let colorBlindMode: ColorBlindMode
     let highContrastEnabled: Bool
@@ -23,6 +24,7 @@ enum ColorBlindMode {
 }
 
 // MARK: - View Extensions
+
 extension View {
     func apgiAccessibility(
         label: String,
@@ -50,18 +52,15 @@ extension View {
             .accessibilityLabel(dynamicLabel)
             .accessibilityValue(currentValue ?? "")
             .accessibilityHint(contextualHint ?? "")
-
             .applyIf(primaryAction != nil) { view in
                 view.accessibilityAction(.default) {
                     primaryAction!()
                 }
             }
             .accessibilityInputLabels(["activate", "select", "choose"])
-
             .dynamicTypeSize(...DynamicTypeSize.accessibility5)
             .colorBlind(mode: userPreferences.colorBlindMode)
             .highContrast(enabled: userPreferences.highContrastEnabled)
-
             .applyIf(userPreferences.hapticFeedbackEnabled && significantEvent != nil) { view in
                 view.sensoryFeedback(.impact, trigger: significantEvent!)
             }
@@ -89,7 +88,8 @@ extension View {
                     .background(Color.black)
                     .foregroundColor(Color.white)
                     .colorScheme(.dark)
-            } else {
+            }
+            else {
                 self
             }
         }
@@ -97,12 +97,14 @@ extension View {
 }
 
 // MARK: - Helper Extensions
+
 extension View {
     @ViewBuilder
     func applyIf<Content: View>(_ condition: Bool, transform: (Self) -> Content) -> some View {
         if condition {
             transform(self)
-        } else {
+        }
+        else {
             self
         }
     }

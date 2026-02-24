@@ -1,7 +1,7 @@
+import AppKit
+import Combine
 import Foundation
 import SwiftUI
-import Combine
-import AppKit
 
 @MainActor
 final class PerformanceManager: ObservableObject {
@@ -16,16 +16,16 @@ final class PerformanceManager: ObservableObject {
     private let searchCache = NSCache<NSString, CachedSearchResults>()
 
     private init() {
-        setupCacheConfiguration()
-        setupSystemMonitoring()
+        self.setupCacheConfiguration()
+        self.setupSystemMonitoring()
     }
 
     private func setupCacheConfiguration() {
-        contentCache.countLimit = 50
-        contentCache.totalCostLimit = 100 * 1024 * 1024 // 100MB
+        self.contentCache.countLimit = 50
+        self.contentCache.totalCostLimit = 100 * 1024 * 1024 // 100MB
 
-        searchCache.countLimit = 100
-        searchCache.totalCostLimit = 50 * 1024 * 1024 // 50MB
+        self.searchCache.countLimit = 100
+        self.searchCache.totalCostLimit = 50 * 1024 * 1024 // 50MB
     }
 
     private func setupSystemMonitoring() {
@@ -33,7 +33,7 @@ final class PerformanceManager: ObservableObject {
         ProcessInfo.processInfo.publisher(for: \.isLowPowerModeEnabled)
             .receive(on: DispatchQueue.main)
             .assign(to: \.isLowPowerModeEnabled, on: self)
-            .store(in: &cancellables)
+            .store(in: &self.cancellables)
 
         // Monitor thermal state
         Timer.publish(every: 5.0, on: .main, in: .common)
@@ -41,16 +41,16 @@ final class PerformanceManager: ObservableObject {
             .sink { [weak self] _ in
                 self?.thermalState = ProcessInfo.processInfo.thermalState
             }
-            .store(in: &cancellables)
+            .store(in: &self.cancellables)
 
         // Register for memory warnings - macOS doesn't have the same memory warning system as iOS
         // For macOS, we'll monitor memory pressure through other means
     }
 
     private func handleMemoryWarning() {
-        memoryWarningReceived = true
-        contentCache.removeAllObjects()
-        searchCache.removeAllObjects()
+        self.memoryWarningReceived = true
+        self.contentCache.removeAllObjects()
+        self.searchCache.removeAllObjects()
 
         // Reset after 30 seconds
         DispatchQueue.main.asyncAfter(deadline: .now() + 30) {
@@ -61,31 +61,31 @@ final class PerformanceManager: ObservableObject {
     // MARK: - Content Caching
 
     func getCachedContent(for key: String) -> CachedContent? {
-        return contentCache.object(forKey: NSString(string: key))
+        return self.contentCache.object(forKey: NSString(string: key))
     }
 
     func setCachedContent(_ content: CachedContent, for key: String) {
-        contentCache.setObject(content, forKey: NSString(string: key))
+        self.contentCache.setObject(content, forKey: NSString(string: key))
     }
 
     // MARK: - Search Caching
 
     func getCachedSearchResults(for query: String) -> CachedSearchResults? {
-        return searchCache.object(forKey: NSString(string: query))
+        return self.searchCache.object(forKey: NSString(string: query))
     }
 
     func setCachedSearchResults(_ results: CachedSearchResults, for query: String) {
-        searchCache.setObject(results, forKey: NSString(string: query))
+        self.searchCache.setObject(results, forKey: NSString(string: query))
     }
 
     // MARK: - Performance Optimization
 
     var shouldReduceAnimations: Bool {
-        isLowPowerModeEnabled || thermalState == .fair || thermalState == .serious
+        self.isLowPowerModeEnabled || self.thermalState == .fair || self.thermalState == .serious
     }
 
     var shouldLimitConcurrentOperations: Bool {
-        memoryWarningReceived || thermalState == .serious || thermalState == .critical
+        self.memoryWarningReceived || self.thermalState == .serious || self.thermalState == .critical
     }
 
     func getOptimizedLoadingDelay(for contentType: ContentType) -> TimeInterval {
@@ -102,11 +102,11 @@ final class PerformanceManager: ObservableObject {
             baseDelay = 0.3
         }
 
-        if isLowPowerModeEnabled {
+        if self.isLowPowerModeEnabled {
             return baseDelay * 1.5
         }
 
-        if thermalState == .serious || thermalState == .critical {
+        if self.thermalState == .serious || self.thermalState == .critical {
             return baseDelay * 2.0
         }
 
