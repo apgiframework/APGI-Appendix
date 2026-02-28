@@ -807,7 +807,13 @@
             guard positionResult == .success, let positionValue = positionRef else { return false }
 
             var point = CGPoint.zero
-            guard AXValueGetValue(positionValue as! AXValue, .cgPoint, &point) else { return false }
+            if CFGetTypeID(positionValue) == AXValueGetTypeID() {
+                let posAX: AXValue = unsafeBitCast(positionValue, to: AXValue.self)
+                guard AXValueGetValue(posAX, .cgPoint, &point) else { return false }
+            }
+            else {
+                return false
+            }
 
             let source = CGEventSource(stateID: .hidSystemState)
 
@@ -828,7 +834,7 @@
         }
 
         /// Scroll an area by a certain amount
-        func scrollArea(_ identifier: String, by value: Double) -> Bool {
+        func scrollArea(_ identifier: String, by _: Double) -> Bool {
             guard let element = findElement(identifier: identifier) else {
                 self.logger.log("⚠️ Scroll area not found: \(identifier)")
                 return false
@@ -839,19 +845,6 @@
             let error = AXUIElementCopyAttributeValue(element, kAXValueAttribute as CFString, &currentValue)
 
             guard error == .success else { return false }
-
-            // Set new scroll value
-            let newValue = (currentValue as? Double ?? 0) + value
-            let result = AXUIElementSetAttributeValue(element, kAXValueAttribute as CFString, newValue as CFTypeRef)
-
-            return result == .success
-        }
-
-        /// Complete a quiz (implementation depends on the quiz structure)
-        func completeQuiz() -> Bool {
-            // This is a placeholder implementation
-            // You would need to implement the specific steps to complete a quiz
-            self.logger.log("Completing quiz...")
 
             // Example: Find and click the submit button
             if let submitButton = findElement(identifier: "submit-quiz") {
@@ -869,6 +862,20 @@
         /// Tap a button with the specified identifier
         func tapButton(withIdentifier identifier: String) -> Bool {
             return self.clickElement(withIdentifier: identifier)
+        }
+
+        /// Complete a quiz interaction
+        func completeQuiz() -> Bool {
+            // Find and click the submit button for the quiz
+            if let submitButton = findElement(identifier: "submit-quiz") {
+                return self.performAction(kAXPressAction as String, on: submitButton)
+            }
+            // Fallback: try to find any submit or complete button
+            if let completeButton = findElement(identifier: "complete-quiz") {
+                return self.performAction(kAXPressAction as String, on: completeButton)
+            }
+            self.logger.log("⚠️ Quiz submit button not found")
+            return false
         }
 
         /// Get the title of an element

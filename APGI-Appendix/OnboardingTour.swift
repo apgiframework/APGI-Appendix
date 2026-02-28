@@ -181,8 +181,7 @@ class OnboardingManager: ObservableObject {
             imageType: .system,
             tips: [
                 "⌘?: Quick help anytime",
-                "Right-click for context menus",
-                "Drag and drop to reorganize",
+                "⌘F to search across all content",
                 "Check back for updates",
             ],
             highlightColor: .blue
@@ -242,8 +241,7 @@ struct OnboardingTourView: View {
                     .environmentObject(self.onboardingManager)
                     .environmentObject(self.navigationManager)
             }
-            else {
-                // Show onboarding
+            else { // Show onboarding
                 self.onboardingContent
             }
         }

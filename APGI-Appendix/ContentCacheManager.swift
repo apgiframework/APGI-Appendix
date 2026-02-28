@@ -15,7 +15,9 @@ class ContentCacheManager: ObservableObject {
 
     private init() {
         // Create cache directory in application support
-        let appSupport = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
+        guard let appSupport = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first else {
+            fatalError("Unable to access application support directory")
+        }
         self.cacheDirectory = appSupport.appendingPathComponent("APGI-Appendix", isDirectory: true).appendingPathComponent("Cache", isDirectory: true)
 
         try? FileManager.default.createDirectory(at: self.cacheDirectory, withIntermediateDirectories: true)

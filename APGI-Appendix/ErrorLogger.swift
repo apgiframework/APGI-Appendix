@@ -19,7 +19,9 @@ class ErrorLogger: ObservableObject {
 
     private init() {
         // Create log file in Application Support directory
-        let appSupportDir = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
+        guard let appSupportDir = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first else {
+            fatalError("Unable to find application support directory")
+        }
         let appDir = appSupportDir.appendingPathComponent("APGI-Appendix")
 
         // Create directory if it doesn't exist

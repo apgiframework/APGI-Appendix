@@ -622,8 +622,8 @@ open APGI-Appendix.xcodeproj
 #### Method 1: Build and Run
 
 ```bash
-# Set authentication token
-export SCREENSHOT_AUTH_TOKEN=APGI-Screenshot-2024
+# Set authentication token (replace YOUR_TOKEN_HERE with actual token)
+export SCREENSHOT_AUTH_TOKEN=YOUR_TOKEN_HERE
 
 # Build the app
 xcodebuild -scheme APGI-Appendix build
@@ -638,7 +638,7 @@ xcodebuild -scheme APGI-Appendix build
 # Find the built app
 find ~/Library/Developer/Xcode/DerivedData -name "APGI-Appendix.app" -type d
 
-# Run with arguments (replace path with actual location)
-export SCREENSHOT_AUTH_TOKEN=APGI-Screenshot-2024
+# Run with arguments (replace path with actual location and YOUR_TOKEN_HERE with actual token)
+export SCREENSHOT_AUTH_TOKEN=YOUR_TOKEN_HERE
 /path/to/APGI-Appendix.app/Contents/MacOS/APGI-Appendix --screenshot-mode
 ```

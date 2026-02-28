@@ -237,75 +237,7 @@ struct EnhancedInteractiveTimeline: View {
 
     private var timelineSection: some View {
         GeometryReader { geometry in
-            ZStack(alignment: .topLeading) {
-                TimelineGrid(maxTime: self.maxTime)
-
-                if self.showPhaseIndicators {
-                    PhaseRegions(maxTime: self.maxTime)
-                        .opacity(0.15)
-                        .transition(.opacity)
-                }
-
-                ForEach(self.events) { event in
-                    EventBlock(
-                        event: event,
-                        isSelected: self.selectedEvent?.id == event.id,
-                        isHovered: self.hoveredEvent?.id == event.id,
-                        currentTime: self.currentTime,
-                        totalWidth: geometry.size.width,
-                        maxTime: self.maxTime
-                    )
-                    .onTapGesture {
-                        withAnimation(.easeInOut(duration: 0.2)) {
-                            self.selectedEvent = event
-                        }
-                    }
-                    .onHover { hovering in
-                        self.hoveredEvent = hovering ? event : nil
-                    }
-                    .accessibilityLabel("\(event.title), \(event.timeRange.lowerBound) to \(event.timeRange.upperBound) milliseconds")
-                    .accessibilityHint("Tap to view details for this ignition phase")
-                    .accessibilityAddTraits(.isButton)
-                }
-
-                PlayheadIndicator(
-                    currentTime: self.currentTime,
-                    maxTime: self.maxTime
-                )
-            }
-            .gesture(
-                DragGesture(minimumDistance: 0)
-                    .onChanged { value in
-                        withAnimation(.interactiveSpring()) {
-                            self.isPlaying = false
-                            let ratio = min(max(0, value.location.x / max(1, geometry.size.width)), 1)
-                            self.currentTime = Int(ratio * Double(self.maxTime))
-                        }
-                    }
-            )
-            .accessibilityLabel("Ignition timeline scrubber")
-            .accessibilityHint("Drag to scrub through the timeline or use arrow keys to navigate")
-            .accessibilityValue("\(self.currentTime) milliseconds")
-            .accessibilityAction(named: "Move to previous event") {
-                if let currentEvent = events.first(where: { $0.timeRange.contains(currentTime) }),
-                   let currentIndex = events.firstIndex(where: { $0.id == currentEvent.id }),
-                   currentIndex > 0
-                {
-                    let previousEvent = self.events[currentIndex - 1]
-                    self.currentTime = previousEvent.timeRange.lowerBound
-                    self.selectedEvent = previousEvent
-                }
-            }
-            .accessibilityAction(named: "Move to next event") {
-                if let currentEvent = events.first(where: { $0.timeRange.contains(currentTime) }),
-                   let currentIndex = events.firstIndex(where: { $0.id == currentEvent.id }),
-                   currentIndex < events.count - 1
-                {
-                    let nextEvent = self.events[currentIndex + 1]
-                    self.currentTime = nextEvent.timeRange.lowerBound
-                    self.selectedEvent = nextEvent
-                }
-            }
+            self.timelineContent(geometry: geometry)
         }
         .frame(height: 200)
         .background(
@@ -315,6 +247,92 @@ struct EnhancedInteractiveTimeline: View {
         .overlay {
             RoundedRectangle(cornerRadius: APGIRadius.lg)
                 .strokeBorder(Color.accentColor.opacity(0.2), lineWidth: 1)
+        }
+    }
+
+    private func timelineContent(geometry: GeometryProxy) -> some View {
+        ZStack(alignment: .topLeading) {
+            TimelineGrid(maxTime: self.maxTime)
+
+            if self.showPhaseIndicators {
+                PhaseRegions(maxTime: self.maxTime)
+                    .opacity(0.15)
+                    .transition(.opacity)
+            }
+
+            self.eventBlocksView(geometry: geometry)
+
+            PlayheadIndicator(
+                currentTime: self.currentTime,
+                maxTime: self.maxTime
+            )
+        }
+        .gesture(self.scrubGesture(geometry: geometry))
+        .accessibilityLabel("Ignition timeline scrubber")
+        .accessibilityHint("Drag to scrub through the timeline or use arrow keys to navigate")
+        .accessibilityValue("\(self.currentTime) milliseconds")
+        .accessibilityAction(named: "Move to previous event") {
+            self.moveToPreviousEvent()
+        }
+        .accessibilityAction(named: "Move to next event") {
+            self.moveToNextEvent()
+        }
+    }
+
+    private func eventBlocksView(geometry: GeometryProxy) -> some View {
+        ForEach(self.events) { event in
+            EventBlock(
+                event: event,
+                isSelected: self.selectedEvent?.id == event.id,
+                isHovered: self.hoveredEvent?.id == event.id,
+                currentTime: self.currentTime,
+                totalWidth: geometry.size.width,
+                maxTime: self.maxTime
+            )
+            .onTapGesture {
+                withAnimation(.easeInOut(duration: 0.2)) {
+                    self.selectedEvent = event
+                }
+            }
+            .onHover { hovering in
+                self.hoveredEvent = hovering ? event : nil
+            }
+            .accessibilityLabel("\(event.title), \(event.timeRange.lowerBound) to \(event.timeRange.upperBound) milliseconds")
+            .accessibilityHint("Tap to view details for this ignition phase")
+            .accessibilityAddTraits(.isButton)
+        }
+    }
+
+    private func scrubGesture(geometry: GeometryProxy) -> some Gesture {
+        DragGesture(minimumDistance: 0)
+            .onChanged { value in
+                withAnimation(.interactiveSpring()) {
+                    self.isPlaying = false
+                    let ratio = min(max(0, value.location.x / max(1, geometry.size.width)), 1)
+                    self.currentTime = Int(ratio * Double(self.maxTime))
+                }
+            }
+    }
+
+    private func moveToPreviousEvent() {
+        if let currentEvent = events.first(where: { $0.timeRange.contains(currentTime) }),
+           let currentIndex = events.firstIndex(where: { $0.id == currentEvent.id }),
+           currentIndex > 0
+        {
+            let previousEvent = self.events[currentIndex - 1]
+            self.currentTime = previousEvent.timeRange.lowerBound
+            self.selectedEvent = previousEvent
+        }
+    }
+
+    private func moveToNextEvent() {
+        if let currentEvent = events.first(where: { $0.timeRange.contains(currentTime) }),
+           let currentIndex = events.firstIndex(where: { $0.id == currentEvent.id }),
+           currentIndex < events.count - 1
+        {
+            let nextEvent = self.events[currentIndex + 1]
+            self.currentTime = nextEvent.timeRange.lowerBound
+            self.selectedEvent = nextEvent
         }
     }
 

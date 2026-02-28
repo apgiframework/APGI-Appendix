@@ -41,7 +41,10 @@ class KeychainHelper {
     private func encrypt(data: Data) throws -> Data {
         let key = try getEncryptionKey()
         let sealedBox = try AES.GCM.seal(data, using: key)
-        return sealedBox.combined!
+        guard let combined = sealedBox.combined else {
+            throw NSError(domain: "KeychainHelper", code: -1, userInfo: [NSLocalizedDescriptionKey: "Failed to get combined data from sealed box"])
+        }
+        return combined
     }
 
     /// Decrypt data using CryptoKit

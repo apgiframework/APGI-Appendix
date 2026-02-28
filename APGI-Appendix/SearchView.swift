@@ -205,6 +205,10 @@ struct SearchView: View {
             }
         }
         .frame(width: 720, height: 560)
+        .onDisappear {
+            self.debounceTimer?.invalidate()
+            self.searchTask?.cancel()
+        }
     }
 
     private func performSearch() {

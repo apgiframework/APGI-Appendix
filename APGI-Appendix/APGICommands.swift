@@ -14,6 +14,13 @@ struct APGICommands: Commands {
                 self.focusSearch()
             }
             .keyboardShortcut("f", modifiers: [.command])
+
+            Divider()
+
+            Button("Print Current Section") {
+                self.printCurrentSection()
+            }
+            .keyboardShortcut("p", modifiers: [.command])
         }
 
         CommandMenu("Demonstrations") {
@@ -249,6 +256,10 @@ struct APGICommands: Commands {
         }
     }
 
+    private func printCurrentSection() {
+        NotificationCenter.default.post(name: .printCurrentSection, object: nil)
+    }
+
     private func checkForUpdates() {
         NotificationCenter.default.post(name: .checkForUpdates, object: nil)
     }
@@ -278,4 +289,8 @@ extension Notification.Name {
     static let copyCitation = Notification.Name("copyCitation")
     static let openHelpGuide = Notification.Name("openHelpGuide")
     static let checkForUpdates = Notification.Name("checkForUpdates")
+    static let printCurrentSection = Notification.Name("printCurrentSection")
+    static let toggleAllSections = Notification.Name("toggleAllSections")
+    static let scrollToTables = Notification.Name("scrollToTables")
+    static let clearAllBookmarks = Notification.Name("clearAllBookmarks")
 }

@@ -265,7 +265,7 @@ struct AdvancedTableUsage: View {
             ]
         }
         catch {
-            print("Error loading tables: \(error)")
+            logError(error, context: "TableParserExamples.loadTables", function: #function, file: #file, line: #line)
         }
     }
 
@@ -309,7 +309,7 @@ struct AdvancedTableUsage: View {
             }
         }
         catch {
-            print("Error converting to JSON: \(error)")
+            logError(error, context: "TableParserExamples.exportTableAsJSON", function: #function, file: #file, line: #line)
         }
     }
 }

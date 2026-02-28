@@ -1,12 +1,6 @@
 import Combine
 import SwiftUI
 
-extension Optional {
-    var isNil: Bool {
-        self == nil
-    }
-}
-
 struct EnhancedSettingsView: View {
     @StateObject private var themeManager = ThemeManager.shared
 
@@ -92,12 +86,19 @@ struct SettingsView: View {
 
                 Toggle("Auto-save Bookmarks", isOn: self.$themeManager.autoSaveBookmarks)
 
+                Divider()
+
+                Text("Your Bookmarks")
+                    .font(.headline)
+
+                BookmarkListView()
+
+                Divider()
+
                 Button("Clear All Bookmarks") {
                     self.clearAllBookmarks()
                 }
                 .foregroundColor(.red)
-
-                Divider()
 
                 Button("Reset to Defaults") {
                     self.themeManager.resetToDefaults()
@@ -166,10 +167,58 @@ struct SettingsView: View {
     }
 }
 
-// MARK: - Notification Extensions
+struct BookmarkListView: View {
+    @StateObject private var bookmarkManager = BookmarkManager()
 
-extension Notification.Name {
-    static let clearAllBookmarks = Notification.Name("clearAllBookmarks")
+    var body: some View {
+        if self.bookmarkManager.bookmarks.isEmpty {
+            Text("No bookmarks yet")
+                .foregroundStyle(.secondary)
+                .font(.subheadline)
+                .frame(maxWidth: .infinity, alignment: .center)
+                .padding(.vertical, 20)
+        }
+        else {
+            List {
+                ForEach(self.bookmarkManager.bookmarks, id: \.self) { bookmarkId in
+                    if let tab = Tab.allCases.first(where: { $0.id == bookmarkId }) {
+                        HStack {
+                            Image(systemName: tab.icon)
+                                .foregroundStyle(tab.category.color)
+                                .frame(width: 20, height: 20)
+
+                            VStack(alignment: .leading) {
+                                Text(tab.shortTitle)
+                                    .font(.headline)
+                                Text(tab.category.rawValue)
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                            }
+
+                            Spacer()
+
+                            Image(systemName: "line.horizontal.3")
+                                .foregroundStyle(.tertiary)
+                                .font(.caption)
+                        }
+                        .padding(.vertical, 8)
+                        .contentShape(Rectangle())
+                        .contextMenu {
+                            Button("Remove Bookmark") {
+                                self.bookmarkManager.removeBookmark(tab)
+                            }
+                        }
+                    }
+                }
+                .onMove { indices, newOffset in
+                    self.bookmarkManager.bookmarks.move(fromOffsets: indices, toOffset: newOffset)
+                    self.bookmarkManager.saveBookmarks()
+                }
+            }
+            .frame(height: min(CGFloat(self.bookmarkManager.bookmarks.count) * 60 + 20, 200))
+            .listStyle(.plain)
+        }
+    }
 }
 
 #Preview {

@@ -503,6 +503,7 @@ struct EnhancedContentCard: View {
     let hasDataTable: Bool
 
     @Environment(\.colorScheme) private var colorScheme
+    @EnvironmentObject private var themeManager: ThemeManager
     @AppStorage("highContrastMode") private var highContrastMode = false
     @AppStorage("contentFontSize") private var fontSize: Double = 15.0
 
@@ -556,7 +557,7 @@ struct EnhancedContentCard: View {
                 .frame(width: 10, height: 10)
 
             Text(self.title)
-                .font(.system(size: 16, weight: .semibold))
+                .font(.system(size: self.themeManager.headlineFontSize, weight: .semibold))
                 .foregroundStyle(.primary)
 
             if self.hasDataTable {

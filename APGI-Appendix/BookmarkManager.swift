@@ -79,7 +79,7 @@ class BookmarkManager: ObservableObject {
         }
     }
 
-    private func saveBookmarks() {
+    func saveBookmarks() {
         let success = KeychainHelper.shared.save(object: self.bookmarks, for: self.bookmarksKey)
         if !success {
             logError(NSError(domain: "BookmarkManager", code: -1, userInfo: [NSLocalizedDescriptionKey: "Failed to save bookmarks to Keychain"]), context: "saveBookmarks()", function: #function, file: #file, line: #line)

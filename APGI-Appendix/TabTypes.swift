@@ -567,6 +567,7 @@ enum NavigationSection: String, CaseIterable, Identifiable, Hashable {
     case neurobiology = "Neurobiology"
     case cognition = "Cognition & Psychology"
     case clinical = "Clinical Applications"
+    case navigation = "Demonstrations"
     case reference = "Reference"
 
     var id: String {
@@ -587,9 +588,11 @@ enum NavigationSection: String, CaseIterable, Identifiable, Hashable {
                     .psychologicalStates, .apgiToPsyState, .lifeStages]
         case .clinical:
             return [.psychiatricDisorders, .disordersConditions]
+        case .navigation:
+            return [.ignitionTimeline, .apgiSimulator]
         case .reference:
             return [.glossary, .bibliography, .epistemicStandards,
-                    .thermodynamicEfficiency, .ignitionTimeline, .apgiSimulator]
+                    .thermodynamicEfficiency]
         }
     }
 }
@@ -601,6 +604,7 @@ extension NavigationSection {
         case .neurobiology: return "brain.head.profile"
         case .cognition: return "brain"
         case .clinical: return "stethoscope"
+        case .navigation: return "location"
         case .reference: return "books.vertical.fill"
         }
     }
@@ -611,6 +615,7 @@ extension NavigationSection {
         case .neurobiology: return .apgiGreen
         case .cognition: return .apgiOrange
         case .clinical: return .apgiRed
+        case .navigation: return .accentColor
         case .reference: return .gray
         }
     }

@@ -230,7 +230,18 @@ struct NetworkSettingsView: View {
 
     private func testConnection() {
         // Simple connection test
-        let task = URLSession.shared.dataTask(with: URL(string: "https://api.apgi-framework.org")!) { _, _, error in
+        guard let url = URL(string: "https://api.apgi-framework.org") else {
+            DispatchQueue.main.async {
+                let alert = NSAlert()
+                alert.messageText = "Connection Test Failed"
+                alert.informativeText = "Invalid URL for connection test."
+                alert.alertStyle = .warning
+                alert.runModal()
+            }
+            return
+        }
+
+        let task = URLSession.shared.dataTask(with: url) { _, _, error in
             DispatchQueue.main.async {
                 if let error = error {
                     let alert = NSAlert()

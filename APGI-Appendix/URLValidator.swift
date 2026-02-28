@@ -164,8 +164,8 @@ struct SafeLink: View {
             .buttonStyle(.link)
             .foregroundColor(.orange)
         }
-        else {
-            Link(self.title, destination: URL(string: self.urlString)!)
+        else if let url = URL(string: self.urlString) {
+            Link(self.title, destination: url)
         }
     }
 }

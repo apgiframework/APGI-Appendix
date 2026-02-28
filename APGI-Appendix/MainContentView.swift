@@ -17,6 +17,10 @@ struct MainContentView: View {
     @StateObject private var bookmarkManager = BookmarkManager()
     @EnvironmentObject private var navigationManager: KeyboardNavigationManager
     @EnvironmentObject private var themeManager: ThemeManager
+    @State private var showUpdateCheck = false
+
+    @FocusState private var sidebarFocused: Bool
+    @FocusState private var detailFocused: Bool
 
     var body: some View {
         let navSplitView = NavigationSplitView(columnVisibility: $columnVisibility) {
@@ -28,6 +32,9 @@ struct MainContentView: View {
         let configuredView = navSplitView
             .frame(minWidth: 1000, minHeight: 700)
             .environmentObject(self.bookmarkManager)
+            .onAppear {
+                self.sidebarFocused = true
+            }
 
         let withCategoryChanges = configuredView
             .onChange(of: self.selectedSection) { _, newValue in
@@ -97,7 +104,15 @@ struct MainContentView: View {
                             try (self.selectedSection?.content ?? "").write(to: url, atomically: true, encoding: .utf8)
                         }
                         catch {
-                            print("Failed to export section: \(error)")
+                            logError(error, context: "MainContentView.exportCurrentSection", function: #function, file: #file, line: #line)
+                        }
+                        do {
+                            let resourceValues = try url.resourceValues(forKeys: [.fileSizeKey])
+                            let fileSize = UInt64(resourceValues.fileSize ?? 0)
+                            logInfo("Exported file size: \(fileSize) bytes", context: "MainContentView.exportCurrentSection")
+                        }
+                        catch {
+                            logError(error, context: "MainContentView.exportCurrentSection", function: #function, file: #file, line: #line)
                         }
                     }
                 }
@@ -110,11 +125,17 @@ struct MainContentView: View {
             .onReceive(NotificationCenter.default.publisher(for: .checkForUpdates)) { _ in
                 self.checkForUpdates()
             }
+            .onReceive(NotificationCenter.default.publisher(for: .printCurrentSection)) { _ in
+                self.printCurrentSection()
+            }
             .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("HandleHandoffActivity"))) { notification in
                 if let userActivity = notification.object as? NSUserActivity {
                     self.handleIncomingHandoff(userActivity)
                 }
             })
+            .sheet(isPresented: self.$showUpdateCheck) {
+                UpdateCheckView()
+            }
     }
 
     private var sidebarView: some View {
@@ -123,6 +144,13 @@ struct MainContentView: View {
             set: { self.selectedSection = $0 }
         ))
         .navigationSplitViewColumnWidth(min: 240, ideal: 280, max: 350)
+        .focusable()
+        .focused(self.$sidebarFocused)
+        .onKeyPress(.tab) {
+            self.detailFocused = true
+            self.sidebarFocused = false
+            return .handled
+        }
     }
 
     private var detailView: some View {
@@ -130,6 +158,16 @@ struct MainContentView: View {
             self.detailContentView
             self.focusModeOverlay
             self.searchOverlay
+        }
+        .focusable()
+        .focused(self.$detailFocused)
+        .onKeyPress(.tab, phases: .down) { press in
+            if press.modifiers.contains(.shift) {
+                self.sidebarFocused = true
+                self.detailFocused = false
+                return .handled
+            }
+            return .ignored
         }
         .toolbar {
             ToolbarItemGroup {
@@ -388,7 +426,7 @@ struct MainContentView: View {
             self.showExportSuccess(message: "PDF exported successfully to \(url.lastPathComponent)")
         }
         catch {
-            self.showExportError(message: "Failed to save PDF: \(error.localizedDescription)")
+            logError(error, context: "ContentCacheManager", function: #function, file: #file, line: #line)
         }
     }
 
@@ -431,7 +469,7 @@ struct MainContentView: View {
                     try (self.selectedSection?.content ?? "").write(to: url, atomically: true, encoding: .utf8)
                 }
                 catch {
-                    print("Failed to export section: \(error)")
+                    logError(error, context: "MainContentView.exportToText", function: #function, file: #file, line: #line)
                 }
             }
         }
@@ -446,8 +484,33 @@ struct MainContentView: View {
     }
 
     private func checkForUpdates() {
-        // This would integrate with UpdateManager
-        print("Checking for updates...")
+        self.showUpdateCheck = true
+    }
+
+    private func printCurrentSection() {
+        guard let selectedSection = selectedSection else {
+            self.showExportError(message: "No section selected for printing")
+            return
+        }
+
+        // Create the content view for the selected section
+        let contentView = selectedSection.view
+        let hostingView = NSHostingView(rootView: contentView)
+
+        // Set up the hosting view with proper sizing
+        hostingView.frame = NSRect(x: 0, y: 0, width: 792, height: 612) // Standard US Letter size
+        hostingView.layoutSubtreeIfNeeded()
+
+        // Create print operation
+        let printOperation = NSPrintOperation(view: hostingView)
+        printOperation.printInfo.orientation = .portrait
+        printOperation.printInfo.scalingFactor = 1.0
+
+        // Set print job title
+        printOperation.printInfo.jobDisposition = .spool
+
+        // Run the print operation
+        printOperation.run()
     }
 
     private struct DetailContentView: View {

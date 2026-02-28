@@ -38,6 +38,25 @@ struct BookmarkButton: View {
             },
             alignment: .top
         )
+        .contextMenu {
+            if self.isBookmarked {
+                Button("Remove Bookmark") {
+                    self.bookmarkManager.removeBookmark(self.tab)
+                    // Show feedback animation
+                    withAnimation(.easeInOut(duration: 0.3)) {
+                        self.feedbackMessage = "Bookmark removed"
+                        self.showFeedback = true
+                    }
+
+                    // Hide feedback after delay
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+                        withAnimation(.easeInOut(duration: 0.3)) {
+                            self.showFeedback = false
+                        }
+                    }
+                }
+            }
+        }
         .apgiAccessibility(
             label: self.isBookmarked ? "Remove bookmark" : "Add bookmark",
             hint: "\(self.tab.shortTitle) section",

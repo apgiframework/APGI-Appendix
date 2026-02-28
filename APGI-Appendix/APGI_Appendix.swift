@@ -28,6 +28,9 @@ struct APGIAppendixApp: App {
                 .onAppear {
                     // Start memory monitoring when the view appears
                     self.memoryMonitor.startMonitoring(interval: 30.0)
+
+                    // Index content for Spotlight search
+                    SpotlightManager.shared.indexAllContent()
                 }
         }
         .commands {

@@ -1,3 +1,4 @@
+import AppKit
 import SwiftUI
 
 struct SidebarView: View {
@@ -18,6 +19,7 @@ struct SidebarView: View {
                                 endPoint: .bottomTrailing
                             )
                         )
+                        .accessibilityLabel("APGI Framework logo")
 
                     VStack(alignment: .leading, spacing: 2) {
                         Text("APGI")
@@ -32,13 +34,18 @@ struct SidebarView: View {
                     Spacer()
                 }
                 .padding(APGISpacing.lg)
+                .accessibilityElement(children: .combine)
+                .accessibilityLabel("APGI Consciousness Framework")
 
                 HStack {
                     Image(systemName: "magnifyingglass")
                         .foregroundStyle(.secondary)
+                        .accessibilityHidden(true)
 
                     TextField("Search topics...", text: self.$searchText)
                         .textFieldStyle(.plain)
+                        .accessibilityLabel("Search sidebar topics")
+                        .accessibilityHint("Type to filter sections and topics")
                 }
                 .padding(APGISpacing.sm)
                 .background(.quaternary.opacity(0.5))
@@ -67,21 +74,25 @@ struct SidebarView: View {
             Divider()
 
             HStack(spacing: APGISpacing.md) {
-                Button(action: {
-                    NSApp.sendAction(Selector(("showSettingsWindow:")), to: nil, from: nil)
-                }) {
+                SettingsLink {
                     Label("Settings", systemImage: "gear")
                 }
                 .buttonStyle(.plain)
+                .accessibilityLabel("Open settings window")
+                .accessibilityHint("Configure application preferences")
 
                 Spacer()
 
                 Button(action: {
-                    NSApp.sendAction(#selector(NSApplication.showHelp(_:)), to: nil, from: nil)
+                    if let url = URL(string: "https://docs.apgi-framework.org") {
+                        NSWorkspace.shared.open(url)
+                    }
                 }) {
                     Label("Help", systemImage: "questionmark.circle")
                 }
                 .buttonStyle(.plain)
+                .accessibilityLabel("Open help documentation")
+                .accessibilityHint("View user guide and documentation")
             }
             .font(APGITypography.labelMedium)
             .foregroundStyle(.secondary)
@@ -184,6 +195,7 @@ struct NavigationSectionView: View {
                         .font(.body)
                         .foregroundStyle(self.section.color)
                         .frame(width: 24)
+                        .accessibilityHidden(true)
 
                     Text(self.section.title)
                         .font(APGITypography.labelLarge)
@@ -195,6 +207,7 @@ struct NavigationSectionView: View {
                         .font(.caption)
                         .foregroundStyle(.secondary)
                         .rotationEffect(.degrees(self.isExpanded ? 90 : 0))
+                        .accessibilityHidden(true)
                 }
                 .padding(.vertical, APGISpacing.sm)
                 .padding(.horizontal, APGISpacing.md)
@@ -204,6 +217,29 @@ struct NavigationSectionView: View {
                 )
             }
             .buttonStyle(.plain)
+            .accessibilityLabel("\(self.section.title) section")
+            .accessibilityHint(self.isExpanded ? "Collapse section" : "Expand section")
+            .accessibilityValue(self.isExpanded ? "Expanded" : "Collapsed")
+            .contextMenu {
+                Button {
+                    // Expand/collapse all sections
+                    NotificationCenter.default.post(name: .toggleAllSections, object: nil)
+                } label: {
+                    Label(self.isExpanded ? "Collapse All" : "Expand All", systemImage: self.isExpanded ? "chevron.up" : "chevron.down")
+                }
+
+                Divider()
+
+                Button {
+                    // Navigate to first item in section
+                    if let firstTab = self.section.tabs.first {
+                        self.selection = firstTab
+                    }
+                } label: {
+                    Label("Go to First Item", systemImage: "arrow.right")
+                }
+                .disabled(self.section.tabs.isEmpty)
+            }
 
             if self.isExpanded {
                 VStack(alignment: .leading, spacing: 2) {
@@ -233,37 +269,90 @@ struct NavigationItemRow: View {
         Button {
             self.onSelect()
         } label: {
-            HStack(spacing: APGISpacing.sm) {
-                Circle()
-                    .fill(self.isSelected ? self.item.category.color : .secondary.opacity(0.3))
-                    .frame(width: 6, height: 6)
-
-                Text(self.item.shortTitle)
-                    .font(APGITypography.bodyMedium)
-                    .foregroundStyle(self.isSelected ? .primary : .secondary)
-
-                Spacer()
-
-                if self.item.hasTables {
-                    Circle()
-                        .fill(Color.apgiAccent)
-                        .frame(width: 8, height: 8)
-                }
-            }
-            .padding(.vertical, APGISpacing.sm)
-            .padding(.horizontal, APGISpacing.md)
-            .background {
-                RoundedRectangle(cornerRadius: APGIRadius.sm)
-                    .fill(
-                        self.isSelected
-                            ? self.item.category.color.opacity(0.15)
-                            : (self.isHovered ? Color.secondary.opacity(0.3) : Color.clear)
-                    )
-            }
+            self.buttonContent
         }
         .buttonStyle(.plain)
         .onHover { hovering in
             self.isHovered = hovering
         }
+        .accessibilityLabel("\(self.item.shortTitle), \(self.item.category.rawValue) section")
+        .accessibilityHint("Navigate to \(self.item.shortTitle)")
+        .accessibilityValue(self.isSelected ? "Selected" : "Not selected")
+        .accessibilityAddTraits(self.isSelected ? .isSelected : [])
+        .contextMenu {
+            self.contextMenuContent
+        }
+    }
+
+    private var buttonContent: some View {
+        HStack(spacing: APGISpacing.sm) {
+            Circle()
+                .fill(self.isSelected ? self.item.category.color : .secondary.opacity(0.3))
+                .frame(width: 6, height: 6)
+                .accessibilityHidden(true)
+
+            Text(self.item.shortTitle)
+                .font(APGITypography.bodyMedium)
+                .foregroundStyle(self.isSelected ? .primary : .secondary)
+
+            Spacer()
+
+            if self.item.hasTables {
+                Circle()
+                    .fill(Color.apgiAccent)
+                    .frame(width: 8, height: 8)
+                    .accessibilityLabel("Contains data tables")
+            }
+        }
+        .padding(.vertical, APGISpacing.sm)
+        .padding(.horizontal, APGISpacing.md)
+        .background {
+            RoundedRectangle(cornerRadius: APGIRadius.sm)
+                .fill(self.backgroundColor)
+        }
+    }
+
+    private var backgroundColor: Color {
+        if self.isSelected {
+            return self.item.category.color.opacity(0.15)
+        }
+        else if self.isHovered {
+            return Color.secondary.opacity(0.3)
+        }
+        else {
+            return Color.clear
+        }
+    }
+
+    @ViewBuilder
+    private var contextMenuContent: some View {
+        Button {
+            self.onSelect()
+        } label: {
+            Label("Open \(self.item.shortTitle)", systemImage: "arrow.right")
+        }
+
+        if self.item.hasTables {
+            Divider()
+
+            Button {
+                // Scroll to first table in content
+                NotificationCenter.default.post(name: .scrollToTables, object: self.item)
+            } label: {
+                Label("Go to Tables", systemImage: "tablecells")
+            }
+        }
+
+        Divider()
+
+        Button {
+            // Copy section title to clipboard
+            NSPasteboard.general.clearContents()
+            NSPasteboard.general.setString(self.item.shortTitle, forType: .string)
+        } label: {
+            Label("Copy Title", systemImage: "doc.on.doc")
+        }
     }
 }
+
+// ... (rest of the code remains the same)

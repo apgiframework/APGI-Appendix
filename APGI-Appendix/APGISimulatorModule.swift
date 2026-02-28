@@ -457,47 +457,38 @@ struct APGICore {
         return self.clamp(precision, min: self.config.precisionMin, max: self.config.precisionMax)
     }
 
-    /// Updates dynamic ignition threshold based on homeostatic and urgency factors
+    /// Parameters for threshold update calculation
+    struct ThresholdUpdateParams {
+        let current: Float
+        let prevIgnition: Float
+        let prevSurprise: Float
+        let currentSurprise: Float
+        let energyReserves: Float
+        let allostaticLoad: Float
+        let deltaTime: Float
+    }
+
+    /// Computes updated ignition threshold based on system state
     ///
-    /// Implements threshold adaptation dynamics:
-    /// dθ_t/dt = γ(θ₀ − θ_t) + δ·B_{t-1} − λ·|dS_t/dt|
+    /// Implements adaptive threshold model with homeostatic recovery,
+    /// post-ignition refractoriness, and metabolic urgency signaling
     ///
-    /// Where:
-    /// - γ: Homeostatic recovery rate (returns threshold to baseline)
-    /// - θ₀: Baseline threshold value
-    /// - δ: Post-ignition refractory elevation
-    /// - B_{t-1}: Previous ignition state
-    /// - λ: Urgency gain factor (lowers threshold for rapidly increasing surprise)
-    /// - |dS_t/dt|: Absolute rate of surprise change (urgency signal)
-    ///
-    /// - Parameters:
-    ///   - currentTheta: Current threshold value
-    ///   - prevIgnition: Previous ignition state (0.0 or 1.0)
-    ///   - surpriseRate: Current rate of surprise change
-    ///   - dt: Time step for integration
+    /// - Parameter params: Threshold update parameters
     /// - Returns: Updated threshold value
-    func updateThreshold(
-        current: Float,
-        prevIgnition: Float,
-        prevSurprise: Float,
-        currentSurprise: Float,
-        energyReserves: Float,
-        allostaticLoad: Float,
-        deltaTime: Float
-    ) -> Float {
+    func updateThreshold(params: ThresholdUpdateParams) -> Float {
         let theta0 = self.config.theta0
         let gamma = self.config.gamma
         let delta = self.config.delta
         let lambdaUrg = self.config.lambdaUrg
 
-        let homeostasis = gamma * (theta0 - current)
-        let refractoriness = -delta * prevIgnition
-        let dSdt = (currentSurprise - prevSurprise) / max(deltaTime, 0.001)
+        let homeostasis = gamma * (theta0 - params.current)
+        let refractoriness = -delta * params.prevIgnition
+        let dSdt = (params.currentSurprise - params.prevSurprise) / max(params.deltaTime, 0.001)
         let urgency = -lambdaUrg * max(dSdt, 0.0)
-        let metabolicPenalty = (1.0 - energyReserves) * 0.2 + allostaticLoad * 0.1
+        let metabolicPenalty = (1.0 - params.energyReserves) * 0.2 + params.allostaticLoad * 0.1
 
         let dTheta = homeostasis + refractoriness + urgency + metabolicPenalty
-        let newTheta = current + deltaTime * dTheta
+        let newTheta = params.current + params.deltaTime * dTheta
 
         return self.clamp(newTheta, min: self.config.thetaMin, max: self.config.thetaMax)
     }
@@ -669,7 +660,7 @@ final class SimpleAPGIModel {
 
         // Step 6: Update dynamic ignition threshold
         // θ_t evolves based on homeostatic recovery, post-ignition refractory, and urgency
-        let newTheta = self.core.updateThreshold(
+        let params = APGICore.ThresholdUpdateParams(
             current: Float(state.theta),
             prevIgnition: Float(state.prevIgnition),
             prevSurprise: Float(state.prevS),
@@ -678,6 +669,7 @@ final class SimpleAPGIModel {
             allostaticLoad: Float(state.allostaticLoad),
             deltaTime: deltaTime
         )
+        let newTheta = self.core.updateThreshold(params: params)
 
         // Step 7: Compute ignition probability using sigmoid decision rule
         // B_t = σ(α(S_t - θ_t)) - threshold-based stochastic ignition

@@ -51,7 +51,7 @@ struct LazyLoadingContainer<Content: View, Placeholder: View, Loading: View>: Vi
                 else if isVisible && !self.hasLoaded {
                     self.loadingView()
                         .onAppear {
-                            self.loadContentWithDelay()
+                            self.loadContent()
                         }
                 }
                 else {
@@ -238,25 +238,31 @@ struct PerformanceOptimizedChart: View {
 
     var body: some View {
         GeometryReader { geometry in
-            Chart(self.visibleDataPoints) { point in
+            let width = geometry.size.width
+            let maxVisiblePoints = self.performanceManager.shouldLimitConcurrentOperations ? 50 : 200
+            let pointsPerPixel = Double(data.count) / Double(width)
+            let visiblePoints = min(maxVisiblePoints, Int(width * pointsPerPixel))
+
+            let startIndex = max(0, data.count - visiblePoints)
+            let endIndex = self.data.count
+
+            Chart(Array(self.data[startIndex ..< endIndex])) { point in
                 LineMark(
                     x: .value("Time", point.timestamp),
                     y: .value("Value", point.value)
                 )
                 .foregroundStyle(.blue)
             }
-            .frame(height: 300)
-            .onChange(of: geometry.size.width) { _, newWidth in
-                self.updateVisibleDataPoints(for: newWidth)
-            }
             .onAppear {
-                let _ = self.calculateVisibleRange(geometry.size.width)
-                self.updateVisibleDataPoints(for: geometry.size.width)
+                self.updateVisibleDataPoints(for: width)
+            }
+            .onChange(of: width) { _, newWidth in
+                self.updateVisibleDataPoints(for: newWidth)
             }
         }
     }
 
-    private func calculateVisibleRange(_ width: CGFloat) -> Range<Int> {
+    private func updateVisibleDataPoints(for width: CGFloat) {
         let maxVisiblePoints = self.performanceManager.shouldLimitConcurrentOperations ? 50 : 200
         let pointsPerPixel = Double(data.count) / Double(width)
         let visiblePoints = min(maxVisiblePoints, Int(width * pointsPerPixel))
@@ -264,11 +270,6 @@ struct PerformanceOptimizedChart: View {
         let startIndex = max(0, data.count - visiblePoints)
         let endIndex = self.data.count
 
-        return startIndex ..< endIndex
-    }
-
-    private func updateVisibleDataPoints(for width: CGFloat) {
-        let range = self.calculateVisibleRange(width)
-        self.visibleDataPoints = Array(self.data[range])
+        self.visibleDataPoints = Array(self.data[startIndex ..< endIndex])
     }
 }

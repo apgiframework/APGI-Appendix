@@ -34,7 +34,6 @@ class ThemeManager: ObservableObject {
             self.applyTheme()
             // Save settings immediately for persistence
             UserDefaults.standard.set(self.selectedTheme.rawValue, forKey: "selectedTheme")
-            UserDefaults.standard.synchronize()
         }
     }
 
@@ -44,6 +43,15 @@ class ThemeManager: ObservableObject {
     @AppStorage("sidebarVisible") var sidebarVisible: Bool = true
     @AppStorage("focusModeEnabled") var focusModeEnabled: Bool = false
     @AppStorage("autoSaveBookmarks") var autoSaveBookmarks: Bool = true
+
+    // Dynamic Type scaled metrics
+    @ScaledMetric(relativeTo: .body) var bodyFontSize: CGFloat = 15
+    @ScaledMetric(relativeTo: .headline) var headlineFontSize: CGFloat = 17
+    @ScaledMetric(relativeTo: .title) var titleFontSize: CGFloat = 28
+    @ScaledMetric(relativeTo: .title2) var title2FontSize: CGFloat = 22
+    @ScaledMetric(relativeTo: .title3) var title3FontSize: CGFloat = 20
+    @ScaledMetric(relativeTo: .caption) var captionFontSize: CGFloat = 12
+    @ScaledMetric(relativeTo: .footnote) var footnoteFontSize: CGFloat = 13
 
     var backgroundColor: Color {
         switch self.selectedTheme {
@@ -107,8 +115,6 @@ class ThemeManager: ObservableObject {
         UserDefaults.standard.set(self.sidebarVisible, forKey: "sidebarVisible")
         UserDefaults.standard.set(self.focusModeEnabled, forKey: "focusModeEnabled")
         UserDefaults.standard.set(self.autoSaveBookmarks, forKey: "autoSaveBookmarks")
-
-        UserDefaults.standard.synchronize()
     }
 
     func resetToDefaults() {
