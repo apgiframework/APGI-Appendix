@@ -187,6 +187,19 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         return true
     }
 
+    func application(_: NSApplication, open urls: [URL]) {
+        // Handle deep-link URLs
+        guard let url = urls.first else { return }
+
+        logInfo("Received deep link URL: \(url.absoluteString)", context: "AppDelegate.openURLs")
+
+        // Post notification for MainContentView to handle
+        NotificationCenter.default.post(
+            name: NSNotification.Name("HandleDeepLink"),
+            object: url
+        )
+    }
+
     private func setupAppearance() {
         ThemeManager.shared.applyTheme()
     }

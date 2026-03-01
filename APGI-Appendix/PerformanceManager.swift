@@ -15,10 +15,16 @@ final class PerformanceManager: ObservableObject {
     private var cancellables = Set<AnyCancellable>()
     private let contentCache = NSCache<NSString, CachedContent>()
     private let searchCache = NSCache<NSString, CachedSearchResults>()
+    private var memoryPressureSource: DispatchSourceMemoryPressure?
 
     private init() {
         self.setupCacheConfiguration()
         self.setupSystemMonitoring()
+        self.setupMemoryPressureMonitoring()
+    }
+
+    deinit {
+        self.memoryPressureSource?.cancel()
     }
 
     private func setupCacheConfiguration() {
@@ -44,48 +50,30 @@ final class PerformanceManager: ObservableObject {
             }
             .store(in: &self.cancellables)
 
-        // Monitor memory pressure on macOS
-        Timer.publish(every: 10.0, on: .main, in: .common)
-            .autoconnect()
-            .sink { [weak self] _ in
-                self?.checkMemoryPressure()
-            }
-            .store(in: &self.cancellables)
+        // Monitor memory pressure on macOS - replaced with proper setup
+        // Memory pressure is now handled by setupMemoryPressureMonitoring()
     }
 
-    private func checkMemoryPressure() {
-        // Check if system is under memory pressure
+    private func setupMemoryPressureMonitoring() {
         let source = DispatchSource.makeMemoryPressureSource(eventMask: .warning, queue: .main)
         source.setEventHandler { [weak self] in
             self?.handleMemoryWarning()
         }
         source.resume()
-
-        // Also check available memory as a fallback
-        let availableMemory = self.getAvailableMemory()
-        let totalMemory = ProcessInfo.processInfo.physicalMemory
-        let memoryUsageRatio = Double(totalMemory - availableMemory) / Double(totalMemory)
-
-        // Trigger memory warning if usage exceeds 80%
-        if memoryUsageRatio > 0.8 {
-            self.handleMemoryWarning()
-        }
+        self.memoryPressureSource = source // retains until deinit
     }
 
     private func getAvailableMemory() -> UInt64 {
-        var info = mach_task_basic_info()
-        var count = mach_msg_type_number_t(MemoryLayout<mach_task_basic_info>.size) / 4
-
-        let kerr: kern_return_t = withUnsafeMutablePointer(to: &info) {
-            $0.withMemoryRebound(to: integer_t.self, capacity: 1) {
-                task_info(mach_task_self_,
-                          task_flavor_t(MACH_TASK_BASIC_INFO),
-                          $0,
-                          &count)
+        var vmStats = vm_statistics64()
+        var count = mach_msg_type_number_t(MemoryLayout<vm_statistics64>.size / MemoryLayout<integer_t>.size)
+        let result = withUnsafeMutablePointer(to: &vmStats) {
+            $0.withMemoryRebound(to: integer_t.self, capacity: Int(count)) {
+                host_statistics64(mach_host_self(), HOST_VM_INFO64, $0, &count)
             }
         }
-
-        return kerr == KERN_SUCCESS ? UInt64(info.resident_size) : 0
+        guard result == KERN_SUCCESS else { return 0 }
+        let pageSize = UInt64(vm_kernel_page_size)
+        return (UInt64(vmStats.free_count) + UInt64(vmStats.inactive_count)) * pageSize
     }
 
     private func handleMemoryWarning() {

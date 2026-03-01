@@ -153,12 +153,12 @@ struct TabContentView: View {
                 try await Task.sleep(nanoseconds: UInt64(loadingDelay * 1_000_000_000))
 
                 // Validate content availability
-                guard !self.tab.content.isEmpty else {
+                guard !self.tab.fullContent.isEmpty else {
                     throw ContentLoadError.emptyContent
                 }
 
                 // Cache the content
-                let cachedContent = CachedContent(content: tab.content, cost: self.getContentCost(self.tab))
+                let cachedContent = CachedContent(content: tab.fullContent, cost: self.getContentCost(self.tab))
                 self.performanceManager.setCachedContent(cachedContent, for: cacheKey)
 
                 await MainActor.run {

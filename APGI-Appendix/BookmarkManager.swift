@@ -7,6 +7,8 @@ class BookmarkManager: ObservableObject {
     @Published var bookmarks: [String] = []
     @Published var lastAction: BookmarkAction?
 
+    static let shared = BookmarkManager()
+
     private let bookmarksKey = "APGIBookmarks"
 
     enum BookmarkAction {

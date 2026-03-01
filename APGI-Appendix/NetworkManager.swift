@@ -31,14 +31,17 @@ class NetworkManager: ObservableObject {
     func startMonitoring() {
         guard !self.isMonitoring else { return }
 
-        self.monitor.start(queue: self.queue)
-        self.isMonitoring = true
-
-        self.monitor.pathUpdateHandler = { [weak self] path in
-            DispatchQueue.main.async {
-                self?.updateConnectionStatus(path)
+        // Avoid capturing the @MainActor-isolated `self` in the @Sendable handler.
+        weak let weakSelf = self
+        self.monitor.pathUpdateHandler = { path in
+            // Hop to the main actor to update published properties.
+            Task { @MainActor in
+                weakSelf?.updateConnectionStatus(path)
             }
         }
+
+        self.monitor.start(queue: self.queue)
+        self.isMonitoring = true
     }
 
     func stopMonitoring() {

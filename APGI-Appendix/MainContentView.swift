@@ -26,7 +26,7 @@ struct MainContentView: View {
         let navSplitView = NavigationSplitView(columnVisibility: $columnVisibility) {
             self.sidebarView
         } detail: {
-            self.detailContentView
+            self.detailView
         }
 
         let configuredView = navSplitView
@@ -82,6 +82,11 @@ struct MainContentView: View {
                     self.selectedCategory = tab.category
                 }
             }
+            .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("HandleDeepLink"))) { notification in
+                if let url = notification.object as? URL {
+                    self.handleDeepLink(url)
+                }
+            }
 
         let withExport = withSearch
             .onReceive(NotificationCenter.default.publisher(for: .exportPDF)) { _ in
@@ -101,7 +106,7 @@ struct MainContentView: View {
                 panel.begin { response in
                     if response == .OK, let url = panel.url {
                         do {
-                            try (self.selectedSection?.content ?? "").write(to: url, atomically: true, encoding: .utf8)
+                            try (self.selectedSection?.fullContent ?? "").write(to: url, atomically: true, encoding: .utf8)
                         }
                         catch {
                             logError(error, context: "MainContentView.exportCurrentSection", function: #function, file: #file, line: #line)
@@ -250,13 +255,7 @@ struct MainContentView: View {
 
     @ViewBuilder
     private var focusModeOverlay: some View {
-        if self.themeManager.focusModeEnabled, let section = selectedSection {
-            FocusModeView(
-                isEnabled: self.$themeManager.focusModeEnabled,
-                content: section.content,
-                title: section.rawValue
-            )
-        }
+        // Focus mode is handled in detailContentView, not here to prevent double overlay
     }
 
     @ViewBuilder
@@ -300,6 +299,9 @@ struct MainContentView: View {
         activity.isEligibleForPublicIndexing = false
 
         // Set webpage URL for deep linking (only for valid HTTP/HTTPS URLs)
+        if let deepLinkURL = self.createDeepLinkURL(for: section) {
+            activity.webpageURL = deepLinkURL
+        }
         // Note: Custom scheme URLs are not valid for webpageURL property
         // The deep link functionality is handled through the activity itself
 
@@ -410,23 +412,25 @@ struct MainContentView: View {
             return
         }
 
-        // Create the content view for the selected section
-        let contentView = selectedSection.view
-        let hostingView = NSHostingView(rootView: contentView)
+        Task { @MainActor in
+            // Create the content view for the selected section
+            let contentView = selectedSection.view
+            let hostingView = NSHostingView(rootView: contentView)
 
-        // Set up the hosting view with proper sizing
-        hostingView.frame = NSRect(x: 0, y: 0, width: 792, height: 612) // Standard US Letter size
-        hostingView.layoutSubtreeIfNeeded()
+            // Set up the hosting view with proper sizing
+            hostingView.frame = NSRect(x: 0, y: 0, width: 792, height: 612) // Standard US Letter size
+            hostingView.layoutSubtreeIfNeeded()
 
-        // Create PDF data
-        let pdfData = hostingView.dataWithPDF(inside: hostingView.bounds)
+            // Create PDF data
+            let pdfData = hostingView.dataWithPDF(inside: hostingView.bounds)
 
-        do {
-            try pdfData.write(to: url)
-            self.showExportSuccess(message: "PDF exported successfully to \(url.lastPathComponent)")
-        }
-        catch {
-            logError(error, context: "ContentCacheManager", function: #function, file: #file, line: #line)
+            do {
+                try pdfData.write(to: url)
+                self.showExportSuccess(message: "PDF exported successfully to \(url.lastPathComponent)")
+            }
+            catch {
+                logError(error, context: "ContentCacheManager", function: #function, file: #file, line: #line)
+            }
         }
     }
 
@@ -466,7 +470,7 @@ struct MainContentView: View {
         panel.begin { response in
             if response == .OK, let url = panel.url {
                 do {
-                    try (self.selectedSection?.content ?? "").write(to: url, atomically: true, encoding: .utf8)
+                    try (self.selectedSection?.fullContent ?? "").write(to: url, atomically: true, encoding: .utf8)
                 }
                 catch {
                     logError(error, context: "MainContentView.exportToText", function: #function, file: #file, line: #line)
@@ -478,9 +482,38 @@ struct MainContentView: View {
     // MARK: - Help and Updates
 
     private func showHelpGuide() {
-        if let url = URL(string: "https://docs.apgi-framework.org") {
-            NSWorkspace.shared.open(url)
+        URLValidator.shared.openSafely("https://docs.apgi-framework.org") {
+            // Fallback: show local help content
+            self.showLocalHelp()
         }
+    }
+
+    private func showLocalHelp() {
+        let helpContent = URLValidator.shared.getLocalHelpContent()
+
+        let helpWindow = NSWindow(
+            contentRect: NSRect(x: 0, y: 0, width: 600, height: 700),
+            styleMask: [.titled, .closable, .resizable],
+            backing: .buffered,
+            defer: false
+        )
+
+        helpWindow.title = "APGI Appendix Help"
+        helpWindow.center()
+        helpWindow.setFrameAutosaveName("HelpWindow")
+
+        let helpView = ScrollView {
+            VStack(alignment: .leading, spacing: 16) {
+                Text(helpContent)
+                    .font(.system(size: 14, design: .monospaced))
+                    .textSelection(.enabled)
+                    .padding()
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+        }
+
+        helpWindow.contentView = NSHostingView(rootView: helpView)
+        helpWindow.makeKeyAndOrderFront(nil)
     }
 
     private func checkForUpdates() {
@@ -493,24 +526,26 @@ struct MainContentView: View {
             return
         }
 
-        // Create the content view for the selected section
-        let contentView = selectedSection.view
-        let hostingView = NSHostingView(rootView: contentView)
+        Task { @MainActor in
+            // Create the content view for the selected section
+            let contentView = selectedSection.view
+            let hostingView = NSHostingView(rootView: contentView)
 
-        // Set up the hosting view with proper sizing
-        hostingView.frame = NSRect(x: 0, y: 0, width: 792, height: 612) // Standard US Letter size
-        hostingView.layoutSubtreeIfNeeded()
+            // Set up the hosting view with proper sizing
+            hostingView.frame = NSRect(x: 0, y: 0, width: 792, height: 612) // Standard US Letter size
+            hostingView.layoutSubtreeIfNeeded()
 
-        // Create print operation
-        let printOperation = NSPrintOperation(view: hostingView)
-        printOperation.printInfo.orientation = .portrait
-        printOperation.printInfo.scalingFactor = 1.0
+            // Create print operation
+            let printOperation = NSPrintOperation(view: hostingView)
+            printOperation.printInfo.orientation = .portrait
+            printOperation.printInfo.scalingFactor = 1.0
 
-        // Set print job title
-        printOperation.printInfo.jobDisposition = .spool
+            // Set print job title
+            printOperation.printInfo.jobDisposition = .spool
 
-        // Run the print operation
-        printOperation.run()
+            // Run the print operation
+            printOperation.run()
+        }
     }
 
     private struct DetailContentView: View {
@@ -524,7 +559,7 @@ struct MainContentView: View {
                 if self.focusModeEnabled {
                     FocusModeView(
                         isEnabled: self.$focusModeEnabled,
-                        content: self.section.content,
+                        content: self.section.fullContent,
                         title: self.section.rawValue
                     )
                 }
@@ -548,10 +583,57 @@ struct MainContentView: View {
                         .font(.footnote)
                         .foregroundStyle(.secondary)
 
-                    if self.section.hasTables {
-                        Text("Includes tables")
-                            .font(.footnote)
+                    // Content type indicators
+                    HStack(spacing: 8) {
+                        if self.section.hasTables {
+                            Label("Tables", systemImage: "tablecells")
+                                .font(.caption)
+                                .foregroundStyle(.blue)
+                        }
+
+                        if self.section.hasMath {
+                            Label("Math", systemImage: "function")
+                                .font(.caption)
+                                .foregroundStyle(.orange)
+                        }
+
+                        if self.section.hasDiagrams {
+                            Label("Diagrams", systemImage: "chart.line.uptrend.xyaxis")
+                                .font(.caption)
+                                .foregroundStyle(.green)
+                        }
+                    }
+
+                    // Related sections (cross-references)
+                    if !self.section.relatedSections.isEmpty {
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("Related")
+                                .font(.caption.weight(.semibold))
+                                .foregroundStyle(.secondary)
+
+                            ForEach(self.section.relatedSections, id: \.self) { relatedSection in
+                                HStack(spacing: 4) {
+                                    Image(systemName: relatedSection.icon)
+                                        .font(.caption)
+                                        .foregroundStyle(.tertiary)
+                                    Text(relatedSection.shortTitle)
+                                        .font(.caption)
+                                        .foregroundStyle(.blue)
+                                }
+                            }
+                        }
+                    }
+
+                    // Additional metadata
+                    Divider()
+
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("Last Updated")
+                            .font(.caption.weight(.semibold))
                             .foregroundStyle(.secondary)
+                        Text(DateFormatter.localizedString(from: Date(), dateStyle: .medium, timeStyle: .none))
+                            .font(.caption)
+                            .foregroundStyle(.tertiary)
                     }
                 }
 

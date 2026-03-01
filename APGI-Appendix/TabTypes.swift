@@ -117,6 +117,29 @@ enum Tab: String, CaseIterable, Identifiable {
         }
     }
 
+    var hasMath: Bool {
+        switch self {
+        case .mathematicalModel, .apgiMapping, .parameterIdentifiability,
+             .neuromodulatoryImplementation, .explicitNeuromodulator,
+             .ignitionTimeline, .apgiSimulator:
+            return true
+        default:
+            return false
+        }
+    }
+
+    var hasDiagrams: Bool {
+        switch self {
+        case .apgiMapping, .biologicalImplementation, .neuromodulatorEffects,
+             .neuromodulatoryImplementation, .explicitNeuromodulator,
+             .ignitionTimeline, .neuromodulatoryControl, .lifeStages,
+             .psychologicalStates, .apgiToPsyState, .disordersConditions:
+            return true
+        default:
+            return false
+        }
+    }
+
     var searchIndexText: String {
         switch self {
         case .methodology:
@@ -176,8 +199,55 @@ enum Tab: String, CaseIterable, Identifiable {
         }
     }
 
-    var content: String {
-        self.fullContent
+    var relatedSections: [Tab] {
+        switch self {
+        case .methodology:
+            return [.mathematicalModel, .apgiStatement, .epistemicStandards]
+        case .mathematicalModel:
+            return [.methodology, .apgiMapping, .parameterIdentifiability]
+        case .apgiMapping:
+            return [.mathematicalModel, .biologicalImplementation, .neuromodulatoryImplementation]
+        case .parameterIdentifiability:
+            return [.mathematicalModel, .apgiMapping]
+        case .biologicalImplementation:
+            return [.apgiMapping, .neuromodulatorEffects, .neuromodulatoryImplementation]
+        case .neuromodulatorEffects:
+            return [.biologicalImplementation, .neuromodulatoryImplementation, .explicitNeuromodulator]
+        case .neuromodulatoryImplementation:
+            return [.neuromodulatorEffects, .explicitNeuromodulator, .neuromodulatoryControl]
+        case .explicitNeuromodulator:
+            return [.neuromodulatorEffects, .neuromodulatoryImplementation]
+        case .mappingCognitiveToApgi:
+            return [.apgiToCognitive, .psychologicalStates, .apgiToPsyState]
+        case .apgiToCognitive:
+            return [.mappingCognitiveToApgi, .psychologicalStates]
+        case .psychologicalStates:
+            return [.apgiToPsyState, .mappingCognitiveToApgi, .apgiToCognitive]
+        case .apgiToPsyState:
+            return [.psychologicalStates, .psychiatricDisorders, .disordersConditions]
+        case .ignitionTimeline:
+            return [.neuromodulatoryControl, .apgiSimulator]
+        case .neuromodulatoryControl:
+            return [.neuromodulatoryImplementation, .ignitionTimeline]
+        case .psychiatricDisorders:
+            return [.apgiToPsyState, .disordersConditions, .lifeStages]
+        case .disordersConditions:
+            return [.psychiatricDisorders, .lifeStages]
+        case .apgiStatement:
+            return [.methodology, .epistemicStandards]
+        case .lifeStages:
+            return [.disordersConditions, .psychologicalStates, .thermodynamicEfficiency]
+        case .thermodynamicEfficiency:
+            return [.lifeStages, .epistemicStandards]
+        case .epistemicStandards:
+            return [.methodology, .apgiStatement, .thermodynamicEfficiency]
+        case .bibliography:
+            return [.glossary]
+        case .glossary:
+            return [.bibliography]
+        case .apgiSimulator:
+            return [.ignitionTimeline, .mathematicalModel]
+        }
     }
 
     var fullContent: String {

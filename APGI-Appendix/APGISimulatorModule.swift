@@ -31,14 +31,14 @@ struct APGIState {
     var norepinephrine: Double
     var acetylcholine: Double
 
-    static func initialize(hiddenSize: Int = APGISimulatorConstants.defaultHiddenSize, numLevels: Int = APGISimulatorConstants.defaultNumLevels) -> APGIState {
-        let interoStates = (try? MLMultiArray(shape: [1, NSNumber(value: hiddenSize * numLevels)], dataType: .float32)) ?? MLMultiArray()
-        let exteroStates = (try? MLMultiArray(shape: [1, NSNumber(value: hiddenSize * numLevels)], dataType: .float32)) ?? MLMultiArray()
-        let workspace = (try? MLMultiArray(shape: [1, NSNumber(value: hiddenSize)], dataType: .float32)) ?? MLMultiArray()
-        let qMean = (try? MLMultiArray(shape: [1, NSNumber(value: hiddenSize)], dataType: .float32)) ?? MLMultiArray()
-        let qVar = (try? MLMultiArray(shape: [1, NSNumber(value: hiddenSize)], dataType: .float32)) ?? MLMultiArray()
-        let pMean = (try? MLMultiArray(shape: [1, NSNumber(value: hiddenSize)], dataType: .float32)) ?? MLMultiArray()
-        let pVar = (try? MLMultiArray(shape: [1, NSNumber(value: hiddenSize)], dataType: .float32)) ?? MLMultiArray()
+    static func initialize(hiddenSize: Int = APGISimulatorConstants.defaultHiddenSize, numLevels: Int = APGISimulatorConstants.defaultNumLevels) throws -> APGIState {
+        let interoStates = try MLMultiArray(shape: [1, NSNumber(value: hiddenSize * numLevels)], dataType: .float32)
+        let exteroStates = try MLMultiArray(shape: [1, NSNumber(value: hiddenSize * numLevels)], dataType: .float32)
+        let workspace = try MLMultiArray(shape: [1, NSNumber(value: hiddenSize)], dataType: .float32)
+        let qMean = try MLMultiArray(shape: [1, NSNumber(value: hiddenSize)], dataType: .float32)
+        let qVar = try MLMultiArray(shape: [1, NSNumber(value: hiddenSize)], dataType: .float32)
+        let pMean = try MLMultiArray(shape: [1, NSNumber(value: hiddenSize)], dataType: .float32)
+        let pVar = try MLMultiArray(shape: [1, NSNumber(value: hiddenSize)], dataType: .float32)
 
         for index in 0 ..< (hiddenSize * numLevels) {
             interoStates[index] = 0.0
@@ -780,7 +780,13 @@ actor StateManager {
     }
 
     func reset(configuration: APGIConfiguration) async {
-        self.currentState = await APGIState.initial(configuration: configuration)
+        do {
+            self.currentState = try await APGIState.initial(configuration: configuration)
+        }
+        catch {
+            // Handle error appropriately - could log or set error state
+            print("Failed to reset APGI state: \(error)")
+        }
     }
 }
 
@@ -809,11 +815,11 @@ final class APGIInferenceEngine: ObservableObject {
         self.config
     }
 
-    init(configuration: APGIConfiguration) {
+    init(configuration: APGIConfiguration) throws {
         self.config = configuration
         self.inferenceQueue = DispatchQueue(label: "com.apgi.inference", qos: .userInitiated, attributes: .concurrent)
 
-        let initialState = APGIState.initialize(hiddenSize: configuration.hiddenSize, numLevels: configuration.numLevels)
+        let initialState = try APGIState.initialize(hiddenSize: configuration.hiddenSize, numLevels: configuration.numLevels)
         self.currentState = initialState
         self.stateManager = StateManager(initialState: initialState)
 
@@ -1104,8 +1110,8 @@ struct PerformanceMetrics {
 }
 
 extension APGIState {
-    static func initial(configuration: APGIConfiguration) -> APGIState {
-        APGIState.initialize(hiddenSize: configuration.hiddenSize, numLevels: configuration.numLevels)
+    static func initial(configuration: APGIConfiguration) throws -> APGIState {
+        try APGIState.initialize(hiddenSize: configuration.hiddenSize, numLevels: configuration.numLevels)
     }
 }
 
@@ -1243,34 +1249,97 @@ struct APGITimeSeriesView: View {
 }
 
 struct APGISimulatorView: View {
-    @StateObject private var engine = APGIInferenceEngine(configuration: .default)
+    @StateObject private var engine: APGIInferenceEngine
+    @State private var engineError: String?
     @State private var isLoading = true
     @State private var loadError: String?
     @State private var context = APGIContext()
+
+    init() {
+        do {
+            let engine = try APGIInferenceEngine(configuration: .default)
+            self._engine = StateObject(wrappedValue: engine)
+            self.engineError = nil
+        }
+        catch {
+            // Create a fallback engine with minimal configuration
+            do {
+                let fallbackConfig = APGIConfiguration(
+                    inputSize: 32,
+                    hiddenSize: 64,
+                    numLevels: 2,
+                    dtMs: 10.0,
+                    maxWindowMs: 1000.0,
+                    theta0: 0.5,
+                    gamma: 0.1,
+                    delta: 0.2,
+                    lambdaUrg: 0.1,
+                    thetaMin: 0.1,
+                    thetaMax: 2.0,
+                    betaTransition: 5.0,
+                    hysteresis: 0.1,
+                    tauMin: 0.1,
+                    tauMax: 2.0,
+                    tauInteroBaseline: 1.0,
+                    tauExteroBaseline: 1.0,
+                    precisionMin: 0.1,
+                    precisionMax: 2.0,
+                    alphaBroadcast: 0.1,
+                    betaMaintenance: 0.01,
+                    energyDepletionRate: 0.1,
+                    energyMin: 0.1,
+                    energyMax: 1.0,
+                    allostaticIncreaseRate: 0.1,
+                    allostaticDecreaseRate: 0.2,
+                    allostaticMin: 0.0,
+                    allostaticMax: 1.0,
+                    maxRefractoryMs: 100.0,
+                    historyLength: 10,
+                    eps: 1e-6,
+                    reservoirScaling: 1.0,
+                    reservoirSparsity: 0.1,
+                    precisionHistoryMax: 10
+                )
+                let fallbackEngine = try APGIInferenceEngine(configuration: fallbackConfig)
+                self._engine = StateObject(wrappedValue: fallbackEngine)
+                self.engineError = "Using fallback configuration due to initialization error: \(error.localizedDescription)"
+            }
+            catch {
+                // If even fallback fails, we can't continue
+                fatalError("Failed to initialize APGI engine with both default and fallback configurations: \(error)")
+            }
+        }
+    }
+
     @State private var isSimulating = false
     @State private var simulationTimer: Timer?
 
     var body: some View {
         VStack(spacing: 0) {
-            self.headerView
-            Divider()
+            if let error = engineError {
+                self.errorView(error)
+            }
+            else {
+                self.headerView
+                Divider()
 
-            ScrollView {
-                VStack(spacing: 20) {
-                    if self.isLoading {
-                        self.loadingView
+                ScrollView {
+                    VStack(spacing: 20) {
+                        if self.isLoading {
+                            self.loadingView
+                        }
+                        else if let error = loadError {
+                            self.errorView(error)
+                        }
+                        else {
+                            self.statusSection
+                            self.dynamicsChartSection
+                            self.controlsSection
+                            self.diagnosticsSection
+                        }
                     }
-                    else if let error = loadError {
-                        self.errorView(error)
-                    }
-                    else {
-                        self.statusSection
-                        self.dynamicsChartSection
-                        self.controlsSection
-                        self.diagnosticsSection
-                    }
+                    .padding()
                 }
-                .padding()
             }
         }
         .task {

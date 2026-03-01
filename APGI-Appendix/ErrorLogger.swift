@@ -29,6 +29,9 @@ class ErrorLogger: ObservableObject {
 
         self.logFileURL = appDir.appendingPathComponent("error.log")
 
+        // Set file protection attributes
+        self.setFileProtection()
+
         // Load recent errors on startup
         self.loadRecentErrors()
     }
@@ -52,6 +55,38 @@ class ErrorLogger: ObservableObject {
 
         // Also log to system logger
         os_log("%{public}@", log: self.osLog, type: .error, "\(context): \(error.localizedDescription)")
+    }
+
+    func success(_ message: String, context: String = "", function: String = #function, file: String = #fileID, line: Int = #line) {
+        guard self.isLoggingEnabled else { return }
+
+        let entry = LogEntry(
+            timestamp: Date(),
+            level: .info,
+            message: message,
+            context: context,
+            function: function,
+            file: file,
+            line: line
+        )
+
+        self.writeLogEntry(entry)
+    }
+
+    func warning(_ message: String, context: String = "", function: String = #function, file: String = #fileID, line: Int = #line) {
+        guard self.isLoggingEnabled else { return }
+
+        let entry = LogEntry(
+            timestamp: Date(),
+            level: .warning,
+            message: message,
+            context: context,
+            function: function,
+            file: file,
+            line: line
+        )
+
+        self.writeLogEntry(entry)
     }
 
     func log(_ message: String, level: LogLevel = .info, context: String = "", function: String = #function, file: String = #fileID, line: Int = #line) {
@@ -102,6 +137,17 @@ class ErrorLogger: ObservableObject {
 
     // MARK: - Private Methods
 
+    private func setFileProtection() {
+        do {
+            var attributes = try FileManager.default.attributesOfItem(atPath: self.logFileURL.path)
+            attributes[.protectionKey] = FileProtectionType.complete
+            try FileManager.default.setAttributes(attributes, ofItemAtPath: self.logFileURL.path)
+        }
+        catch {
+            os_log("Failed to set file protection: %{public}@", log: OSLog(subsystem: "com.apgi.appendix", category: "ErrorLogger"), type: .error, error.localizedDescription)
+        }
+    }
+
     private func writeLogEntry(_ entry: LogEntry) {
         // Add to recent errors
         self.recentErrors.append(entry)
@@ -128,11 +174,16 @@ class ErrorLogger: ObservableObject {
                 fileHandle.seekToEndOfFile()
                 fileHandle.write(logLine.data(using: .utf8) ?? Data())
                 fileHandle.closeFile()
+            } else {
+                // Fallback to system log if file writing fails
+                os_log("Failed to open log file for writing at path: %{public}@", log: OSLog(subsystem: "com.apgi.appendix", category: "ErrorLogger"), type: .error, logFileURL.path)
             }
         }
         else {
             // Create new file
             try? logLine.write(to: self.logFileURL, atomically: true, encoding: .utf8)
+            // Set file protection on newly created file
+            self.setFileProtection()
         }
     }
 
@@ -455,3 +506,4 @@ func logDebug(_ message: String, context: String = "", function: String = #funct
         ErrorLogger.shared.log(message, level: .debug, context: context, function: function, file: file, line: line)
     }
 }
+

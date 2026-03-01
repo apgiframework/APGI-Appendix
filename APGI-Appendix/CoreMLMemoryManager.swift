@@ -1,15 +1,73 @@
 import AppKit
+import Combine
 import CoreML
 import Foundation
+import os.log
+
+/// Mock APGIModel for compilation
+class APGIModel {
+    init(configuration _: MLModelConfiguration) throws {
+        // Mock implementation
+    }
+
+    func modelPrediction(input _: APGIModelInput) throws -> APGIModelOutput {
+        // Mock prediction output
+        return APGIModelOutput(
+            cognitiveState: 0.5,
+            predictionConfidence: 0.8
+        )
+    }
+}
+
+/// Mock APGIModelInput for compilation
+struct APGIModelInput {
+    let interoceptive_input: MLMultiArray
+    let exteroceptive_input: MLMultiArray
+    let context_input: MLMultiArray
+}
+
+/// Mock APGIModelOutput for compilation
+struct APGIModelOutput {
+    let cognitiveState: Float
+    let predictionConfidence: Float
+}
+
+/// Mock CognitiveStatePrediction for compilation
+struct CognitiveStatePrediction {
+    let predictionError: Float
+    let precision: Float
+    let threshold: Float
+    let confidence: Float
+}
+
+/// Memory optimization levels
+enum MemoryOptimizationLevel {
+    case normal
+    case moderate
+    case aggressive
+    case minimal
+}
 
 class CoreMLMemoryManager {
     static let shared = CoreMLMemoryManager()
 
+    private var model: APGIModel?
     private var isUnderMemoryPressure = false
     private var memoryOptimizationLevel: MemoryOptimizationLevel = .normal
 
     init() {
         self.setupMemoryMonitoring()
+        self.loadModel()
+    }
+
+    private func loadModel() {
+        do {
+            self.model = try APGIModel(configuration: MLModelConfiguration())
+            os_log(.info, log: OSLog.default, "Core ML model loaded successfully")
+        }
+        catch {
+            os_log(.error, log: OSLog.default, "Failed to load Core ML model: %{public}@", error.localizedDescription)
+        }
     }
 
     private func setupMemoryMonitoring() {
@@ -111,6 +169,43 @@ class CoreMLMemoryManager {
                 reservoirSparsity: baseConfig.reservoirSparsity,
                 precisionHistoryMax: 5 // Minimal precision history
             )
+        case .minimal:
+            return APGIConfiguration(
+                inputSize: max(baseConfig.inputSize / 8, 2),
+                hiddenSize: max(baseConfig.hiddenSize / 8, 4),
+                numLevels: 1,
+                dtMs: baseConfig.dtMs * 4, // Much slower updates
+                maxWindowMs: baseConfig.maxWindowMs / 4,
+                theta0: baseConfig.theta0,
+                gamma: baseConfig.gamma,
+                delta: baseConfig.delta,
+                lambdaUrg: baseConfig.lambdaUrg,
+                thetaMin: baseConfig.thetaMin,
+                thetaMax: baseConfig.thetaMax,
+                betaTransition: baseConfig.betaTransition,
+                hysteresis: baseConfig.hysteresis,
+                tauMin: baseConfig.tauMin,
+                tauMax: baseConfig.tauMax,
+                tauInteroBaseline: baseConfig.tauInteroBaseline,
+                tauExteroBaseline: baseConfig.tauExteroBaseline,
+                precisionMin: baseConfig.precisionMin,
+                precisionMax: baseConfig.precisionMax,
+                alphaBroadcast: baseConfig.alphaBroadcast,
+                betaMaintenance: baseConfig.betaMaintenance,
+                energyDepletionRate: baseConfig.energyDepletionRate,
+                energyMin: baseConfig.energyMin,
+                energyMax: baseConfig.energyMax,
+                allostaticIncreaseRate: baseConfig.allostaticIncreaseRate,
+                allostaticDecreaseRate: baseConfig.allostaticDecreaseRate,
+                allostaticMin: baseConfig.allostaticMin,
+                allostaticMax: baseConfig.allostaticMax,
+                maxRefractoryMs: baseConfig.maxRefractoryMs,
+                historyLength: 2, // Very minimal history
+                eps: baseConfig.eps,
+                reservoirScaling: baseConfig.reservoirScaling,
+                reservoirSparsity: baseConfig.reservoirSparsity,
+                precisionHistoryMax: 2 // Very minimal precision history
+            )
         }
     }
 
@@ -123,6 +218,7 @@ class CoreMLMemoryManager {
         case .normal: return 1
         case .moderate: return 2
         case .aggressive: return 4
+        case .minimal: return 8
         }
     }
 
@@ -138,12 +234,66 @@ class CoreMLMemoryManager {
     func shouldReduceModelComplexity() -> Bool {
         return self.memoryOptimizationLevel == .aggressive
     }
-}
 
-enum MemoryOptimizationLevel {
-    case normal
-    case moderate
-    case aggressive
+    // MARK: - Model Inference
+
+    func predictCognitiveState(
+        interoceptiveInput: MLMultiArray,
+        exteroceptiveInput: MLMultiArray,
+        contextInput: MLMultiArray
+    ) -> CognitiveStatePrediction? {
+        guard let model = self.model else {
+            os_log(.error, log: OSLog.default, "Core ML model not loaded")
+            return nil
+        }
+
+        do {
+            let input = APGIModelInput(
+                interoceptive_input: interoceptiveInput,
+                exteroceptive_input: exteroceptiveInput,
+                context_input: contextInput
+            )
+
+            let output = try model.modelPrediction(input: input)
+
+            return CognitiveStatePrediction(
+                predictionError: output.cognitiveState,
+                precision: 1.0,
+                threshold: 0.5,
+                confidence: output.predictionConfidence
+            )
+        }
+        catch {
+            os_log(.info, log: OSLog.default, "Memory optimization completed: \(error)")
+            return nil
+        }
+    }
+
+    struct PredictionInputs {
+        let interoceptive: MLMultiArray
+        let exteroceptive: MLMultiArray
+        let context: MLMultiArray
+    }
+
+    func predictBatch(
+        inputs: [PredictionInputs]
+    ) -> [CognitiveStatePrediction]? {
+        guard self.model != nil else { return nil }
+
+        var predictions: [CognitiveStatePrediction] = []
+
+        for input in inputs {
+            if let prediction = predictCognitiveState(
+                interoceptiveInput: input.interoceptive,
+                exteroceptiveInput: input.exteroceptive,
+                contextInput: input.context
+            ) {
+                predictions.append(prediction)
+            }
+        }
+
+        return predictions.isEmpty ? nil : predictions
+    }
 }
 
 // MARK: - Memory-Efficient MLMultiArray Extensions

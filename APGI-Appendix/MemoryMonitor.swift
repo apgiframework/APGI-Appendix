@@ -2,6 +2,7 @@ import Combine
 import Foundation
 
 /// Memory monitoring utility for leak detection and performance tracking
+@MainActor
 class MemoryMonitor: ObservableObject {
     static let shared = MemoryMonitor()
 
@@ -37,7 +38,9 @@ class MemoryMonitor: ObservableObject {
         self.stopMonitoring()
 
         self.timer = Timer.scheduledTimer(withTimeInterval: interval, repeats: true) { [weak self] _ in
-            self?.recordMemoryStats()
+            Task { @MainActor in
+                await self?.recordMemoryStats()
+            }
         }
         self.timer?.tolerance = 0.1
 
@@ -100,7 +103,7 @@ class MemoryMonitor: ObservableObject {
         logInfo("Garbage collection triggered", context: "MemoryMonitor.forceGarbageCollection")
     }
 
-    private func recordMemoryStats() {
+    private func recordMemoryStats() async {
         let stats = MemoryStats(
             timestamp: Date(),
             usedMemory: getUsedMemory(),

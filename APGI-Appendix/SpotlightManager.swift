@@ -53,7 +53,7 @@ class SpotlightManager {
         attributeSet.displayName = tab.rawValue
 
         // Add more detailed content for better search results
-        let fullContent = tab.content
+        let fullContent = tab.fullContent
         attributeSet.contentDescription = fullContent.prefix(200) + (fullContent.count > 200 ? "..." : "")
 
         let identifier = "com.apgi-framework.appendix.\(tab.rawValue)"

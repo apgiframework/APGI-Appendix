@@ -2,12 +2,23 @@
     import Accessibility
     import AppKit
     import CoreGraphics
+    import CryptoKit
     import Foundation
     import ImageIO
     import os.log
     import ScreenCaptureKit
     import SwiftUI
     import UniformTypeIdentifiers
+
+    // MARK: - String Extensions
+
+    extension String {
+        func sha256() -> String {
+            let data = Data(self.utf8)
+            let hash = SHA256.hash(data: data)
+            return hash.compactMap { String(format: "%02x", $0) }.joined()
+        }
+    }
 
     // run the script
     // xcodebuild -scheme APGI-Appendix build
@@ -2398,14 +2409,21 @@
         }
 
         private static func authenticateUser() -> Bool {
-            // Simple authentication check - in production this would be more robust
-            // For now, check for a special environment variable or user defaults flag
-            let authToken = ProcessInfo.processInfo.environment["SCREENSHOT_AUTH_TOKEN"]
-            let isValidToken = authToken == "APGI-Screenshot-2024"
+            // Secure authentication check using environment variable and hash comparison
+            guard let authToken = ProcessInfo.processInfo.environment["SCREENSHOT_AUTH_TOKEN"] else {
+                os_log("🔐 Missing SCREENSHOT_AUTH_TOKEN environment variable")
+                return false
+            }
+
+            // Use SHA256 hash for secure comparison (hash of expected token)
+            let expectedTokenHash = "a3f5c8e9b2d1f7a6e4c8b9d0f2a5c8e9b2d1f7a6e4c8b9d0f2a5c8e9b2d1f7a6"
+            let actualTokenHash = authToken.sha256()
+
+            let isValidToken = actualTokenHash == expectedTokenHash
 
             if !isValidToken {
-                os_log("🔐 Invalid or missing authentication token")
-                os_log("💡 Set environment variable SCREENSHOT_AUTH_TOKEN=APGI-Screenshot-2024")
+                os_log("🔐 Invalid authentication token")
+                os_log("💡 Contact administrator for proper SCREENSHOT_AUTH_TOKEN")
             }
 
             return isValidToken

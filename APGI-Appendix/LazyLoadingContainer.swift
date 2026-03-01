@@ -146,17 +146,24 @@ struct LazyChartView: View {
 struct LazyTableView: View {
     let markdownTable: String
 
+    private var parsedTableView: some View {
+        do {
+            let parsedTable = try TableParser().parseMarkdownTable(self.markdownTable)
+            return AnyView(parsedTable.toSwiftUIView())
+        }
+        catch {
+            return AnyView(
+                Text("Error loading table: \(error.localizedDescription)")
+                    .foregroundColor(.red)
+            )
+        }
+    }
+
     var body: some View {
         LazyLoadingContainer(
             content: {
                 VStack(alignment: .leading, spacing: 16) {
-                    if let parsedTable = try? TableParser().parseMarkdownTable(markdownTable) {
-                        parsedTable.toSwiftUIView()
-                    }
-                    else {
-                        Text("Failed to load table")
-                            .foregroundStyle(.red)
-                    }
+                    self.parsedTableView
                 }
                 .padding()
             },
@@ -187,7 +194,64 @@ struct LazyTableView: View {
 }
 
 struct LazySimulationView: View {
-    @StateObject private var simulationEngine = APGIInferenceEngine(configuration: .default)
+    @StateObject private var simulationEngine: APGIInferenceEngine
+    @State private var engineError: String?
+
+    init() {
+        do {
+            let engine = try APGIInferenceEngine(configuration: .default)
+            self._simulationEngine = StateObject(wrappedValue: engine)
+            self.engineError = nil
+        }
+        catch {
+            // Create a fallback engine with minimal configuration
+            do {
+                let fallbackConfig = APGIConfiguration(
+                    inputSize: 32,
+                    hiddenSize: 64,
+                    numLevels: 2,
+                    dtMs: 10.0,
+                    maxWindowMs: 1000.0,
+                    theta0: 0.5,
+                    gamma: 0.1,
+                    delta: 0.2,
+                    lambdaUrg: 0.1,
+                    thetaMin: 0.1,
+                    thetaMax: 2.0,
+                    betaTransition: 5.0,
+                    hysteresis: 0.1,
+                    tauMin: 0.1,
+                    tauMax: 2.0,
+                    tauInteroBaseline: 1.0,
+                    tauExteroBaseline: 1.0,
+                    precisionMin: 0.1,
+                    precisionMax: 2.0,
+                    alphaBroadcast: 0.1,
+                    betaMaintenance: 0.01,
+                    energyDepletionRate: 0.1,
+                    energyMin: 0.1,
+                    energyMax: 1.0,
+                    allostaticIncreaseRate: 0.1,
+                    allostaticDecreaseRate: 0.2,
+                    allostaticMin: 0.0,
+                    allostaticMax: 1.0,
+                    maxRefractoryMs: 100.0,
+                    historyLength: 10,
+                    eps: 1e-6,
+                    reservoirScaling: 1.0,
+                    reservoirSparsity: 0.1,
+                    precisionHistoryMax: 10
+                )
+                let fallbackEngine = try APGIInferenceEngine(configuration: fallbackConfig)
+                self._simulationEngine = StateObject(wrappedValue: fallbackEngine)
+                self.engineError = "Using fallback configuration due to initialization error: \(error.localizedDescription)"
+            }
+            catch {
+                // If even fallback fails, we can't continue
+                fatalError("Failed to initialize APGI engine with both default and fallback configurations: \(error)")
+            }
+        }
+    }
 
     var body: some View {
         LazyLoadingContainer(
