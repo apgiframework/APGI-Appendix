@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct NeuromodulatorEffectsView: View {
-    private let effectsBody = """
+  private let effectsBody = """
 
     Neuromodulator Effects on APGI Model State Variables
 
@@ -131,21 +131,21 @@ struct NeuromodulatorEffectsView: View {
 
     """
 
-    var body: some View {
-        ScrollView {
-            LazyVStack(alignment: .leading, spacing: 20) {
-                EnhancedContentCard(
-                    title: "Neuromodulator Effects",
-                    content: self.effectsBody,
-                    category: .biological,
-                    hasDataTable: false
-                )
-            }
-            .padding()
-        }
+  var body: some View {
+    ScrollView {
+      LazyVStack(alignment: .leading, spacing: 20) {
+        EnhancedContentCard(
+          title: "Neuromodulator Effects",
+          content: self.effectsBody,
+          category: .biological,
+          hasDataTable: false
+        )
+      }
+      .padding()
     }
+  }
 }
 
 #Preview {
-    NeuromodulatorEffectsView()
+  NeuromodulatorEffectsView()
 }

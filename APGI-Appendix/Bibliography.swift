@@ -7,7 +7,7 @@ import UniformTypeIdentifiers
 // All bibliography data is now sourced locally
 
 struct BibliographyView: View {
-    private let bibliographyBody = """
+  private let bibliographyBody = """
 
     Baars, B. J. (1988). A cognitive theory of consciousness. Cambridge University Press.
 
@@ -191,28 +191,28 @@ struct BibliographyView: View {
 
     """
 
-    var body: some View {
-        VStack(spacing: 0) {
-            HStack {
-                Text("Bibliography")
-                    .font(.title.bold())
+  var body: some View {
+    VStack(spacing: 0) {
+      HStack {
+        Text("Bibliography")
+          .font(.title.bold())
 
-                Spacer()
-            }
-            .padding()
-            .background(.thinMaterial)
+        Spacer()
+      }
+      .padding()
+      .background(.thinMaterial)
 
-            EnhancedContentCard(
-                title: "Bibliography",
-                content: self.bibliographyBody,
-                category: SectionCategory.reference,
-                hasDataTable: false
-            )
-            .padding()
-        }
+      EnhancedContentCard(
+        title: "Bibliography",
+        content: self.bibliographyBody,
+        category: SectionCategory.reference,
+        hasDataTable: false
+      )
+      .padding()
     }
+  }
 }
 
 #Preview {
-    BibliographyView()
+  BibliographyView()
 }

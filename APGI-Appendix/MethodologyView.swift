@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct MethodologyView: View {
-    private let methodologyBody = """
+  private let methodologyBody = """
         The persistent challenges in the field are the pitfalls of vague assertions, implicit assumptions
         and unfalsifiable claims that have long hindered progress. Theoretical frameworks of consciousness
         must meet stringent standards to move beyond correlation and establish causation, ensure
@@ -64,94 +64,99 @@ struct MethodologyView: View {
         stringent test. This ensures causal claims are explicitly tested rather than merely assumed.
     """
 
-    var body: some View {
-        EnhancedSectionView(section: self.enhancedSection)
+  var body: some View {
+    EnhancedSectionView(section: self.enhancedSection)
+  }
+
+  private var enhancedSection: EnhancedSection {
+    EnhancedSection(
+      id: "methodology",
+      title: "Methodology",
+      summary:
+        "Seven criteria to keep consciousness theories empirically grounded, logically explicit, and falsifiable—while providing a practical roadmap from correlation to causation.",
+      icon: Tab.methodology.icon,
+      estimatedReadingTime: "~8 min",
+      conceptDiagram: nil,
+      subsections: [
+        EnhancedSection.Subsection(
+          id: "level-transparency",
+          title: "Level Transparency",
+          content: self.extractParagraphs(prefix: "Standard 1:", from: self.methodologyBody),
+          category: .theoretical,
+          hasDataTable: false
+        ),
+        EnhancedSection.Subsection(
+          id: "bridge-principles",
+          title: "Bridge Principles Required",
+          content: self.extractParagraphs(prefix: "Standard 2:", from: self.methodologyBody),
+          category: .theoretical,
+          hasDataTable: false
+        ),
+        EnhancedSection.Subsection(
+          id: "quantitative-benchmarks",
+          title: "Quantitative Benchmarks",
+          content: self.extractParagraphs(prefix: "Standard 3:", from: self.methodologyBody),
+          category: .theoretical,
+          hasDataTable: false
+        ),
+        EnhancedSection.Subsection(
+          id: "falsification",
+          title: "Falsification Conditions",
+          content: self.extractParagraphs(prefix: "Standard 4:", from: self.methodologyBody),
+          category: .theoretical,
+          hasDataTable: false
+        ),
+        EnhancedSection.Subsection(
+          id: "alternative-comparison",
+          title: "Alternative Comparison",
+          content: self.extractParagraphs(prefix: "Standard 5:", from: self.methodologyBody),
+          category: .theoretical,
+          hasDataTable: false
+        ),
+        EnhancedSection.Subsection(
+          id: "evolutionary-plausibility",
+          title: "Evolutionary Plausibility",
+          content: self.extractParagraphs(prefix: "Standard 6:", from: self.methodologyBody),
+          category: .theoretical,
+          hasDataTable: false
+        ),
+        EnhancedSection.Subsection(
+          id: "causal-roadmap",
+          title: "Causal Roadmap",
+          content: self.extractParagraphs(prefix: "Standard 7:", from: self.methodologyBody),
+          category: .theoretical,
+          hasDataTable: false
+        ),
+      ],
+      relatedSections: [.apgiStatement, .epistemicStandards, .mathematicalModel]
+    )
+  }
+
+  private func extractParagraphs(prefix: String, from text: String) -> String {
+    let lines = text.components(separatedBy: "\n")
+    guard
+      let startIndex = lines.firstIndex(where: {
+        $0.trimmingCharacters(in: .whitespaces).hasPrefix(prefix)
+      })
+    else {
+      return text
     }
 
-    private var enhancedSection: EnhancedSection {
-        EnhancedSection(
-            id: "methodology",
-            title: "Methodology",
-            summary: "Seven criteria to keep consciousness theories empirically grounded, logically explicit, and falsifiable—while providing a practical roadmap from correlation to causation.",
-            icon: Tab.methodology.icon,
-            estimatedReadingTime: "~8 min",
-            conceptDiagram: nil,
-            subsections: [
-                EnhancedSection.Subsection(
-                    id: "level-transparency",
-                    title: "Level Transparency",
-                    content: self.extractParagraphs(prefix: "Standard 1:", from: self.methodologyBody),
-                    category: .theoretical,
-                    hasDataTable: false
-                ),
-                EnhancedSection.Subsection(
-                    id: "bridge-principles",
-                    title: "Bridge Principles Required",
-                    content: self.extractParagraphs(prefix: "Standard 2:", from: self.methodologyBody),
-                    category: .theoretical,
-                    hasDataTable: false
-                ),
-                EnhancedSection.Subsection(
-                    id: "quantitative-benchmarks",
-                    title: "Quantitative Benchmarks",
-                    content: self.extractParagraphs(prefix: "Standard 3:", from: self.methodologyBody),
-                    category: .theoretical,
-                    hasDataTable: false
-                ),
-                EnhancedSection.Subsection(
-                    id: "falsification",
-                    title: "Falsification Conditions",
-                    content: self.extractParagraphs(prefix: "Standard 4:", from: self.methodologyBody),
-                    category: .theoretical,
-                    hasDataTable: false
-                ),
-                EnhancedSection.Subsection(
-                    id: "alternative-comparison",
-                    title: "Alternative Comparison",
-                    content: self.extractParagraphs(prefix: "Standard 5:", from: self.methodologyBody),
-                    category: .theoretical,
-                    hasDataTable: false
-                ),
-                EnhancedSection.Subsection(
-                    id: "evolutionary-plausibility",
-                    title: "Evolutionary Plausibility",
-                    content: self.extractParagraphs(prefix: "Standard 6:", from: self.methodologyBody),
-                    category: .theoretical,
-                    hasDataTable: false
-                ),
-                EnhancedSection.Subsection(
-                    id: "causal-roadmap",
-                    title: "Causal Roadmap",
-                    content: self.extractParagraphs(prefix: "Standard 7:", from: self.methodologyBody),
-                    category: .theoretical,
-                    hasDataTable: false
-                ),
-            ],
-            relatedSections: [.apgiStatement, .epistemicStandards, .mathematicalModel]
-        )
+    var collected: [String] = [lines[startIndex]]
+    var index = startIndex + 1
+    while index < lines.count {
+      let trimmed = lines[index].trimmingCharacters(in: .whitespaces)
+      if trimmed.hasPrefix("Standard ") {
+        break
+      }
+      collected.append(lines[index])
+      index += 1
     }
 
-    private func extractParagraphs(prefix: String, from text: String) -> String {
-        let lines = text.components(separatedBy: "\n")
-        guard let startIndex = lines.firstIndex(where: { $0.trimmingCharacters(in: .whitespaces).hasPrefix(prefix) }) else {
-            return text
-        }
-
-        var collected: [String] = [lines[startIndex]]
-        var index = startIndex + 1
-        while index < lines.count {
-            let trimmed = lines[index].trimmingCharacters(in: .whitespaces)
-            if trimmed.hasPrefix("Standard ") {
-                break
-            }
-            collected.append(lines[index])
-            index += 1
-        }
-
-        return collected.joined(separator: "\n").trimmingCharacters(in: .whitespacesAndNewlines)
-    }
+    return collected.joined(separator: "\n").trimmingCharacters(in: .whitespacesAndNewlines)
+  }
 }
 
 #Preview {
-    MethodologyView()
+  MethodologyView()
 }

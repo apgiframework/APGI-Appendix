@@ -2,7 +2,7 @@ import Combine
 import SwiftUI
 
 struct BiologicalImplementationView: View {
-    private let implementationBody = """
+  private let implementationBody = """
 
     Variable | Neural Correlate & Mechanism
 
@@ -31,17 +31,17 @@ struct BiologicalImplementationView: View {
     Orexin | Coordinate β, others | Context-dependent β; meta-modulation | OX1R, OX2R | Via coordinating others | Via coordinating NE, histamine | 1.3→0.8 (hunger) 1.3→1.7 (satiety) | Energy-state awareness | Narcolepsy-1: No orexin → β uncoordinated
     """
 
-    var body: some View {
-        EnhancedContentCard(
-            title: "Biological Implementation",
-            content: self.implementationBody,
-            category: SectionCategory.biological,
-            hasDataTable: true
-        )
-        .padding()
-    }
+  var body: some View {
+    EnhancedContentCard(
+      title: "Biological Implementation",
+      content: self.implementationBody,
+      category: SectionCategory.biological,
+      hasDataTable: true
+    )
+    .padding()
+  }
 }
 
 #Preview {
-    BiologicalImplementationView()
+  BiologicalImplementationView()
 }

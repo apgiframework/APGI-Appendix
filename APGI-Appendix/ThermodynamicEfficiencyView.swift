@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct ThermodynamicEfficiencyView: View {
-    private let efficiencyBody = """
+  private let efficiencyBody = """
 
     Physical Constraint | APGI Solution | Efficiency Argument | Alternative Solutions
 
@@ -16,17 +16,17 @@ struct ThermodynamicEfficiencyView: View {
     Slow, unreliable components | Hierarchical temporal integration | Leverage multiple timescales for stability | Flat architectures with fast components?
     """
 
-    var body: some View {
-        EnhancedContentCard(
-            title: "Thermodynamic and Evolutionary Efficiency",
-            content: self.efficiencyBody,
-            category: .applications,
-            hasDataTable: true
-        )
-        .padding()
-    }
+  var body: some View {
+    EnhancedContentCard(
+      title: "Thermodynamic and Evolutionary Efficiency",
+      content: self.efficiencyBody,
+      category: .applications,
+      hasDataTable: true
+    )
+    .padding()
+  }
 }
 
 #Preview {
-    ThermodynamicEfficiencyView()
+  ThermodynamicEfficiencyView()
 }

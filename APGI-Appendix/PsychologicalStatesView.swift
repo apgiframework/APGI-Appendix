@@ -2,7 +2,7 @@ import Combine
 import SwiftUI
 
 struct PsychologicalStatesView: View {
-    private let psychologicalStatesIntro = """
+  private let psychologicalStatesIntro = """
 
     Psychological States and APGI Parameters
 
@@ -76,144 +76,149 @@ struct PsychologicalStatesView: View {
 
     """
 
-    @AppStorage("contentFontSize") private var fontSize: Double = 15.0
+  @AppStorage("contentFontSize") private var fontSize: Double = 15.0
 
-    private struct StateSection: Identifiable, Hashable {
-        let id: String
-        let headerLine: String
-        let body: String
+  private struct StateSection: Identifiable, Hashable {
+    let id: String
+    let headerLine: String
+    let body: String
 
-        var displayTitle: String {
-            self.headerLine.trimmingCharacters(in: .whitespacesAndNewlines)
-        }
+    var displayTitle: String {
+      self.headerLine.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+  }
+
+  private struct ParsedContent {
+    let introTitle: String
+    let introBody: String
+    let sections: [StateSection]
+  }
+
+  private var parsedContent: ParsedContent {
+    let lines = self.psychologicalStatesIntro.split(
+      separator: "\n", omittingEmptySubsequences: false
+    ).map(String.init)
+
+    func isStateHeader(_ line: String) -> Bool {
+      let trimmed = line.trimmingCharacters(in: .whitespacesAndNewlines)
+      guard trimmed.count >= 3 else { return false }
+      guard trimmed == trimmed.uppercased() else { return false }
+      guard trimmed.rangeOfCharacter(from: .letters) != nil else { return false }
+      guard trimmed.rangeOfCharacter(from: .lowercaseLetters) == nil else { return false }
+      return true
     }
 
-    private struct ParsedContent {
-        let introTitle: String
-        let introBody: String
-        let sections: [StateSection]
+    var headerIndices: [Int] = []
+    headerIndices.reserveCapacity(32)
+    for (idx, line) in lines.enumerated() {
+      if isStateHeader(line) {
+        headerIndices.append(idx)
+      }
     }
 
-    private var parsedContent: ParsedContent {
-        let lines = self.psychologicalStatesIntro.split(separator: "\n", omittingEmptySubsequences: false).map(String.init)
+    let introEndIndex = headerIndices.first ?? lines.count
+    let introLines = Array(lines.prefix(introEndIndex))
+    let trimmedIntroLines = introLines.drop {
+      $0.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+    }
+    let introTitle = trimmedIntroLines.first?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+    let introBody: String = {
+      guard !trimmedIntroLines.isEmpty else { return "" }
+      let rest = Array(trimmedIntroLines.dropFirst())
+      return rest.joined(separator: "\n")
+    }()
 
-        func isStateHeader(_ line: String) -> Bool {
-            let trimmed = line.trimmingCharacters(in: .whitespacesAndNewlines)
-            guard trimmed.count >= 3 else { return false }
-            guard trimmed == trimmed.uppercased() else { return false }
-            guard trimmed.rangeOfCharacter(from: .letters) != nil else { return false }
-            guard trimmed.rangeOfCharacter(from: .lowercaseLetters) == nil else { return false }
-            return true
-        }
+    var sections: [StateSection] = []
+    for (pos, start) in headerIndices.enumerated() {
+      let end = (pos + 1 < headerIndices.count) ? headerIndices[pos + 1] : lines.count
+      let headerLine = lines[start]
+      let bodyLines = Array(lines[(start + 1)..<end])
+      let body = bodyLines.joined(separator: "\n")
+      let id = headerLine.trimmingCharacters(in: .whitespacesAndNewlines)
+      sections.append(.init(id: id, headerLine: headerLine, body: body))
+    }
 
-        var headerIndices: [Int] = []
-        headerIndices.reserveCapacity(32)
-        for (idx, line) in lines.enumerated() {
-            if isStateHeader(line) {
-                headerIndices.append(idx)
+    return ParsedContent(introTitle: introTitle, introBody: introBody, sections: sections)
+  }
+
+  var body: some View {
+    ScrollViewReader { proxy in
+      ScrollView {
+        LazyVStack(alignment: .leading, spacing: APGISpacing.sectionSpacing) {
+          VStack(alignment: .leading, spacing: 12) {
+            Text("Psychological States")
+              .font(APGITypography.titleLarge)
+              .foregroundStyle(.primary)
+
+            if !self.parsedContent.introTitle.isEmpty {
+              Text(self.parsedContent.introTitle)
+                .font(.system(size: 18, weight: .semibold))
+                .foregroundStyle(.primary)
             }
-        }
 
-        let introEndIndex = headerIndices.first ?? lines.count
-        let introLines = Array(lines.prefix(introEndIndex))
-        let trimmedIntroLines = introLines.drop { $0.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }
-        let introTitle = trimmedIntroLines.first?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
-        let introBody: String = {
-            guard !trimmedIntroLines.isEmpty else { return "" }
-            let rest = Array(trimmedIntroLines.dropFirst())
-            return rest.joined(separator: "\n")
-        }()
+            if !self.parsedContent.introBody.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+            {
+              LazyGlossaryHighlightedContent(text: self.parsedContent.introBody)
+                .font(.system(size: self.fontSize, design: .default))
+                .lineSpacing(6)
+                .foregroundStyle(.primary)
+                .textSelection(.enabled)
+            }
+          }
+          .frame(maxWidth: .infinity, alignment: .leading)
+          .padding(APGISpacing.cardPadding)
+          .background {
+            RoundedRectangle(cornerRadius: APGIRadius.lg, style: .continuous)
+              .fill(.background)
+              .shadow(color: Color.apgiBlue.opacity(0.08), radius: 10, y: 4)
+          }
+          .overlay {
+            RoundedRectangle(cornerRadius: APGIRadius.lg, style: .continuous)
+              .strokeBorder(Color.apgiBlue.opacity(0.18), lineWidth: 1)
+          }
 
-        var sections: [StateSection] = []
-        for (pos, start) in headerIndices.enumerated() {
-            let end = (pos + 1 < headerIndices.count) ? headerIndices[pos + 1] : lines.count
-            let headerLine = lines[start]
-            let bodyLines = Array(lines[(start + 1) ..< end])
-            let body = bodyLines.joined(separator: "\n")
-            let id = headerLine.trimmingCharacters(in: .whitespacesAndNewlines)
-            sections.append(.init(id: id, headerLine: headerLine, body: body))
-        }
-
-        return ParsedContent(introTitle: introTitle, introBody: introBody, sections: sections)
-    }
-
-    var body: some View {
-        ScrollViewReader { proxy in
-            ScrollView {
-                LazyVStack(alignment: .leading, spacing: APGISpacing.sectionSpacing) {
-                    VStack(alignment: .leading, spacing: 12) {
-                        Text("Psychological States")
-                            .font(APGITypography.titleLarge)
-                            .foregroundStyle(.primary)
-
-                        if !self.parsedContent.introTitle.isEmpty {
-                            Text(self.parsedContent.introTitle)
-                                .font(.system(size: 18, weight: .semibold))
-                                .foregroundStyle(.primary)
-                        }
-
-                        if !self.parsedContent.introBody.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                            LazyGlossaryHighlightedContent(text: self.parsedContent.introBody)
-                                .font(.system(size: self.fontSize, design: .default))
-                                .lineSpacing(6)
-                                .foregroundStyle(.primary)
-                                .textSelection(.enabled)
-                        }
+          if !self.parsedContent.sections.isEmpty {
+            ScrollView(.horizontal, showsIndicators: false) {
+              HStack(spacing: 8) {
+                ForEach(self.parsedContent.sections) { section in
+                  Button {
+                    withAnimation(.easeInOut(duration: 0.25)) {
+                      proxy.scrollTo(section.id, anchor: .top)
                     }
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(APGISpacing.cardPadding)
-                    .background {
-                        RoundedRectangle(cornerRadius: APGIRadius.lg, style: .continuous)
-                            .fill(.background)
-                            .shadow(color: Color.apgiBlue.opacity(0.08), radius: 10, y: 4)
-                    }
-                    .overlay {
-                        RoundedRectangle(cornerRadius: APGIRadius.lg, style: .continuous)
-                            .strokeBorder(Color.apgiBlue.opacity(0.18), lineWidth: 1)
-                    }
-
-                    if !self.parsedContent.sections.isEmpty {
-                        ScrollView(.horizontal, showsIndicators: false) {
-                            HStack(spacing: 8) {
-                                ForEach(self.parsedContent.sections) { section in
-                                    Button {
-                                        withAnimation(.easeInOut(duration: 0.25)) {
-                                            proxy.scrollTo(section.id, anchor: .top)
-                                        }
-                                    } label: {
-                                        Text(section.displayTitle)
-                                            .font(.system(size: 13, weight: .semibold))
-                                            .foregroundStyle(.primary)
-                                            .lineLimit(1)
-                                            .padding(.vertical, 8)
-                                            .padding(.horizontal, 12)
-                                            .background(Color.apgiBlue.opacity(0.12))
-                                            .clipShape(Capsule())
-                                            .overlay(Capsule().strokeBorder(Color.apgiBlue.opacity(0.22), lineWidth: 1))
-                                    }
-                                    .buttonStyle(.plain)
-                                }
-                            }
-                            .padding(.horizontal, 2)
-                        }
-                    }
-
-                    // Use SmartContentView for progressive loading
-                    SmartContentView(
-                        sections: self.parsedContent.sections.map { section in
-                            ContentSection(
-                                title: section.headerLine,
-                                content: section.body
-                            )
-                        }
-                    )
+                  } label: {
+                    Text(section.displayTitle)
+                      .font(.system(size: 13, weight: .semibold))
+                      .foregroundStyle(.primary)
+                      .lineLimit(1)
+                      .padding(.vertical, 8)
+                      .padding(.horizontal, 12)
+                      .background(Color.apgiBlue.opacity(0.12))
+                      .clipShape(Capsule())
+                      .overlay(Capsule().strokeBorder(Color.apgiBlue.opacity(0.22), lineWidth: 1))
+                  }
+                  .buttonStyle(.plain)
                 }
-                .padding(APGISpacing.screenMargin)
+              }
+              .padding(.horizontal, 2)
             }
+          }
+
+          // Use SmartContentView for progressive loading
+          SmartContentView(
+            sections: self.parsedContent.sections.map { section in
+              ContentSection(
+                title: section.headerLine,
+                content: section.body
+              )
+            }
+          )
         }
+        .padding(APGISpacing.screenMargin)
+      }
     }
+  }
 }
 
 #Preview {
-    PsychologicalStatesView()
+  PsychologicalStatesView()
 }

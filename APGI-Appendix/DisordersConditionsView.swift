@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct DisordersConditionsView: View {
-    private let disordersConditionsContent = """
+  private let disordersConditionsContent = """
 
     APGI Parameter Table — Disorders & Conditions
 
@@ -68,21 +68,21 @@ struct DisordersConditionsView: View {
     | Mild Neurocognitive Disorder | Global −2–3 | Executive ↓ | +15–30 | 1.0 |
     """
 
-    var body: some View {
-        ScrollView {
-            LazyVStack(alignment: .leading, spacing: 20) {
-                EnhancedContentCard(
-                    title: "Disorders and Conditions",
-                    content: self.disordersConditionsContent,
-                    category: .applications,
-                    hasDataTable: true
-                )
-            }
-            .padding()
-        }
+  var body: some View {
+    ScrollView {
+      LazyVStack(alignment: .leading, spacing: 20) {
+        EnhancedContentCard(
+          title: "Disorders and Conditions",
+          content: self.disordersConditionsContent,
+          category: .applications,
+          hasDataTable: true
+        )
+      }
+      .padding()
     }
+  }
 }
 
 #Preview {
-    DisordersConditionsView()
+  DisordersConditionsView()
 }

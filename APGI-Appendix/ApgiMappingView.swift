@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct ApgiMappingView: View {
-    private let mappingBody = """
+  private let mappingBody = """
 
     APGI Explicit Mapping
 
@@ -70,21 +70,21 @@ struct ApgiMappingView: View {
     - σ·η(t): Gaussian white noise with standard deviation σ and with unit variance and σ ≈ 0.1·θ₀ captures intrinsic neural variability.
     """
 
-    var body: some View {
-        ScrollView {
-            LazyVStack(alignment: .leading, spacing: 20) {
-                EnhancedContentCard(
-                    title: "APGI Mapping",
-                    content: self.mappingBody,
-                    category: .mathematical,
-                    hasDataTable: false
-                )
-            }
-            .padding()
-        }
+  var body: some View {
+    ScrollView {
+      LazyVStack(alignment: .leading, spacing: 20) {
+        EnhancedContentCard(
+          title: "APGI Mapping",
+          content: self.mappingBody,
+          category: .mathematical,
+          hasDataTable: false
+        )
+      }
+      .padding()
     }
+  }
 }
 
 #Preview {
-    ApgiMappingView()
+  ApgiMappingView()
 }

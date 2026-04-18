@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct MappingCognitiveToApgiView: View {
-    private let mappingBody = """
+  private let mappingBody = """
 
     Control Parameters encompass neuromodulator-regulated factors, including the ignition threshold (θ₀), exteroceptive precision (Πₑ), interoceptive precision (Πᵢ) and urgency (gain modulation). These parameters set the foundational conditions for cognitive processing. Neural Representations involve latent hypotheses—whether perceptual, interoceptive or mnemonic—that compete for global ignition and are driven by precision-weighted prediction error minimization, a process that determines which hypotheses gain prominence in conscious experience. Output Behaviors refer to the observable outcomes of integrated conscious content, manifesting as decisions, reports or actions and reflect the culmination of the cognitive processes.
 
@@ -32,17 +32,17 @@ struct MappingCognitiveToApgiView: View {
     [Additional mappings continue in the full table...]
     """
 
-    var body: some View {
-        EnhancedContentCard(
-            title: "Mapping Cognitive Constructs → APGI",
-            content: self.mappingBody,
-            category: .cognitive,
-            hasDataTable: true
-        )
-        .padding()
-    }
+  var body: some View {
+    EnhancedContentCard(
+      title: "Mapping Cognitive Constructs → APGI",
+      content: self.mappingBody,
+      category: .cognitive,
+      hasDataTable: true
+    )
+    .padding()
+  }
 }
 
 #Preview {
-    MappingCognitiveToApgiView()
+  MappingCognitiveToApgiView()
 }

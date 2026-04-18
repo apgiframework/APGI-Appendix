@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct PsychiatricDisordersView: View {
-    private let disordersBody = """
+  private let disordersBody = """
 
     Disorder-Specific Precision Profiles
 
@@ -74,17 +74,17 @@ struct PsychiatricDisordersView: View {
     Addiction | Substance-Induced θₜ/Π Manipulation | Consciousness dominated by craving and drug-seeking
     """
 
-    var body: some View {
-        EnhancedContentCard(
-            title: "APGI for Psychiatric Disorders with Specific Precision Profiles",
-            content: self.disordersBody,
-            category: .applications,
-            hasDataTable: true
-        )
-        .padding()
-    }
+  var body: some View {
+    EnhancedContentCard(
+      title: "APGI for Psychiatric Disorders with Specific Precision Profiles",
+      content: self.disordersBody,
+      category: .applications,
+      hasDataTable: true
+    )
+    .padding()
+  }
 }
 
 #Preview {
-    PsychiatricDisordersView()
+  PsychiatricDisordersView()
 }

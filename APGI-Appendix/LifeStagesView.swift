@@ -1,16 +1,16 @@
 import SwiftUI
 
 struct LifeStagesView: View {
-    private let lifeStagesIntro = """
+  private let lifeStagesIntro = """
 
     APGI Parameters Across Life Stages
     """
 
-    private let tableParser = TableParser()
-    @State private var parsedTable: ParsedTable?
-    @State private var parseError: String?
+  private let tableParser = TableParser()
+  @State private var parsedTable: ParsedTable?
+  @State private var parseError: String?
 
-    private let markdownTable = """
+  private let markdownTable = """
     | Life Stage | Threshold (θ) | Precision Weighting (Π) | Ignition Frequency | Working Memory Capacity | Neuromodulator Levels |
     |------------|---------------|-------------------------|--------------------|-----------------------|----------------------|
     | Infancy (0–12 months) | Exceptionally high (8-9/10) | Undifferentiated, minimal calibration | 10-15 events/minute (vs. 40-60 in adults) | 1 item maximum | Acetylcholine and norepinephrine developing; dopamine immature |
@@ -21,53 +21,50 @@ struct LifeStagesView: View {
     | Aging (65+ years) | Gradually rising (6-8/10) | Conservative, established patterns prioritized | 25-35 events/minute | 3-4 items | Acetylcholine declining; dopamine variability; norepinephrine reduced reactivity |
     """
 
-    var body: some View {
-        ScrollView {
-            LazyVStack(alignment: .leading, spacing: APGISimulatorConstants.largeVStackSpacing) {
-                EnhancedContentCard(
-                    title: "Life Stages",
-                    content: self.lifeStagesIntro,
-                    category: .applications,
-                    hasDataTable: true
-                )
+  var body: some View {
+    ScrollView {
+      LazyVStack(alignment: .leading, spacing: APGISimulatorConstants.largeVStackSpacing) {
+        EnhancedContentCard(
+          title: "Life Stages",
+          content: self.lifeStagesIntro,
+          category: .applications,
+          hasDataTable: true
+        )
 
-                if let table = parsedTable {
-                    table.toSwiftUIView()
-                }
-                else if let error = parseError {
-                    VStack {
-                        Text("Table Parse Error")
-                            .font(.headline)
-                            .foregroundStyle(.red)
-                        Text(error)
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                    }
-                    .padding()
-                }
-                else {
-                    ProgressView("Loading table...")
-                        .padding()
-                }
-            }
+        if let table = parsedTable {
+          table.toSwiftUIView()
+        } else if let error = parseError {
+          VStack {
+            Text("Table Parse Error")
+              .font(.headline)
+              .foregroundStyle(.red)
+            Text(error)
+              .font(.caption)
+              .foregroundStyle(.secondary)
+          }
+          .padding()
+        } else {
+          ProgressView("Loading table...")
             .padding()
         }
-        .onAppear {
-            self.loadTable()
-        }
+      }
+      .padding()
     }
+    .onAppear {
+      self.loadTable()
+    }
+  }
 
-    private func loadTable() {
-        self.parsedTable = try? self.tableParser.parseMarkdownTable(self.markdownTable)
-        if self.parsedTable == nil {
-            self.parseError = "Failed to parse table"
-        }
-        else {
-            self.parseError = nil
-        }
+  private func loadTable() {
+    self.parsedTable = try? self.tableParser.parseMarkdownTable(self.markdownTable)
+    if self.parsedTable == nil {
+      self.parseError = "Failed to parse table"
+    } else {
+      self.parseError = nil
     }
+  }
 }
 
 #Preview {
-    LifeStagesView()
+  LifeStagesView()
 }

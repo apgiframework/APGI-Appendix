@@ -2,7 +2,7 @@ import Combine
 import SwiftUI
 
 struct ApgiToCognitiveView: View {
-    private let mappingBody = """
+  private let mappingBody = """
 
     Parameter | Associated Cognitive Constructs | Mechanics
 
@@ -19,17 +19,17 @@ struct ApgiToCognitiveView: View {
     dSₜ/dt (Rate of Surprise Change) | Urgency Perception, Time Pressure Sensitivity, Threat Imminence, Flow State Dynamics, Looming Stimulus Detection | Drives λ-mediated threshold lowering; explains "faster-than-expected" conscious access under threat
     """
 
-    var body: some View {
-        EnhancedContentCard(
-            title: "APGI Parameters → Cognitive Constructs",
-            content: self.mappingBody,
-            category: SectionCategory.cognitive,
-            hasDataTable: true
-        )
-        .padding()
-    }
+  var body: some View {
+    EnhancedContentCard(
+      title: "APGI Parameters → Cognitive Constructs",
+      content: self.mappingBody,
+      category: SectionCategory.cognitive,
+      hasDataTable: true
+    )
+    .padding()
+  }
 }
 
 #Preview {
-    ApgiToCognitiveView()
+  ApgiToCognitiveView()
 }

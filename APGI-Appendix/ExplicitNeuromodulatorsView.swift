@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct ExplicitNeuromodulatorsView: View {
-    private let mappingBody = """
+  private let mappingBody = """
 
     Concept | Definition | Primary Location | Biological Implementation | Inputs
 
@@ -12,17 +12,17 @@ struct ExplicitNeuromodulatorsView: View {
     Ignition Probability (Bₜ) | Probability of a self-sustaining, metastable attractor state in the frontoparietal network. | Apical tuft of L5 pyramidal cells (for the "switch"). | The "switch" is the NMDA-receptor-mediated calcium spike in the apical tuft of L5 pyramidal cells. When Sₜ > θₜ, the disinhibited matrix thalamus delivers sufficient coordinated drive to L1 to trigger a regenerative dendritic calcium spike. This spike propagates to the soma and, if coincident with perisomatic input, triggers a burst of output spikes (coincidence detection). Steepness α is determined by apical NMDA receptor density and thalamic input synchrony. | Disinhibited matrix thalamus (pulvinar/MD) providing coordinated drive to L1; perisomatic input from basal dendrites.
     """
 
-    var body: some View {
-        EnhancedContentCard(
-            title: "Explicit Neuromodulator Mapping",
-            content: self.mappingBody,
-            category: .biological,
-            hasDataTable: true
-        )
-        .padding()
-    }
+  var body: some View {
+    EnhancedContentCard(
+      title: "Explicit Neuromodulator Mapping",
+      content: self.mappingBody,
+      category: .biological,
+      hasDataTable: true
+    )
+    .padding()
+  }
 }
 
 #Preview {
-    ExplicitNeuromodulatorsView()
+  ExplicitNeuromodulatorsView()
 }

@@ -1,213 +1,244 @@
 import Combine
 import Foundation
+import Network
 import SwiftUI
 
 /// Manages offline caching of remote content
 @MainActor
 class ContentCacheManager: ObservableObject {
-    static let shared = ContentCacheManager()
+  static let shared = ContentCacheManager()
 
-    @Published var isOfflineMode = false
+  @Published var isOfflineMode = false
 
-    private let cacheDirectory: URL
-    private let networkManager = NetworkManager.shared
-    private var cancellables = Set<AnyCancellable>()
+  private let cacheDirectory: URL
+  private let networkManager = NetworkManager.shared
+  private var cancellables = Set<AnyCancellable>()
 
-    private init() {
-        // Create cache directory in application support
-        guard let appSupport = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first else {
-            fatalError("Unable to access application support directory")
-        }
-        self.cacheDirectory = appSupport.appendingPathComponent("APGI-Appendix", isDirectory: true).appendingPathComponent("Cache", isDirectory: true)
+  private init() {
+    // Create cache directory in application support
+    let appSupport = FileManager.default.urls(
+      for: .applicationSupportDirectory, in: .userDomainMask
+    ).first
+    let baseDir = appSupport ?? FileManager.default.temporaryDirectory
 
-        try? FileManager.default.createDirectory(at: self.cacheDirectory, withIntermediateDirectories: true)
+    self.cacheDirectory = baseDir.appendingPathComponent("APGI-Appendix", isDirectory: true)
+      .appendingPathComponent("Cache", isDirectory: true)
 
-        self.setupNetworkMonitoring()
+    if appSupport == nil {
+      print(
+        "Warning: Unable to access application support directory. Using temporary directory for cache."
+      )
     }
 
-    private func setupNetworkMonitoring() {
-        self.networkManager.$isConnected
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] isConnected in
-                self?.isOfflineMode = !isConnected
-                if isConnected {
-                    logInfo("Network restored - exiting offline mode", context: "ContentCacheManager")
-                }
-                else {
-                    logInfo("Network lost - entering offline mode", context: "ContentCacheManager")
-                }
-            }
-            .store(in: &self.cancellables)
-    }
+    try? FileManager.default.createDirectory(
+      at: self.cacheDirectory, withIntermediateDirectories: true)
 
-    /// Cache content with metadata
-    func cacheContent(_ content: Data, for key: String, metadata: [String: Any]? = nil) {
-        let cacheURL = self.cacheDirectory.appendingPathComponent(key)
+    self.setupNetworkMonitoring()
+  }
 
-        do {
-            try content.write(to: cacheURL)
-
-            // Cache metadata if provided
-            if let metadata = metadata {
-                let metadataURL = cacheURL.appendingPathExtension("metadata")
-                let metadataData = try JSONSerialization.data(withJSONObject: metadata)
-                try metadataData.write(to: metadataURL)
-            }
-
-            logInfo("Cached content for key: \(key)", context: "ContentCacheManager.cacheContent")
+  private func setupNetworkMonitoring() {
+    self.networkManager.$isConnected
+      .receive(on: DispatchQueue.main)
+      .sink { [weak self] isConnected in
+        self?.isOfflineMode = !isConnected
+        if isConnected {
+          logInfo("Network restored - exiting offline mode", context: "ContentCacheManager")
+        } else {
+          logInfo("Network lost - entering offline mode", context: "ContentCacheManager")
         }
-        catch {
-            logError(error, context: "ContentCacheManager.cacheContent", function: #function, file: #file, line: #line)
-        }
-    }
+      }
+      .store(in: &self.cancellables)
+  }
 
-    /// Retrieve cached content
-    func cachedContent(for key: String) -> Data? {
-        let cacheURL = self.cacheDirectory.appendingPathComponent(key)
+  /// Cache content with metadata
+  func cacheContent(_ content: Data, for key: String, metadata: [String: Any]? = nil) {
+    let cacheURL = self.cacheDirectory.appendingPathComponent(key)
 
-        do {
-            let data = try Data(contentsOf: cacheURL)
-            logInfo("Retrieved cached content for key: \(key)", context: "ContentCacheManager.cachedContent")
-            return data
-        }
-        catch {
-            logDebug("No cached content found for key: \(key)", context: "ContentCacheManager.cachedContent")
-            return nil
-        }
-    }
+    do {
+      try content.write(to: cacheURL)
 
-    /// Check if content is cached
-    func isCached(_ key: String) -> Bool {
-        let cacheURL = self.cacheDirectory.appendingPathComponent(key)
-        return FileManager.default.fileExists(atPath: cacheURL.path)
-    }
-
-    /// Get cache metadata
-    func cacheMetadata(for key: String) -> [String: Any]? {
-        let metadataURL = self.cacheDirectory.appendingPathComponent(key).appendingPathExtension("metadata")
-
-        do {
-            let data = try Data(contentsOf: metadataURL)
-            return try JSONSerialization.jsonObject(with: data) as? [String: Any]
-        }
-        catch {
-            return nil
-        }
-    }
-
-    /// Clear specific cached content
-    func clearCache(for key: String) {
-        let cacheURL = self.cacheDirectory.appendingPathComponent(key)
+      // Cache metadata if provided
+      if let metadata = metadata {
         let metadataURL = cacheURL.appendingPathExtension("metadata")
+        let metadataData = try JSONSerialization.data(withJSONObject: metadata)
+        try metadataData.write(to: metadataURL)
+      }
 
-        try? FileManager.default.removeItem(at: cacheURL)
-        try? FileManager.default.removeItem(at: metadataURL)
-
-        logInfo("Cleared cache for key: \(key)", context: "ContentCacheManager.clearCache")
+      logInfo("Cached content for key: \(key)", context: "ContentCacheManager.cacheContent")
+    } catch {
+      logError(
+        error, context: "ContentCacheManager.cacheContent", function: #function, file: #file,
+        line: #line)
     }
+  }
 
-    /// Clear all cached content
-    func clearAllCache() {
+  /// Retrieve cached content
+  func cachedContent(for key: String) -> Data? {
+    let cacheURL = self.cacheDirectory.appendingPathComponent(key)
+
+    do {
+      let data = try Data(contentsOf: cacheURL)
+      logInfo(
+        "Retrieved cached content for key: \(key)", context: "ContentCacheManager.cachedContent")
+      return data
+    } catch {
+      logDebug(
+        "No cached content found for key: \(key)", context: "ContentCacheManager.cachedContent")
+      return nil
+    }
+  }
+
+  /// Check if content is cached
+  func isCached(_ key: String) -> Bool {
+    let cacheURL = self.cacheDirectory.appendingPathComponent(key)
+    return FileManager.default.fileExists(atPath: cacheURL.path)
+  }
+
+  /// Get cache metadata
+  func cacheMetadata(for key: String) -> [String: Any]? {
+    let metadataURL = self.cacheDirectory.appendingPathComponent(key).appendingPathExtension(
+      "metadata")
+
+    do {
+      let data = try Data(contentsOf: metadataURL)
+      return try JSONSerialization.jsonObject(with: data) as? [String: Any]
+    } catch {
+      return nil
+    }
+  }
+
+  /// Clear specific cached content
+  func clearCache(for key: String) {
+    let cacheURL = self.cacheDirectory.appendingPathComponent(key)
+    let metadataURL = cacheURL.appendingPathExtension("metadata")
+
+    try? FileManager.default.removeItem(at: cacheURL)
+    try? FileManager.default.removeItem(at: metadataURL)
+
+    logInfo("Cleared cache for key: \(key)", context: "ContentCacheManager.clearCache")
+  }
+
+  /// Clear all cached content
+  func clearAllCache() {
+    do {
+      let contents = try FileManager.default.contentsOfDirectory(
+        at: self.cacheDirectory, includingPropertiesForKeys: nil)
+      for url in contents {
+        try FileManager.default.removeItem(at: url)
+      }
+      logInfo("Cleared all cached content", context: "ContentCacheManager.clearAllCache")
+    } catch {
+      logError(
+        error, context: "ContentCacheManager.clearAllCache", function: #function, file: #file,
+        line: #line)
+    }
+  }
+
+  /// Get cache size in bytes
+  func cacheSize() -> UInt64 {
+    do {
+      let contents = try FileManager.default.contentsOfDirectory(
+        at: self.cacheDirectory, includingPropertiesForKeys: [.fileSizeKey])
+      return contents.reduce(0) { size, url in
         do {
-            let contents = try FileManager.default.contentsOfDirectory(at: self.cacheDirectory, includingPropertiesForKeys: nil)
-            for url in contents {
-                try FileManager.default.removeItem(at: url)
-            }
-            logInfo("Cleared all cached content", context: "ContentCacheManager.clearAllCache")
+          let resourceValues = try url.resourceValues(forKeys: [.fileSizeKey])
+          return size + UInt64(resourceValues.fileSize ?? 0)
+        } catch {
+          return size
         }
-        catch {
-            logError(error, context: "ContentCacheManager.clearAllCache", function: #function, file: #file, line: #line)
-        }
+      }
+    } catch {
+      return 0
     }
+  }
 
-    /// Get cache size in bytes
-    func cacheSize() -> UInt64 {
+  /// Cache remote content with fallback to cached version
+  func fetchAndCache(from url: URL, cacheKey: String) async throws -> Data {
+    let enableRemoteContent = UserDefaults.standard.bool(forKey: "enableRemoteContent")
+    let useCellularData = UserDefaults.standard.bool(forKey: "useCellularData")
+
+    // Try to fetch fresh content if online and allowed
+    if self.networkManager.isConnected && enableRemoteContent {
+      // Check cellular data restriction
+      if self.networkManager.connectionType == .cellular && !useCellularData {
+        logInfo(
+          "Skipping remote fetch on cellular data per settings", context: "ContentCacheManager")
+      } else {
         do {
-            let contents = try FileManager.default.contentsOfDirectory(at: self.cacheDirectory, includingPropertiesForKeys: [.fileSizeKey])
-            return contents.reduce(0) { size, url in
-                do {
-                    let resourceValues = try url.resourceValues(forKeys: [.fileSizeKey])
-                    return size + UInt64(resourceValues.fileSize ?? 0)
-                }
-                catch {
-                    return size
-                }
-            }
+          let (data, response) = try await URLSession.shared.data(from: url)
+
+          if let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 {
+            // Cache the fresh content
+            let metadata: [String: Any] = [
+              "cachedAt": Date().timeIntervalSince1970,
+              "sourceURL": url.absoluteString,
+              "contentType": httpResponse.mimeType ?? "unknown",
+            ]
+            self.cacheContent(data, for: cacheKey, metadata: metadata)
+
+            logInfo(
+              "Fetched and cached fresh content for: \(url)",
+              context: "ContentCacheManager.fetchAndCache")
+            return data
+          }
+        } catch {
+          logWarning(
+            "Failed to fetch fresh content from \(url): \(error.localizedDescription)",
+            context: "ContentCacheManager.fetchAndCache")
         }
-        catch {
-            return 0
-        }
+      }
     }
 
-    /// Cache remote content with fallback to cached version
-    func fetchAndCache(from url: URL, cacheKey: String) async throws -> Data {
-        // Try to fetch fresh content if online
-        if self.networkManager.isConnected {
-            do {
-                let (data, response) = try await URLSession.shared.data(from: url)
-
-                if let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 {
-                    // Cache the fresh content
-                    let metadata: [String: Any] = [
-                        "cachedAt": Date().timeIntervalSince1970,
-                        "sourceURL": url.absoluteString,
-                        "contentType": httpResponse.mimeType ?? "unknown",
-                    ]
-                    self.cacheContent(data, for: cacheKey, metadata: metadata)
-
-                    logInfo("Fetched and cached fresh content for: \(url)", context: "ContentCacheManager.fetchAndCache")
-                    return data
-                }
-            }
-            catch {
-                logWarning("Failed to fetch fresh content from \(url): \(error.localizedDescription)", context: "ContentCacheManager.fetchAndCache")
-            }
-        }
-
-        // Fall back to cached content
-        if let cachedData = cachedContent(for: cacheKey) {
-            logInfo("Serving cached content for: \(url)", context: "ContentCacheManager.fetchAndCache")
-            return cachedData
-        }
-
-        // No cached content available
-        throw NSError(domain: "ContentCacheManager", code: -1,
-                      userInfo: [NSLocalizedDescriptionKey: "No content available (offline and not cached)"])
+    // Fall back to cached content
+    if let cachedData = cachedContent(for: cacheKey) {
+      logInfo("Serving cached content for: \(url)", context: "ContentCacheManager.fetchAndCache")
+      return cachedData
     }
 
-    /// Cache string content
-    func cacheString(_ string: String, for key: String, encoding: String.Encoding = .utf8, metadata: [String: Any]? = nil) {
-        guard let data = string.data(using: encoding) else { return }
-        self.cacheContent(data, for: key, metadata: metadata)
-    }
+    // No cached content available
+    throw NSError(
+      domain: "ContentCacheManager", code: -1,
+      userInfo: [NSLocalizedDescriptionKey: "No content available (offline and not cached)"])
+  }
 
-    /// Retrieve cached string
-    func cachedString(for key: String, encoding: String.Encoding = .utf8) -> String? {
-        guard let data = cachedContent(for: key) else { return nil }
-        return String(data: data, encoding: encoding)
-    }
+  /// Cache string content
+  func cacheString(
+    _ string: String, for key: String, encoding: String.Encoding = .utf8,
+    metadata: [String: Any]? = nil
+  ) {
+    guard let data = string.data(using: encoding) else { return }
+    self.cacheContent(data, for: key, metadata: metadata)
+  }
 
-    /// Cache Codable objects
-    func cacheObject<T: Codable>(_ object: T, for key: String, metadata: [String: Any]? = nil) {
-        do {
-            let data = try JSONEncoder().encode(object)
-            self.cacheContent(data, for: key, metadata: metadata)
-        }
-        catch {
-            logError(error, context: "ContentCacheManager.cacheObject", function: #function, file: #file, line: #line)
-        }
-    }
+  /// Retrieve cached string
+  func cachedString(for key: String, encoding: String.Encoding = .utf8) -> String? {
+    guard let data = cachedContent(for: key) else { return nil }
+    return String(data: data, encoding: encoding)
+  }
 
-    /// Retrieve cached Codable object
-    func cachedObject<T: Codable>(for key: String) -> T? {
-        guard let data = cachedContent(for: key) else { return nil }
-
-        do {
-            return try JSONDecoder().decode(T.self, from: data)
-        }
-        catch {
-            logError(error, context: "ContentCacheManager.cachedObject", function: #function, file: #file, line: #line)
-            return nil
-        }
+  /// Cache Codable objects
+  func cacheObject<T: Codable>(_ object: T, for key: String, metadata: [String: Any]? = nil) {
+    do {
+      let data = try JSONEncoder().encode(object)
+      self.cacheContent(data, for: key, metadata: metadata)
+    } catch {
+      logError(
+        error, context: "ContentCacheManager.cacheObject", function: #function, file: #file,
+        line: #line)
     }
+  }
+
+  /// Retrieve cached Codable object
+  func cachedObject<T: Codable>(for key: String) -> T? {
+    guard let data = cachedContent(for: key) else { return nil }
+
+    do {
+      return try JSONDecoder().decode(T.self, from: data)
+    } catch {
+      logError(
+        error, context: "ContentCacheManager.cachedObject", function: #function, file: #file,
+        line: #line)
+      return nil
+    }
+  }
 }

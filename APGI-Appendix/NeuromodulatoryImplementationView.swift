@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct NeuromodulatoryImplementationView: View {
-    private let implementationBody = """
+  private let implementationBody = """
 
     Neuromodulator | Primary Source | Key Receptors | Effect on Πₑ | Effect on Πᵢ | Effect on θₜ | Key Computational Role
 
@@ -36,17 +36,17 @@ struct NeuromodulatoryImplementationView: View {
     This linear approximation captures first-order effects; higher-order interactions likely exist in specific contexts.
     """
 
-    var body: some View {
-        EnhancedContentCard(
-            title: "Neuromodulatory Implementation of APGI Control Parameters",
-            content: self.implementationBody,
-            category: .biological,
-            hasDataTable: true
-        )
-        .padding()
-    }
+  var body: some View {
+    EnhancedContentCard(
+      title: "Neuromodulatory Implementation of APGI Control Parameters",
+      content: self.implementationBody,
+      category: .biological,
+      hasDataTable: true
+    )
+    .padding()
+  }
 }
 
 #Preview {
-    NeuromodulatoryImplementationView()
+  NeuromodulatoryImplementationView()
 }

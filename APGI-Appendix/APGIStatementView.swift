@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct APGIStatementView: View {
-    private let statementBody = """
+  private let statementBody = """
 
     Consciousness emerges as an adaptive inference protocol—a metabolically expensive, allostatically gated control system that prioritizes survival-relevant computations under energy constraints. Far from being an introspective luxury or philosophical epiphenomenon, it functions as a precision-tuned motivation and steering system that compels organisms to prioritize immediate threats to viability: energy deficits, physical danger, social exclusion, and reproductive opportunities. Over evolutionary time, this alignment with inclusive fitness was sculpted into phenotypic steering. The felt quality of experience—the pain of hunger, the urgency of thirst, the warmth of social connection—serves as the user interface of this survival engine, making organisms behave in ways that propagate the genes that built them. Consciousness thus operates not for the organism's inner life but to make survival-relevant outcomes consciously salient when energetically cheaper mechanisms prove insufficient.
 
@@ -13,17 +13,17 @@ struct APGIStatementView: View {
 
     """
 
-    var body: some View {
-        EnhancedContentCard(
-            title: "APGI Statement about Consciousness",
-            content: self.statementBody,
-            category: SectionCategory.theoretical,
-            hasDataTable: false
-        )
-        .padding()
-    }
+  var body: some View {
+    EnhancedContentCard(
+      title: "APGI Statement about Consciousness",
+      content: self.statementBody,
+      category: SectionCategory.theoretical,
+      hasDataTable: false
+    )
+    .padding()
+  }
 }
 
 #Preview {
-    APGIStatementView()
+  APGIStatementView()
 }

@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct MathematicalModelView: View {
-    private let modelBody = """
+  private let modelBody = """
     The Allostatic Precision-Gated Ignition Framework provides a quantitative framework for understanding the dynamics of conscious access. It integrates three core components—State Variables, Dynamics and Empirically Constrained Parameters—to capture the interplay between surprise accumulation, threshold adaptation and the probability of conscious ignition.
 
     State Variables
@@ -48,80 +48,98 @@ struct MathematicalModelView: View {
     β | Somatic bias factor | 1.2–1.5 (neutral) | Ratio of LC-NE innervation density (AI/ACC vs. sensory)
     """
 
-    var body: some View {
-        EnhancedSectionView(section: self.enhancedSection)
+  var body: some View {
+    EnhancedSectionView(section: self.enhancedSection)
+  }
+
+  private var enhancedSection: EnhancedSection {
+    EnhancedSection(
+      id: "mathematical-model",
+      title: "Mathematical Model",
+      summary:
+        "A compact dynamical system for conscious ignition: surprise accumulates, a threshold adapts, and ignition probability emerges via a sigmoid switch under neuromodulatory control.",
+      icon: Tab.mathematicalModel.icon,
+      estimatedReadingTime: "~10 min",
+      conceptDiagram: nil,
+      subsections: [
+        EnhancedSection.Subsection(
+          id: "state-variables",
+          title: "State Variables",
+          content: self.extractParagraphs(
+            startingAt: "State Variables",
+            untilAnyOf: ["Surprise Accumulation", "Threshold Adaptation"], from: self.modelBody),
+          category: .mathematical,
+          hasDataTable: false
+        ),
+        EnhancedSection.Subsection(
+          id: "surprise-accumulation",
+          title: "Surprise Accumulation",
+          content: self.extractParagraphs(
+            startingAt: "Surprise Accumulation", untilAnyOf: ["Threshold Adaptation"],
+            from: self.modelBody),
+          category: .mathematical,
+          hasDataTable: false
+        ),
+        EnhancedSection.Subsection(
+          id: "threshold-adaptation",
+          title: "Threshold Adaptation",
+          content: self.extractParagraphs(
+            startingAt: "Threshold Adaptation", untilAnyOf: ["Ignition Probability"],
+            from: self.modelBody),
+          category: .mathematical,
+          hasDataTable: false
+        ),
+        EnhancedSection.Subsection(
+          id: "ignition-probability",
+          title: "Ignition Probability",
+          content: self.extractParagraphs(
+            startingAt: "Ignition Probability", untilAnyOf: ["Empirically Constrained Parameters"],
+            from: self.modelBody),
+          category: .mathematical,
+          hasDataTable: false
+        ),
+        EnhancedSection.Subsection(
+          id: "parameters-table",
+          title: "Parameters (Table)",
+          content: self.extractParagraphs(
+            startingAt: "Parameters of the APGI Dynamical System for Simulation", untilAnyOf: [],
+            from: self.modelBody),
+          category: .mathematical,
+          hasDataTable: true
+        ),
+      ],
+      relatedSections: [.apgiMapping, .parameterIdentifiability, .neuromodulatoryControl]
+    )
+  }
+
+  private func extractParagraphs(
+    startingAt marker: String, untilAnyOf endMarkers: [String], from text: String
+  ) -> String {
+    let lines = text.components(separatedBy: "\n")
+    guard
+      let startIndex = lines.firstIndex(where: {
+        $0.trimmingCharacters(in: .whitespaces).hasPrefix(marker)
+      })
+    else {
+      return text
     }
 
-    private var enhancedSection: EnhancedSection {
-        EnhancedSection(
-            id: "mathematical-model",
-            title: "Mathematical Model",
-            summary: "A compact dynamical system for conscious ignition: surprise accumulates, a threshold adapts, and ignition probability emerges via a sigmoid switch under neuromodulatory control.",
-            icon: Tab.mathematicalModel.icon,
-            estimatedReadingTime: "~10 min",
-            conceptDiagram: nil,
-            subsections: [
-                EnhancedSection.Subsection(
-                    id: "state-variables",
-                    title: "State Variables",
-                    content: self.extractParagraphs(startingAt: "State Variables", untilAnyOf: ["Surprise Accumulation", "Threshold Adaptation"], from: self.modelBody),
-                    category: .mathematical,
-                    hasDataTable: false
-                ),
-                EnhancedSection.Subsection(
-                    id: "surprise-accumulation",
-                    title: "Surprise Accumulation",
-                    content: self.extractParagraphs(startingAt: "Surprise Accumulation", untilAnyOf: ["Threshold Adaptation"], from: self.modelBody),
-                    category: .mathematical,
-                    hasDataTable: false
-                ),
-                EnhancedSection.Subsection(
-                    id: "threshold-adaptation",
-                    title: "Threshold Adaptation",
-                    content: self.extractParagraphs(startingAt: "Threshold Adaptation", untilAnyOf: ["Ignition Probability"], from: self.modelBody),
-                    category: .mathematical,
-                    hasDataTable: false
-                ),
-                EnhancedSection.Subsection(
-                    id: "ignition-probability",
-                    title: "Ignition Probability",
-                    content: self.extractParagraphs(startingAt: "Ignition Probability", untilAnyOf: ["Empirically Constrained Parameters"], from: self.modelBody),
-                    category: .mathematical,
-                    hasDataTable: false
-                ),
-                EnhancedSection.Subsection(
-                    id: "parameters-table",
-                    title: "Parameters (Table)",
-                    content: self.extractParagraphs(startingAt: "Parameters of the APGI Dynamical System for Simulation", untilAnyOf: [], from: self.modelBody),
-                    category: .mathematical,
-                    hasDataTable: true
-                ),
-            ],
-            relatedSections: [.apgiMapping, .parameterIdentifiability, .neuromodulatoryControl]
-        )
+    var collected: [String] = []
+    var i = startIndex
+    while i < lines.count {
+      let trimmed = lines[i].trimmingCharacters(in: .whitespaces)
+      if i != startIndex, !endMarkers.isEmpty, endMarkers.contains(where: { trimmed.hasPrefix($0) })
+      {
+        break
+      }
+      collected.append(lines[i])
+      i += 1
     }
 
-    private func extractParagraphs(startingAt marker: String, untilAnyOf endMarkers: [String], from text: String) -> String {
-        let lines = text.components(separatedBy: "\n")
-        guard let startIndex = lines.firstIndex(where: { $0.trimmingCharacters(in: .whitespaces).hasPrefix(marker) }) else {
-            return text
-        }
-
-        var collected: [String] = []
-        var i = startIndex
-        while i < lines.count {
-            let trimmed = lines[i].trimmingCharacters(in: .whitespaces)
-            if i != startIndex, !endMarkers.isEmpty, endMarkers.contains(where: { trimmed.hasPrefix($0) }) {
-                break
-            }
-            collected.append(lines[i])
-            i += 1
-        }
-
-        return collected.joined(separator: "\n").trimmingCharacters(in: .whitespacesAndNewlines)
-    }
+    return collected.joined(separator: "\n").trimmingCharacters(in: .whitespacesAndNewlines)
+  }
 }
 
 #Preview {
-    MathematicalModelView()
+  MathematicalModelView()
 }

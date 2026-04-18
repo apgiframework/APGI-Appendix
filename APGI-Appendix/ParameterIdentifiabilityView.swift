@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct ParameterIdentifiabilityView: View {
-    private let identifiabilityBody = """
+  private let identifiabilityBody = """
 
     Parameter Recovery and Recoverability Tiers
 
@@ -18,17 +18,17 @@ struct ParameterIdentifiabilityView: View {
     - σ (noise amplitude)
     """
 
-    var body: some View {
-        EnhancedContentCard(
-            title: "Parameter Identifiability and the Reduced Model",
-            content: self.identifiabilityBody,
-            category: .mathematical,
-            hasDataTable: false
-        )
-        .padding()
-    }
+  var body: some View {
+    EnhancedContentCard(
+      title: "Parameter Identifiability and the Reduced Model",
+      content: self.identifiabilityBody,
+      category: .mathematical,
+      hasDataTable: false
+    )
+    .padding()
+  }
 }
 
 #Preview {
-    ParameterIdentifiabilityView()
+  ParameterIdentifiabilityView()
 }

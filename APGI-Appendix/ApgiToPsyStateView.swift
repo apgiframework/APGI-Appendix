@@ -2,7 +2,7 @@ import Combine
 import SwiftUI
 
 struct ApgiToPsyStateView: View {
-    private let mappingBody = """
+  private let mappingBody = """
 
     APGI parameter table for psychological states
 
@@ -404,17 +404,17 @@ struct ApgiToPsyStateView: View {
 
     """
 
-    var body: some View {
-        EnhancedContentCard(
-            title: "APGI Parameters → Psychological States",
-            content: self.mappingBody,
-            category: SectionCategory.cognitive,
-            hasDataTable: true
-        )
-        .padding()
-    }
+  var body: some View {
+    EnhancedContentCard(
+      title: "APGI Parameters → Psychological States",
+      content: self.mappingBody,
+      category: SectionCategory.cognitive,
+      hasDataTable: true
+    )
+    .padding()
+  }
 }
 
 #Preview {
-    ApgiToPsyStateView()
+  ApgiToPsyStateView()
 }

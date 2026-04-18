@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct NeuromodulatoryControlsView: View {
-    private let controlsBody = """
+  private let controlsBody = """
 
     Neuromodulator | Primary APGI Parameter | Mechanism | Effect
 
@@ -16,17 +16,17 @@ struct NeuromodulatoryControlsView: View {
     Orexin | Modulates β (arousal) | Coordinates LC/BF/TMN | Tunes bias by state
     """
 
-    var body: some View {
-        EnhancedContentCard(
-            title: "Neuromodulatory Control System",
-            content: self.controlsBody,
-            category: .biological,
-            hasDataTable: true
-        )
-        .padding()
-    }
+  var body: some View {
+    EnhancedContentCard(
+      title: "Neuromodulatory Control System",
+      content: self.controlsBody,
+      category: .biological,
+      hasDataTable: true
+    )
+    .padding()
+  }
 }
 
 #Preview {
-    NeuromodulatoryControlsView()
+  NeuromodulatoryControlsView()
 }
