@@ -20,8 +20,12 @@ class URLValidator: ObservableObject {
   private let trustedDomains = [
     "apgi-framework.org",
     "docs.apgi-framework.org",
-    "github.com/apgi",
     "apple.com",
+    "github.com",
+  ]
+
+  private let trustedPathPrefixes = [
+    "github.com": ["/apgi/"]
   ]
 
   func validateURL(_ urlString: String) async -> Bool {
@@ -29,22 +33,48 @@ class URLValidator: ObservableObject {
 
     // Enforce HTTPS for safety
     guard url.scheme == "https" else {
-      print("Insecure URL scheme detected: \(url.scheme ?? "unknown")")
+      logError(
+        NSError(
+          domain: "URLValidator", code: -1,
+          userInfo: [NSLocalizedDescriptionKey: "Insecure URL scheme: \(url.scheme ?? "unknown")"]),
+        context: "URLValidator.validateURL")
       return false
     }
 
     // Check if the host is in the allow-list
     guard let host = url.host else { return false }
 
-    let isTrusted = self.trustedDomains.contains { domain in
+    let isTrustedHost = self.trustedDomains.contains { domain in
       host == domain || host.hasSuffix("." + domain)
     }
 
-    if !isTrusted {
-      print("Untrusted domain blocked: \(host)")
+    if !isTrustedHost {
+      logError(
+        NSError(
+          domain: "URLValidator", code: -1,
+          userInfo: [NSLocalizedDescriptionKey: "Untrusted domain blocked: \(host)"]),
+        context: "URLValidator.validateURL")
+      return false
     }
 
-    return isTrusted
+    // Check path-based trust if applicable
+    if let prefixes = self.trustedPathPrefixes[host] {
+      let urlPath = url.path.lowercased()
+      let isTrustedPath = prefixes.contains { prefix in
+        urlPath.hasPrefix(prefix.lowercased())
+      }
+
+      if !isTrustedPath {
+        logError(
+          NSError(
+            domain: "URLValidator", code: -1,
+            userInfo: [NSLocalizedDescriptionKey: "Untrusted path on trusted host: \(urlPath)"]),
+          context: "URLValidator.validateURL")
+        return false
+      }
+    }
+
+    return true
   }
 
   // MARK: - Safe URL Opening

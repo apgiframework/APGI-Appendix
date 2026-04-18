@@ -101,6 +101,9 @@ struct SidebarView: View {
     }
     .frame(minWidth: 240, idealWidth: 280)
     .background(Color.surfacePrimary)
+    .onReceive(NotificationCenter.default.publisher(for: .toggleAllSections)) { _ in
+      self.toggleAllSections()
+    }
   }
 
   private var allSections: [SidebarSection] {
@@ -159,6 +162,14 @@ struct SidebarView: View {
       self.expandedSections.remove(section)
     } else {
       self.expandedSections.insert(section)
+    }
+  }
+
+  private func toggleAllSections() {
+    if self.expandedSections.count == NavigationSection.allCases.count {
+      self.expandedSections.removeAll()
+    } else {
+      self.expandedSections = Set(NavigationSection.allCases)
     }
   }
 }

@@ -11,6 +11,7 @@ struct APGIAppendixApp: App {
   @StateObject private var onboardingManager = OnboardingManager.shared
   @StateObject private var navigationManager = KeyboardNavigationManager.shared
   @StateObject private var memoryMonitor = MemoryMonitor.shared
+  @StateObject private var bookmarkManager = BookmarkManager.shared
 
   init() {
     // StateObjects are automatically initialized by SwiftUI
@@ -25,6 +26,7 @@ struct APGIAppendixApp: App {
         .environmentObject(self.onboardingManager)
         .environmentObject(self.navigationManager)
         .environmentObject(self.memoryMonitor)
+        .environmentObject(self.bookmarkManager)
         .onAppear {
           // Start memory monitoring when the view appears
           self.memoryMonitor.startMonitoring(interval: 30.0)
@@ -69,6 +71,7 @@ struct APGIAppendixApp: App {
       IgnitionTimelineView()
         .applyTheme()
         .environmentObject(self.themeManager)
+        .environmentObject(self.bookmarkManager)
     }
     .defaultSize(width: 1000, height: 800)
 
@@ -76,6 +79,7 @@ struct APGIAppendixApp: App {
       GlossaryView()
         .applyTheme()
         .environmentObject(self.themeManager)
+        .environmentObject(self.bookmarkManager)
     }
     .defaultSize(width: 1000, height: 800)
     .defaultPosition(.trailing)
@@ -84,6 +88,7 @@ struct APGIAppendixApp: App {
       APGISimulatorView()
         .applyTheme()
         .environmentObject(self.themeManager)
+        .environmentObject(self.bookmarkManager)
     }
     .defaultSize(width: 1000, height: 800)
 
@@ -91,6 +96,7 @@ struct APGIAppendixApp: App {
       EnhancedSettingsView()
         .applyTheme()
         .environmentObject(self.themeManager)
+        .environmentObject(self.bookmarkManager)
     }
   }
 

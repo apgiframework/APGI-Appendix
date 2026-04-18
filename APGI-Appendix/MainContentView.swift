@@ -14,10 +14,11 @@ struct MainContentView: View {
   @State private var columnVisibility = NavigationSplitViewVisibility.all
   @State private var searchPresented: Bool = false
   @AppStorage("contentFontSize") private var fontSize: Double = 15.0
-  @StateObject private var bookmarkManager = BookmarkManager()
+  @EnvironmentObject private var bookmarkManager: BookmarkManager
   @EnvironmentObject private var navigationManager: KeyboardNavigationManager
   @EnvironmentObject private var themeManager: ThemeManager
   @State private var showUpdateCheck = false
+  @State private var showKeyboardShortcuts = false
 
   @FocusState private var sidebarFocused: Bool
   @FocusState private var detailFocused: Bool
@@ -164,9 +165,31 @@ struct MainContentView: View {
         if let userActivity = notification.object as? NSUserActivity {
           self.handleIncomingHandoff(userActivity)
         }
+      }
+      .onReceive(NotificationCenter.default.publisher(for: .copyCitation)) { _ in
+        self.copyCitation()
+      }
+      .onReceive(NotificationCenter.default.publisher(for: .toggleBookmark)) { _ in
+        self.toggleBookmark()
+      }
+      .onReceive(NotificationCenter.default.publisher(for: .toggleAllSections)) { _ in
+        // Handled in SidebarView
+      }
+      .onReceive(NotificationCenter.default.publisher(for: .scrollToTables)) { _ in
+        // Handled in EnhancedSectionView
+      }
+      .onReceive(NotificationCenter.default.publisher(for: .showKeyboardShortcuts)) { _ in
+        self.showKeyboardShortcuts = true
       })
       .sheet(isPresented: self.$showUpdateCheck) {
         UpdateCheckView()
+      }
+      .overlay {
+        if self.showKeyboardShortcuts {
+          KeyboardShortcutsView(isPresented: self.$showKeyboardShortcuts)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .background(Color.black.opacity(0.4).ignoresSafeArea())
+        }
       }
   }
 
@@ -499,6 +522,24 @@ struct MainContentView: View {
             line: #line)
         }
       }
+    }
+  }
+
+  private func copyCitation() {
+    guard let selectedSection = selectedSection else { return }
+    ClipboardManager.shared.copyCitation(
+      title: selectedSection.shortTitle,
+      year: "2024",
+      source: "APGI Appendix"
+    )
+  }
+
+  private func toggleBookmark() {
+    guard let selectedSection = selectedSection else { return }
+    if self.bookmarkManager.isBookmarked(selectedSection) {
+      self.bookmarkManager.removeBookmark(selectedSection)
+    } else {
+      self.bookmarkManager.addBookmark(selectedSection)
     }
   }
 

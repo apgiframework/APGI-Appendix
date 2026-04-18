@@ -685,41 +685,61 @@ struct EnhancedSectionView: View {
   @State private var expandedSubsections: Set<String> = []
 
   var body: some View {
-    ScrollView {
-      LazyVStack(alignment: .leading, spacing: APGISpacing.lg) {
-        SectionHeroCard(
-          title: self.section.title,
-          keyTakeaway: self.section.summary,
-          icon: self.section.icon,
-          readingTime: self.section.estimatedReadingTime
-        )
+    ScrollViewReader { proxy in
+      ScrollView {
+        LazyVStack(alignment: .leading, spacing: APGISpacing.lg) {
+          SectionHeroCard(
+            title: self.section.title,
+            keyTakeaway: self.section.summary,
+            icon: self.section.icon,
+            readingTime: self.section.estimatedReadingTime
+          )
 
-        if let diagram = section.conceptDiagram {
-          InteractiveDiagram(diagram: diagram)
-            .frame(height: 300)
-        }
+          if let diagram = section.conceptDiagram {
+            InteractiveDiagram(diagram: diagram)
+              .frame(height: 300)
+          }
 
-        ForEach(self.section.subsections) { subsection in
-          CollapsibleSubsection(
-            title: subsection.title,
-            isExpanded: self.expandedSubsections.contains(subsection.id)
-          ) {
-            self.toggleExpanded(subsection.id)
-          } content: {
-            SubsectionContentCard(
+          ForEach(self.section.subsections) { subsection in
+            CollapsibleSubsection(
               title: subsection.title,
-              content: subsection.content,
-              category: subsection.category,
-              hasDataTable: subsection.hasDataTable
-            )
+              isExpanded: self.expandedSubsections.contains(subsection.id)
+            ) {
+              self.toggleExpanded(subsection.id)
+            } content: {
+              SubsectionContentCard(
+                title: subsection.title,
+                content: subsection.content,
+                category: subsection.category,
+                hasDataTable: subsection.hasDataTable
+              )
+            }
+            .id(subsection.id)
+          }
+
+          if !self.section.relatedSections.isEmpty {
+            RelatedSectionsCarousel(related: self.section.relatedSections)
           }
         }
-
-        if !self.section.relatedSections.isEmpty {
-          RelatedSectionsCarousel(related: self.section.relatedSections)
+        .padding()
+      }
+      .onReceive(NotificationCenter.default.publisher(for: .scrollToTables)) { notification in
+        if let targetTab = notification.object as? Tab,
+          targetTab.id == self.section.id
+            || self.section.id.contains(targetTab.rawValue.lowercased())
+        {
+          self.scrollToFirstTable(proxy: proxy)
         }
       }
-      .padding()
+    }
+  }
+
+  private func scrollToFirstTable(proxy: ScrollViewProxy) {
+    if let firstTableSubsection = section.subsections.first(where: { $0.hasDataTable }) {
+      withAnimation {
+        self.expandedSubsections.insert(firstTableSubsection.id)
+        proxy.scrollTo(firstTableSubsection.id, anchor: .top)
+      }
     }
   }
 

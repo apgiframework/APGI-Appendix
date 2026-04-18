@@ -11,18 +11,24 @@ class PerformanceMonitor {
   private var measurementsQueue = DispatchQueue(label: "com.apgi.performance", qos: .utility)
 
   var averageInferenceTime: TimeInterval {
-    guard !self.inferenceTimes.isEmpty else { return 0.0 }
-    return self.inferenceTimes.reduce(0, +) / Double(self.inferenceTimes.count)
+    self.measurementsQueue.sync {
+      guard !self.inferenceTimes.isEmpty else { return 0.0 }
+      return self.inferenceTimes.reduce(0, +) / Double(self.inferenceTimes.count)
+    }
   }
 
   var currentFPS: Double {
-    guard !self.fpsHistory.isEmpty else { return 0.0 }
-    return self.fpsHistory.reduce(0, +) / Double(self.fpsHistory.count)
+    self.measurementsQueue.sync {
+      guard !self.fpsHistory.isEmpty else { return 0.0 }
+      return self.fpsHistory.reduce(0, +) / Double(self.fpsHistory.count)
+    }
   }
 
   var averageMemoryUsage: Double {
-    guard !self.memoryUsageHistory.isEmpty else { return 0.0 }
-    return self.memoryUsageHistory.reduce(0, +) / Double(self.memoryUsageHistory.count)
+    self.measurementsQueue.sync {
+      guard !self.memoryUsageHistory.isEmpty else { return 0.0 }
+      return self.memoryUsageHistory.reduce(0, +) / Double(self.memoryUsageHistory.count)
+    }
   }
 
   func recordInference(duration: TimeInterval) {
@@ -65,33 +71,46 @@ class PerformanceMonitor {
   }
 
   func getStatistics() -> PerformanceStats {
-    guard !self.inferenceTimes.isEmpty else {
-      return PerformanceStats(meanLatency: 0.0, p50Latency: 0.0, p95Latency: 0.0, throughput: 0.0)
+    self.measurementsQueue.sync {
+      guard !self.inferenceTimes.isEmpty else {
+        return PerformanceStats(meanLatency: 0.0, p50Latency: 0.0, p95Latency: 0.0, throughput: 0.0)
+      }
+
+      let mean = self.inferenceTimes.reduce(0, +) / Double(self.inferenceTimes.count)
+      let sorted = self.inferenceTimes.sorted()
+      let p50 = sorted[sorted.count / 2]
+      let p95Index = min(Int(Double(sorted.count) * 0.95), sorted.count - 1)
+      let p95 = sorted[p95Index]
+      let throughput = mean > 0 ? 1.0 / mean : 0.0
+
+      return PerformanceStats(
+        meanLatency: mean * 1000,
+        p50Latency: p50 * 1000,
+        p95Latency: p95 * 1000,
+        throughput: throughput
+      )
     }
-
-    let mean = self.averageInferenceTime
-    let sorted = self.inferenceTimes.sorted()
-    let p50 = sorted[sorted.count / 2]
-    let p95Index = min(Int(Double(sorted.count) * 0.95), sorted.count - 1)
-    let p95 = sorted[p95Index]
-    let throughput = mean > 0 ? 1.0 / mean : 0.0
-
-    return PerformanceStats(
-      meanLatency: mean * 1000,
-      p50Latency: p50 * 1000,
-      p95Latency: p95 * 1000,
-      throughput: throughput
-    )
   }
 
   func getPerformanceReport() -> PerformanceReport {
-    return PerformanceReport(
-      averageInferenceTime: self.averageInferenceTime,
-      currentFPS: self.currentFPS,
-      averageMemoryUsage: self.averageMemoryUsage,
-      totalInferences: self.inferenceTimes.count,
-      isPerformanceOptimal: self.isPerformanceOptimal()
-    )
+    self.measurementsQueue.sync {
+      let avgInference =
+        self.inferenceTimes.isEmpty
+        ? 0.0 : self.inferenceTimes.reduce(0, +) / Double(self.inferenceTimes.count)
+      let avgFPS =
+        self.fpsHistory.isEmpty ? 0.0 : self.fpsHistory.reduce(0, +) / Double(self.fpsHistory.count)
+      let avgMem =
+        self.memoryUsageHistory.isEmpty
+        ? 0.0 : self.memoryUsageHistory.reduce(0, +) / Double(self.memoryUsageHistory.count)
+
+      return PerformanceReport(
+        averageInferenceTime: avgInference,
+        currentFPS: avgFPS,
+        averageMemoryUsage: avgMem,
+        totalInferences: self.inferenceTimes.count,
+        isPerformanceOptimal: avgInference < 0.1 && avgFPS > 30 && avgMem < 100
+      )
+    }
   }
 
   private func isPerformanceOptimal() -> Bool {

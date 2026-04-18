@@ -54,7 +54,7 @@ extension View {
       .accessibilityValue(currentValue ?? "")
       .accessibilityHint(contextualHint ?? "")
       .accessibilityInputLabels(["activate", "select", "choose"])
-      .dynamicTypeSize(DynamicTypeSize.accessibility5)
+    // Honor user's system dynamic type settings - do not force a specific size
 
     let accessibilityView =
       baseView

@@ -47,25 +47,49 @@ struct APGICommands: Commands {
 
     CommandMenu("Navigate") {
       Button("Biological Implementation") {
-        self.navigateToBiological()
+        NotificationCenter.default.post(name: .navigateToSection, object: "biological")
       }
       .keyboardShortcut("1", modifiers: [.command])
+
       Button("Neuromodulators") {
-        self.navigateToNeuromodulators()
+        NotificationCenter.default.post(name: .navigateToSection, object: "neuromodulators")
       }
       .keyboardShortcut("2", modifiers: [.command])
+
       Button("Clinical Translations") {
         NotificationCenter.default.post(name: .navigateToSection, object: "clinical")
       }
       .keyboardShortcut("3", modifiers: [.command])
+
       Button("Mathematical Framework") {
         NotificationCenter.default.post(name: .navigateToSection, object: "mathematical")
       }
       .keyboardShortcut("4", modifiers: [.command])
+
       Button("Psychiatric Disorders") {
         NotificationCenter.default.post(name: .navigateToSection, object: "psychiatric")
       }
       .keyboardShortcut("5", modifiers: [.command])
+
+      Button("Life Stages") {
+        NotificationCenter.default.post(name: .navigateToSection, object: "life")
+      }
+      .keyboardShortcut("6", modifiers: [.command])
+
+      Button("Epistemic Standards") {
+        NotificationCenter.default.post(name: .navigateToSection, object: "standards")
+      }
+      .keyboardShortcut("7", modifiers: [.command])
+
+      Button("Bibliography") {
+        NotificationCenter.default.post(name: .navigateToSection, object: "bibliography")
+      }
+      .keyboardShortcut("8", modifiers: [.command])
+
+      Button("APGI Statement") {
+        NotificationCenter.default.post(name: .navigateToSection, object: "statement")
+      }
+      .keyboardShortcut("9", modifiers: [.command])
 
       Divider()
 
@@ -107,9 +131,30 @@ struct APGICommands: Commands {
         self.zoomReset()
       }
       .keyboardShortcut("0", modifiers: [.command])
+
+      Divider()
+
+      Button("Keyboard Shortcuts") {
+        self.showKeyboardShortcuts()
+      }
+      .keyboardShortcut("/", modifiers: [.command])
     }
 
-    CommandMenu("Export") {
+    CommandMenu("Actions") {
+      Button("Toggle Bookmark") {
+        self.toggleBookmark()
+      }
+      .keyboardShortcut("b", modifiers: [.command])
+
+      Divider()
+
+      Button("Copy Citation") {
+        self.copyCitation()
+      }
+      .keyboardShortcut("c", modifiers: [.command, .option])
+
+      Divider()
+
       Button("Export as PDF") {
         self.exportPDF()
       }
@@ -119,13 +164,6 @@ struct APGICommands: Commands {
         self.exportCurrentSection()
       }
       .keyboardShortcut("e", modifiers: [.command])
-
-      Divider()
-
-      Button("Copy Citation") {
-        self.copyCitation()
-      }
-      .keyboardShortcut("c", modifiers: [.command, .option])
     }
 
     CommandMenu("Help") {
@@ -230,6 +268,10 @@ struct APGICommands: Commands {
     NotificationCenter.default.post(name: .zoomReset, object: nil)
   }
 
+  private func showKeyboardShortcuts() {
+    NotificationCenter.default.post(name: .showKeyboardShortcuts, object: nil)
+  }
+
   // MARK: - Export Actions
 
   private func exportPDF() {
@@ -242,6 +284,10 @@ struct APGICommands: Commands {
 
   private func copyCitation() {
     NotificationCenter.default.post(name: .copyCitation, object: nil)
+  }
+
+  private func toggleBookmark() {
+    NotificationCenter.default.post(name: .toggleBookmark, object: nil)
   }
 
   // MARK: - Help Actions
@@ -293,4 +339,6 @@ extension Notification.Name {
   static let toggleAllSections = Notification.Name("toggleAllSections")
   static let scrollToTables = Notification.Name("scrollToTables")
   static let clearAllBookmarks = Notification.Name("clearAllBookmarks")
+  static let toggleBookmark = Notification.Name("toggleBookmark")
+  static let showKeyboardShortcuts = Notification.Name("showKeyboardShortcuts")
 }

@@ -186,16 +186,13 @@ struct SettingsView: View {
   }
 
   private func clearAllBookmarks() {
-    // Clear bookmarks from UserDefaults
-    UserDefaults.standard.removeObject(forKey: "bookmarkedTabs")
-
-    // Clear bookmark manager state if available
+    // Post notification for BookmarkManager to handle clearing
     NotificationCenter.default.post(name: .clearAllBookmarks, object: nil)
   }
 }
 
 struct BookmarkListView: View {
-  @StateObject private var bookmarkManager = BookmarkManager()
+  @EnvironmentObject private var bookmarkManager: BookmarkManager
 
   var body: some View {
     if self.bookmarkManager.bookmarks.isEmpty {

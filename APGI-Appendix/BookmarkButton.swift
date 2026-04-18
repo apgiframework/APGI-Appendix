@@ -3,7 +3,7 @@ import SwiftUI
 /// Bookmark button with feedback for user actions
 struct BookmarkButton: View {
   let tab: Tab
-  @StateObject private var bookmarkManager = BookmarkManager()
+  @EnvironmentObject private var bookmarkManager: BookmarkManager
   @State private var showFeedback = false
   @State private var feedbackMessage = ""
 

@@ -27,6 +27,15 @@ class BookmarkManager: ObservableObject {
 
   init() {
     self.loadBookmarks()
+    self.setupObservers()
+  }
+
+  private func setupObservers() {
+    NotificationCenter.default.addObserver(
+      forName: .clearAllBookmarks, object: nil, queue: .main
+    ) { [weak self] _ in
+      self?.removeAllBookmarks()
+    }
   }
 
   func addBookmark(_ tab: Tab) {
@@ -63,6 +72,12 @@ class BookmarkManager: ObservableObject {
     }
   }
 
+  func removeAllBookmarks() {
+    self.bookmarks.removeAll()
+    self.saveBookmarks()
+    self.lastAction = nil
+  }
+
   func isBookmarked(_ tab: Tab) -> Bool {
     self.bookmarks.contains(tab.id)
   }
@@ -77,6 +92,7 @@ class BookmarkManager: ObservableObject {
       self.saveBookmarks()
       // Optionally clear legacy data
       UserDefaults.standard.removeObject(forKey: self.bookmarksKey)
+      UserDefaults.standard.removeObject(forKey: "bookmarkedTabs")
     }
   }
 

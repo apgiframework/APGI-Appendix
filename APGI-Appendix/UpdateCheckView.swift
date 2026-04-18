@@ -17,8 +17,8 @@ struct UpdateResponse: Codable {
 struct UpdateCheckView: View {
   @State private var isCheckingForUpdates = false
   @State private var updateAvailable = false
-  @State private var currentVersion = "1.0.0"
-  @State private var latestVersion = "1.0.0"
+  @State private var currentVersion = Bundle.main.appVersion
+  @State private var latestVersion = Bundle.main.appVersion
   @State private var updateNotes = ""
   @State private var errorMessage = ""
   @State private var downloadURL: URL?
@@ -232,12 +232,10 @@ struct UpdateCheckView: View {
 
   private func openDownloadURL() {
     if let url = self.downloadURL {
-      NSWorkspace.shared.open(url)
+      URLValidator.shared.openSafely(url.absoluteString)
     } else {
       // Fallback to website
-      if let url = URL(string: "https://apgi-framework.com/download") {
-        NSWorkspace.shared.open(url)
-      }
+      URLValidator.shared.openSafely("https://apgi-framework.com/download")
     }
     self.dismiss()
   }
