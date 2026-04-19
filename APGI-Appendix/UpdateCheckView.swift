@@ -232,10 +232,16 @@ struct UpdateCheckView: View {
 
   private func openDownloadURL() {
     if let url = self.downloadURL {
-      URLValidator.shared.openSafely(url.absoluteString)
+      URLValidator.shared.openSafely(url.absoluteString) {
+        if let fallbackURL = URL(string: "https://apgi-framework.com/download") {
+          NSWorkspace.shared.open(fallbackURL)
+        }
+      }
     } else {
       // Fallback to website
-      URLValidator.shared.openSafely("https://apgi-framework.com/download")
+      if let url = URL(string: "https://apgi-framework.com/download") {
+        NSWorkspace.shared.open(url)
+      }
     }
     self.dismiss()
   }

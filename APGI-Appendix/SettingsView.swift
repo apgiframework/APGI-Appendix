@@ -186,7 +186,11 @@ struct SettingsView: View {
   }
 
   private func clearAllBookmarks() {
-    // Post notification for BookmarkManager to handle clearing
+    // Clear any legacy bookmarks from UserDefaults
+    UserDefaults.standard.removeObject(forKey: "bookmarkedTabs")
+    UserDefaults.standard.removeObject(forKey: "APGIBookmarks")
+
+    // Clear bookmark manager state
     NotificationCenter.default.post(name: .clearAllBookmarks, object: nil)
   }
 }

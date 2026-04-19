@@ -883,12 +883,12 @@ final class APGIInferenceEngine: ObservableObject {
     // We'll use a different approach or manual triggering
   }
 
-  private func handleMemoryPressure() {
+  private func handleMemoryPressure() async {
     // Reduce model complexity under memory pressure
     self.memoryManager.optimizeForMemoryPressure()
 
     // Clear non-essential caches
-    self.performanceMonitor.clearCaches()
+    await self.performanceMonitor.clearCaches()
 
     // Reduce inference frequency
     if self.isInferring {
@@ -968,7 +968,7 @@ final class APGIInferenceEngine: ObservableObject {
       // Validate inference results
       try self.validateInferenceResult(result)
 
-      self.performanceMonitor.recordInference(duration: inferenceTime)
+      await self.performanceMonitor.recordInference(duration: inferenceTime)
       self.updateFPS(inferenceTime: inferenceTime)
 
       await self.stateManager.updateState(result.newState)
@@ -978,7 +978,7 @@ final class APGIInferenceEngine: ObservableObject {
 
       if let timer = fpsUpdateTimer, timer.isValid {
       } else {
-        self.averageInferenceTime = self.performanceMonitor.averageInferenceTime
+        self.averageInferenceTime = await self.performanceMonitor.averageInferenceTime
       }
 
       // Memory cleanup after inference
@@ -1070,7 +1070,7 @@ final class APGIInferenceEngine: ObservableObject {
       [weak self] _ in
       Task { @MainActor [weak self] in
         guard let self else { return }
-        self.averageInferenceTime = self.performanceMonitor.averageInferenceTime
+        self.averageInferenceTime = await self.performanceMonitor.averageInferenceTime
       }
     }
   }
@@ -1103,7 +1103,7 @@ final class APGIInferenceEngine: ObservableObject {
       refractoryTimer: 0.0
     )
 
-    self.performanceMonitor.reset()
+    await self.performanceMonitor.reset()
     self.currentFPS = 0.0
     self.averageInferenceTime = 0.0
   }
@@ -1113,7 +1113,7 @@ final class APGIInferenceEngine: ObservableObject {
   }
 
   func getPerformanceMetrics() async -> PerformanceMetrics {
-    let stats = self.performanceMonitor.getStatistics()
+    let stats = await self.performanceMonitor.getStatistics()
 
     return PerformanceMetrics(
       averageInferenceTime: stats.meanLatency / 1000.0,

@@ -20,8 +20,8 @@ class URLValidator: ObservableObject {
   private let trustedDomains = [
     "apgi-framework.org",
     "docs.apgi-framework.org",
-    "apple.com",
     "github.com",
+    "apple.com",
   ]
 
   private let trustedPathPrefixes = [

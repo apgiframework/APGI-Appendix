@@ -27,7 +27,6 @@ class UserDefaultsValidator: ObservableObject {
     self.validateWindowSettings()
     self.validateThemeSettings()
     self.validateNetworkSettings()
-    self.validateBookmarkSettings()
     self.validateLoggingSettings()
 
     self.isValidated = self.validationErrors.isEmpty
@@ -160,34 +159,6 @@ class UserDefaultsValidator: ObservableObject {
     self.defaults.set(settings.useCellularData, forKey: "useCellularData")
   }
 
-  func getValidatedBookmarks() -> [String] {
-    guard let bookmarkData = defaults.array(forKey: "bookmarkedTabs") as? [String] else {
-      return []
-    }
-
-    // Validate bookmark data structure
-    let validBookmarks = bookmarkData.filter { bookmark in
-      // Check if bookmark is a non-empty string
-      !bookmark.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-    }
-
-    if validBookmarks.count != bookmarkData.count {
-      self.addError(
-        .invalidBookmarkData,
-        value: "Found \(bookmarkData.count - validBookmarks.count) invalid bookmarks")
-    }
-
-    return validBookmarks
-  }
-
-  func setValidatedBookmarks(_ bookmarks: [String]) {
-    let validBookmarks = bookmarks.filter { bookmark in
-      !bookmark.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-    }
-
-    self.defaults.set(validBookmarks, forKey: "bookmarkedTabs")
-  }
-
   func resetToDefaults() {
     // Clear all app-specific settings
     let domain = Bundle.main.bundleIdentifier ?? "com.apgi.appendix"
@@ -197,7 +168,6 @@ class UserDefaultsValidator: ObservableObject {
     self.setValidatedFontSize(15.0)
     self.setValidatedThemeName("system")
     self.setValidatedNetworkSettings(NetworkSettings())
-    self.setValidatedBookmarks([])
 
     self.validateAllSettings()
   }
@@ -235,10 +205,6 @@ class UserDefaultsValidator: ObservableObject {
 
   private func validateNetworkSettings() {
     _ = self.getValidatedNetworkSettings()
-  }
-
-  private func validateBookmarkSettings() {
-    _ = self.getValidatedBookmarks()
   }
 
   private func validateLoggingSettings() {
@@ -291,7 +257,6 @@ enum ValidationErrorType {
   case windowFrameInvalid
   case invalidTheme
   case invalidRefreshInterval
-  case invalidBookmarkData
   case invalidBooleanSetting
   case serializationError
 
@@ -305,8 +270,6 @@ enum ValidationErrorType {
       return "Invalid theme name"
     case .invalidRefreshInterval:
       return "Auto refresh interval out of range (must be 1-168 hours)"
-    case .invalidBookmarkData:
-      return "Invalid bookmark data format"
     case .invalidBooleanSetting:
       return "Invalid boolean setting value"
     case .serializationError:
@@ -318,7 +281,7 @@ enum ValidationErrorType {
     switch self {
     case .fontSizeOutOfRange, .windowFrameInvalid, .invalidTheme:
       return "Warning"
-    case .invalidRefreshInterval, .invalidBookmarkData, .invalidBooleanSetting, .serializationError:
+    case .invalidRefreshInterval, .invalidBooleanSetting, .serializationError:
       return "Error"
     }
   }

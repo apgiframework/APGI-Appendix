@@ -27,15 +27,12 @@ class BookmarkManager: ObservableObject {
 
   init() {
     self.loadBookmarks()
-    self.setupObservers()
-  }
-
-  private func setupObservers() {
     NotificationCenter.default.addObserver(
-      forName: .clearAllBookmarks, object: nil, queue: .main
-    ) { [weak self] _ in
-      self?.removeAllBookmarks()
-    }
+      self,
+      selector: #selector(self.handleClearAllBookmarks),
+      name: .clearAllBookmarks,
+      object: nil
+    )
   }
 
   func addBookmark(_ tab: Tab) {
@@ -72,10 +69,14 @@ class BookmarkManager: ObservableObject {
     }
   }
 
-  func removeAllBookmarks() {
+  @objc private func handleClearAllBookmarks() {
     self.bookmarks.removeAll()
-    self.saveBookmarks()
+    _ = KeychainHelper.shared.delete(for: self.bookmarksKey)
     self.lastAction = nil
+  }
+
+  deinit {
+    NotificationCenter.default.removeObserver(self)
   }
 
   func isBookmarked(_ tab: Tab) -> Bool {

@@ -159,27 +159,21 @@ struct MainContentView: View {
       .onReceive(NotificationCenter.default.publisher(for: .printCurrentSection)) { _ in
         self.printCurrentSection()
       }
+      .onReceive(NotificationCenter.default.publisher(for: .copyCitation)) { _ in
+        self.copyCitationForCurrentSection()
+      }
+      .onReceive(NotificationCenter.default.publisher(for: .scrollToTables)) { notification in
+        if let tab = notification.object as? Tab {
+          self.selectedSection = tab
+          self.selectedCategory = tab.category
+        }
+      }
       .onReceive(
         NotificationCenter.default.publisher(for: NSNotification.Name("HandleHandoffActivity"))
       ) { notification in
         if let userActivity = notification.object as? NSUserActivity {
           self.handleIncomingHandoff(userActivity)
         }
-      }
-      .onReceive(NotificationCenter.default.publisher(for: .copyCitation)) { _ in
-        self.copyCitation()
-      }
-      .onReceive(NotificationCenter.default.publisher(for: .toggleBookmark)) { _ in
-        self.toggleBookmark()
-      }
-      .onReceive(NotificationCenter.default.publisher(for: .toggleAllSections)) { _ in
-        // Handled in SidebarView
-      }
-      .onReceive(NotificationCenter.default.publisher(for: .scrollToTables)) { _ in
-        // Handled in EnhancedSectionView
-      }
-      .onReceive(NotificationCenter.default.publisher(for: .showKeyboardShortcuts)) { _ in
-        self.showKeyboardShortcuts = true
       })
       .sheet(isPresented: self.$showUpdateCheck) {
         UpdateCheckView()
@@ -525,11 +519,11 @@ struct MainContentView: View {
     }
   }
 
-  private func copyCitation() {
-    guard let selectedSection = selectedSection else { return }
+  private func copyCitationForCurrentSection() {
+    guard let selectedSection else { return }
     ClipboardManager.shared.copyCitation(
       title: selectedSection.shortTitle,
-      year: "2024",
+      year: String(Calendar.current.component(.year, from: Date())),
       source: "APGI Appendix"
     )
   }
@@ -554,30 +548,7 @@ struct MainContentView: View {
 
   private func showLocalHelp() {
     let helpContent = URLValidator.shared.getLocalHelpContent()
-
-    let helpWindow = NSWindow(
-      contentRect: NSRect(x: 0, y: 0, width: 600, height: 700),
-      styleMask: [.titled, .closable, .resizable],
-      backing: .buffered,
-      defer: false
-    )
-
-    helpWindow.title = "APGI Appendix Help"
-    helpWindow.center()
-    helpWindow.setFrameAutosaveName("HelpWindow")
-
-    let helpView = ScrollView {
-      VStack(alignment: .leading, spacing: 16) {
-        Text(helpContent)
-          .font(.system(size: 14, design: .monospaced))
-          .textSelection(.enabled)
-          .padding()
-      }
-      .frame(maxWidth: .infinity, alignment: .leading)
-    }
-
-    helpWindow.contentView = NSHostingView(rootView: helpView)
-    helpWindow.makeKeyAndOrderFront(nil)
+    WindowManager.shared.showHelpWindow(content: helpContent)
   }
 
   private func checkForUpdates() {

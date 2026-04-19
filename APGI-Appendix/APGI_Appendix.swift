@@ -109,56 +109,15 @@ struct APGIAppendixApp: App {
 
   private func showLocalHelp() {
     let helpContent = URLValidator.shared.getLocalHelpContent()
-
-    let helpWindow = NSWindow(
-      contentRect: NSRect(x: 0, y: 0, width: 600, height: 700),
-      styleMask: [.titled, .closable, .resizable],
-      backing: .buffered,
-      defer: false
-    )
-
-    helpWindow.title = "APGI Appendix Help"
-    helpWindow.center()
-    helpWindow.setFrameAutosaveName("HelpWindow")
-
-    let helpView = ScrollView {
-      VStack(alignment: .leading, spacing: 16) {
-        Text(helpContent)
-          .font(.system(size: 14, design: .monospaced))
-          .textSelection(.enabled)
-          .padding()
-      }
-      .frame(maxWidth: .infinity, alignment: .leading)
-    }
-
-    helpWindow.contentView = NSHostingView(rootView: helpView)
-    helpWindow.makeKeyAndOrderFront(nil)
+    WindowManager.shared.showHelpWindow(content: helpContent)
   }
 
   private func showWhatsNew() {
-    let window = NSWindow(
-      contentRect: NSRect(x: 0, y: 0, width: 400, height: 450),
-      styleMask: [.titled, .closable],
-      backing: .buffered,
-      defer: false
-    )
-    window.title = "What's New"
-    window.contentView = NSHostingView(rootView: WhatsNewView())
-    window.center()
-    window.makeKeyAndOrderFront(nil)
+    WindowManager.shared.showWhatsNewWindow()
   }
 
   private func showQuickStart() {
-    let window = NSWindow(
-      contentRect: NSRect(x: 0, y: 0, width: 400, height: 500),
-      styleMask: [.titled, .closable],
-      backing: .buffered,
-      defer: false
-    )
-    window.title = "Quick Start"
-    window.contentView = NSHostingView(rootView: QuickStartPanel())
-    window.center()
-    window.makeKeyAndOrderFront(nil)
+    WindowManager.shared.showQuickStartWindow()
   }
 }
 
