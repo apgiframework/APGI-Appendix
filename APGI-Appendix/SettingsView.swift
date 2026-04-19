@@ -1,3 +1,4 @@
+import AppKit
 import Combine
 import SwiftUI
 
@@ -143,16 +144,10 @@ struct SettingsView: View {
           Label("Network", systemImage: "wifi")
         }
 
-      // Error Logs
-      ErrorLoggerView()
+      // Advanced/Diagnostics
+      AdvancedSettingsView()
         .tabItem {
-          Label("Logs", systemImage: "doc.text")
-        }
-
-      // Validation
-      UserDefaultsValidationView()
-        .tabItem {
-          Label("Validation", systemImage: "checkmark.shield")
+          Label("Advanced", systemImage: "gearshape.2")
         }
 
       // About
@@ -244,6 +239,194 @@ struct BookmarkListView: View {
       }
       .frame(height: min(CGFloat(self.bookmarkManager.bookmarks.count) * 60 + 20, 200))
       .listStyle(.plain)
+    }
+  }
+}
+
+// MARK: - Advanced Settings View
+
+/// Consolidated advanced/diagnostics settings for power users
+/// Groups diagnostic tools, logs, and technical configuration
+struct AdvancedSettingsView: View {
+  @State private var selectedTab = 0
+
+  var body: some View {
+    VStack(alignment: .leading, spacing: 16) {
+      HStack {
+        Text("Advanced & Diagnostics")
+          .font(.title2.bold())
+
+        Spacer()
+      }
+      .padding(.bottom, 4)
+
+      // Sub-tab picker for advanced sections
+      Picker("Section", selection: self.$selectedTab) {
+        Text("Logs").tag(0)
+        Text("Validation").tag(1)
+        Text("Diagnostics").tag(2)
+      }
+      .pickerStyle(.segmented)
+      .padding(.bottom, 12)
+
+      // Content based on selected tab
+      TabContent(selectedTab: self.selectedTab)
+
+      Spacer()
+    }
+    .padding()
+    .frame(width: 500, height: 360)
+  }
+}
+
+// MARK: - Advanced Tab Content
+
+private struct TabContent: View {
+  let selectedTab: Int
+
+  var body: some View {
+    switch selectedTab {
+    case 0:
+      ErrorLoggerView()
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+    case 1:
+      UserDefaultsValidationView()
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+    case 2:
+      DiagnosticsView()
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+    default:
+      EmptyView()
+    }
+  }
+}
+
+// MARK: - Diagnostics View
+
+/// Additional diagnostic tools for troubleshooting
+struct DiagnosticsView: View {
+  @State private var systemInfo = ""
+  @State private var isGatheringInfo = false
+
+  var body: some View {
+    VStack(alignment: .leading, spacing: 12) {
+      Text("System Diagnostics")
+        .font(.headline)
+
+      Text("Gather system information for troubleshooting and support requests.")
+        .font(.subheadline)
+        .foregroundStyle(.secondary)
+
+      if !systemInfo.isEmpty {
+        ScrollView {
+          Text(systemInfo)
+            .font(.system(size: 11, design: .monospaced))
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(8)
+            .background(Color(nsColor: .textBackgroundColor))
+            .cornerRadius(6)
+        }
+        .frame(maxHeight: 150)
+
+        HStack {
+          Button("Copy to Clipboard") {
+            NSPasteboard.general.clearContents()
+            NSPasteboard.general.setString(systemInfo, forType: .string)
+          }
+          .buttonStyle(.link)
+
+          Spacer()
+
+          Button("Clear") {
+            systemInfo = ""
+          }
+          .buttonStyle(.link)
+        }
+      } else {
+        VStack(spacing: 12) {
+          Image(systemName: "stethoscope")
+            .font(.system(size: 32))
+            .foregroundStyle(.secondary)
+
+          Text("No diagnostics gathered")
+            .foregroundStyle(.secondary)
+        }
+        .frame(maxWidth: .infinity, maxHeight: 120)
+      }
+
+      Spacer()
+
+      Button {
+        gatherSystemInfo()
+      } label: {
+        if isGatheringInfo {
+          ProgressView()
+            .scaleEffect(0.8)
+            .frame(width: 16, height: 16)
+        } else {
+          Text("Gather System Info")
+        }
+      }
+      .buttonStyle(.borderedProminent)
+      .disabled(isGatheringInfo)
+      .frame(maxWidth: .infinity)
+    }
+  }
+
+  private func gatherSystemInfo() {
+    isGatheringInfo = true
+
+    Task {
+      var info: [String] = []
+
+      // App info
+      info.append("APGI Appendix Diagnostics")
+      info.append(
+        "Generated: \(DateFormatter.localizedString(from: Date(), dateStyle: .medium, timeStyle: .medium))"
+      )
+      info.append("")
+
+      // Version info
+      info.append("App Version: \(Bundle.main.appVersion)")
+      let buildNumber = Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "Unknown"
+      info.append("Build: \(buildNumber)")
+      info.append("")
+
+      // System info
+      let processInfo = ProcessInfo.processInfo
+      info.append("macOS Version: \(processInfo.operatingSystemVersionString)")
+      info.append("Processor: \(processInfo.processorCount) cores")
+      info.append("Physical Memory: \(processInfo.physicalMemory / 1024 / 1024) MB")
+      info.append("")
+
+      // Performance metrics
+      let perfReport = await PerformanceMonitor.shared.getPerformanceReport()
+      info.append("Performance Metrics:")
+      info.append(
+        "  Average Inference: \(String(format: "%.3f", perfReport.averageInferenceTime))s")
+      info.append("  Current FPS: \(String(format: "%.1f", perfReport.currentFPS))")
+      info.append("  Memory Usage: \(String(format: "%.1f", perfReport.averageMemoryUsage))MB")
+      info.append("")
+
+      // User defaults summary
+      info.append("Settings Summary:")
+      info.append("  Theme: \(ThemeManager.shared.selectedTheme.rawValue)")
+      info.append("  Font Size: \(Int(ThemeManager.shared.fontSize))pt")
+      info.append("  Sidebar: \(ThemeManager.shared.sidebarVisible ? "Visible" : "Hidden")")
+      info.append("")
+
+      // Network status
+      info.append("Network: \(NetworkManager.shared.isConnected ? "Connected" : "Disconnected")")
+      if NetworkManager.shared.isConnected {
+        let connectionType =
+          NetworkManager.shared.connectionType.map { String(describing: $0) } ?? "Unknown"
+        info.append("  Connection Type: \(connectionType)")
+      }
+
+      await MainActor.run {
+        systemInfo = info.joined(separator: "\n")
+        isGatheringInfo = false
+      }
     }
   }
 }

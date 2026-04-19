@@ -84,7 +84,9 @@ struct SearchView: View {
             self.debounceTimer = Timer.scheduledTimer(
               withTimeInterval: TimeInterval(debounceDelay) / 1000.0, repeats: false
             ) { _ in
-              self.performSearch()
+              Task { @MainActor in
+                self.performSearch()
+              }
             }
           }
 

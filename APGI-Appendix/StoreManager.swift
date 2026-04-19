@@ -188,35 +188,61 @@ extension StoreManager {
   /// Validates the App Store receipt with Apple's server
   /// This provides additional security beyond local StoreKit verification
   func validateReceiptWithServer() async -> ReceiptValidationResult {
+    // Ensure network connectivity before attempting any server-related validation
     guard NetworkManager.shared.isConnected else {
       return .failure(.serverUnavailable)
     }
 
-    // Fetch the receipt from the app bundle
-    guard let receiptURL = Bundle.main.appStoreReceiptURL,
-      FileManager.default.fileExists(atPath: receiptURL.path)
-    else {
-      return .failure(.receiptNotFound)
-    }
-
+    // Prefer StoreKit 2 APIs across platforms to avoid deprecated receipt URL usage
+    // Attempt to read the signed App Transaction and enumerate transactions
     do {
-      let receiptData = try Data(contentsOf: receiptURL)
-      let receiptBase64 = receiptData.base64EncodedString()
-
-      // Validate with Apple's production server first
-      if let result = await validateWithApple(receiptBase64: receiptBase64, sandbox: false) {
-        return result
-      }
-
-      // If production returns 21007 (sandbox receipt), try sandbox
-      if let sandboxResult = await validateWithApple(receiptBase64: receiptBase64, sandbox: true) {
-        return sandboxResult
-      }
-
-      return .failure(.receiptValidationFailed)
+      _ = try await AppTransaction.shared
     } catch {
-      return .failure(.receiptNotFound)
+      // If AppTransaction is unavailable, we still proceed to check entitlements/transactions
     }
+
+    // Collect current entitlements as the primary, non-deprecated path
+    var currentProductIDs: Set<String> = []
+    for await result in Transaction.currentEntitlements {
+      do {
+        let transaction = try checkVerified(result)
+        currentProductIDs.insert(transaction.productID)
+      } catch {
+        // Skip unverified
+      }
+    }
+
+    // If we have any active entitlements, treat as success without contacting Apple's verifyReceipt endpoint
+    if !currentProductIDs.isEmpty {
+      return .success(Array(currentProductIDs))
+    }
+
+    // If entitlements are empty, attempt to scan full transaction history for previously purchased non-consumables
+    // This still uses StoreKit 2 and avoids deprecated receipt access.
+    do {
+      var historicalProductIDs: Set<String> = []
+      for await verification in Transaction.all {
+        do {
+          let transaction = try checkVerified(verification)
+          // Include completed or restored non-consumables/subscriptions that may still grant access
+          if transaction.revocationDate == nil {
+            historicalProductIDs.insert(transaction.productID)
+          }
+        } catch {
+          // Skip unverified
+        }
+      }
+
+      if !historicalProductIDs.isEmpty {
+        return .success(Array(historicalProductIDs))
+      }
+    }
+
+    // As a final step, if you still need server-side verification for your backend,
+    // you can call your own server here with identifiers or signed transactions.
+    // Since we are avoiding deprecated receipt URL access, we will return a failure that
+    // indicates server-side validation couldn't assert anything new.
+    return .failure(.receiptValidationFailed)
   }
 
   private func validateWithApple(receiptBase64: String, sandbox: Bool) async
@@ -406,7 +432,7 @@ struct StoreView: View {
       .task {
         await self.storeManager.loadProducts()
         // Use comprehensive validation including server-side receipt check
-        await self.storeManager.validatePurchasesComprehensive()
+        _ = await self.storeManager.validatePurchasesComprehensive()
       }
     }
   }

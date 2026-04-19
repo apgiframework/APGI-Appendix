@@ -1,8 +1,9 @@
-import CoreSpotlight
+@preconcurrency import CoreSpotlight
 import Foundation
 
 // MARK: - Spotlight Manager
 
+@MainActor
 class SpotlightManager {
   static let shared = SpotlightManager()
 
@@ -10,23 +11,24 @@ class SpotlightManager {
   }
 
   func indexAllContent() {
-    var searchableItems: [CSSearchableItem] = []
-
-    for tab in Tab.allCases {
-      let item = self.createSearchableItem(for: tab)
-      searchableItems.append(item)
+    let searchableItems: [CSSearchableItem] = Tab.allCases.map {
+      self.createSearchableItem(for: $0)
     }
+    let itemCount = searchableItems.count
 
     CSSearchableIndex.default().indexSearchableItems(searchableItems) { error in
-      if let error = error {
-        logError(
-          error, context: "SpotlightManager.indexAllContent", function: #function, file: #file,
-          line: #line)
-      } else {
-        logInfo(
-          "Successfully indexed \(searchableItems.count) items",
-          context: "SpotlightManager.indexAllContent", function: #function, file: #file, line: #line
-        )
+      Task { @MainActor in
+        if let error = error {
+          logError(
+            error, context: "SpotlightManager.indexAllContent", function: #function, file: #file,
+            line: #line)
+        } else {
+          logInfo(
+            "Successfully indexed \(itemCount) items",
+            context: "SpotlightManager.indexAllContent", function: #function, file: #file,
+            line: #line
+          )
+        }
       }
     }
   }
@@ -34,10 +36,12 @@ class SpotlightManager {
   func updateIndex(for tab: Tab) {
     let item = self.createSearchableItem(for: tab)
     CSSearchableIndex.default().indexSearchableItems([item]) { error in
-      if let error = error {
-        logError(
-          error, context: "SpotlightManager.updateIndex", function: #function, file: #file,
-          line: #line)
+      Task { @MainActor in
+        if let error = error {
+          logError(
+            error, context: "SpotlightManager.updateIndex", function: #function, file: #file,
+            line: #line)
+        }
       }
     }
   }
@@ -45,10 +49,12 @@ class SpotlightManager {
   func removeFromIndex(_ tab: Tab) {
     let identifier = "com.apgi-framework.appendix.\(tab.rawValue)"
     CSSearchableIndex.default().deleteSearchableItems(withIdentifiers: [identifier]) { error in
-      if let error = error {
-        logError(
-          error, context: "SpotlightManager.removeFromIndex", function: #function, file: #file,
-          line: #line)
+      Task { @MainActor in
+        if let error = error {
+          logError(
+            error, context: "SpotlightManager.removeFromIndex", function: #function, file: #file,
+            line: #line)
+        }
       }
     }
   }

@@ -6,14 +6,14 @@ import SwiftUI
 /// Centralized manager for auxiliary window lifecycle
 /// Prevents duplicate windows and provides consistent window management
 @MainActor
-final class WindowManager {
+final class WindowManager: NSObject {
   static let shared = WindowManager()
 
   private var helpWindow: NSWindow?
   private var quickStartWindow: NSWindow?
   private var whatsNewWindow: NSWindow?
 
-  private init() {}
+  private override init() {}
 
   // MARK: - Help Window
 

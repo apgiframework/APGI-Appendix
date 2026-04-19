@@ -220,21 +220,6 @@ struct APGIConfiguration: Equatable {
     energyMax: APGISimulatorConstants.maxEnergy,
     historyLength: APGISimulatorConstants.defaultHistoryLength
   )
-
-  nonisolated static let defaultConfig = APGIConfiguration(
-    inputSize: APGISimulatorConstants.defaultInputSize,
-    hiddenSize: APGISimulatorConstants.defaultHiddenSize,
-    numLevels: APGISimulatorConstants.defaultNumLevels,
-    dtMs: APGISimulatorConstants.defaultDtMs,
-    theta0: APGISimulatorConstants.baselineThreshold,
-    thetaMin: APGISimulatorConstants.minThreshold,
-    thetaMax: APGISimulatorConstants.maxThreshold,
-    precisionMin: APGISimulatorConstants.minPrecision,
-    precisionMax: APGISimulatorConstants.maxPrecision,
-    energyMin: APGISimulatorConstants.minEnergy,
-    energyMax: APGISimulatorConstants.maxEnergy,
-    historyLength: APGISimulatorConstants.defaultHistoryLength
-  )
 }
 
 enum APGIError: Error, LocalizedError {
@@ -871,7 +856,7 @@ final class APGIInferenceEngine: ObservableObject {
     self.setupMemoryPressureObserver()
   }
 
-  deinit {
+  @MainActor deinit {
     fpsUpdateTimer?.invalidate()
     if let observer = memoryPressureObserver {
       NotificationCenter.default.removeObserver(observer)

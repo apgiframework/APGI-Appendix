@@ -86,7 +86,9 @@ class ThemeManager: ObservableObject {
       object: nil,
       queue: .main
     ) { [weak self] _ in
-      self?.saveSettings()
+      Task { @MainActor [weak self] in
+        self?.saveSettings()
+      }
     }
   }
 

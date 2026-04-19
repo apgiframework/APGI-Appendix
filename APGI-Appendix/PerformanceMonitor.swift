@@ -8,8 +8,7 @@ struct PerformanceMonitorActor {
   static let shared = PerformanceMonitor()
 }
 
-@PerformanceMonitorActor
-final class PerformanceMonitor {
+actor PerformanceMonitor {
   static let shared = PerformanceMonitor()
 
   private var inferenceTimes: [TimeInterval] = []

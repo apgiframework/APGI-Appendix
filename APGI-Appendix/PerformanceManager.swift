@@ -63,7 +63,7 @@ final class PerformanceManager: ObservableObject {
     self.memoryPressureSource = source  // retains until deinit
   }
 
-  private func getAvailableMemory() -> UInt64 {
+  private nonisolated func getAvailableMemory() -> UInt64 {
     var vmStats = vm_statistics64()
     var count = mach_msg_type_number_t(
       MemoryLayout<vm_statistics64>.size / MemoryLayout<integer_t>.size)
@@ -73,7 +73,8 @@ final class PerformanceManager: ObservableObject {
       }
     }
     guard result == KERN_SUCCESS else { return 0 }
-    let pageSize = UInt64(vm_kernel_page_size)
+    // Use NSProcessInfo for page size to avoid concurrency issues with vm_kernel_page_size
+    let pageSize: UInt64 = UInt64(getpagesize())
     return (UInt64(vmStats.free_count) + UInt64(vmStats.inactive_count)) * pageSize
   }
 

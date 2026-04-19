@@ -343,12 +343,9 @@ struct MainContentView: View {
     activity.isEligibleForSearch = true
     activity.isEligibleForPublicIndexing = false
 
-    // Set webpage URL for deep linking (only for valid HTTP/HTTPS URLs)
-    if let deepLinkURL = self.createDeepLinkURL(for: section) {
-      activity.webpageURL = deepLinkURL
-    }
-    // Note: Custom scheme URLs are not valid for webpageURL property
-    // The deep link functionality is handled through the activity itself
+    // webpageURL only accepts http/https schemes, not custom schemes
+    // The deep link functionality is handled through userInfo, not webpageURL
+    // Do NOT set webpageURL to custom scheme URLs - it causes a runtime crash
 
     activity.becomeCurrent()
     self.userActivity = activity

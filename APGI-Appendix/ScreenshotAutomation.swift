@@ -852,7 +852,7 @@
 
       var point = CGPoint.zero
       if CFGetTypeID(positionValue) == AXValueGetTypeID() {
-        let posAX: AXValue = unsafeBitCast(positionValue, to: AXValue.self)
+        let posAX = unsafeDowncast(positionValue as AnyObject, to: AXValue.self)
         guard AXValueGetValue(posAX, .cgPoint, &point) else { return false }
       } else {
         return false
@@ -1613,8 +1613,8 @@
       if CFGetTypeID(positionValue) == AXValueGetTypeID(),
         CFGetTypeID(sizeValue) == AXValueGetTypeID()
       {
-        let posAX: AXValue = unsafeBitCast(positionValue, to: AXValue.self)
-        let sizeAX: AXValue = unsafeBitCast(sizeValue, to: AXValue.self)
+        let posAX = unsafeDowncast(positionValue as AnyObject, to: AXValue.self)
+        let sizeAX = unsafeDowncast(sizeValue as AnyObject, to: AXValue.self)
 
         guard AXValueGetValue(posAX, .cgPoint, &position),
           AXValueGetValue(sizeAX, .cgSize, &size)

@@ -10,6 +10,11 @@ struct UpdateResponse: Codable {
   let downloadURL: String?
   let releaseDate: String?
   let isCritical: Bool?
+
+  // Signature fields for cryptographic verification
+  let signature: String?  // Base64-encoded signature
+  let keyId: String?  // Key identifier used for signing
+  let algorithm: String?  // Signature algorithm (e.g., "P256-ECDSA", "Ed25519")
 }
 
 // MARK: - Update Check View
@@ -25,6 +30,8 @@ struct UpdateCheckView: View {
   @State private var isCriticalUpdate = false
   @State private var retryCount = 0
   private let maxRetries = 3
+  @State private var securityError = ""
+  @State private var requiresSignatureVerification = true
 
   @Environment(\.dismiss) private var dismiss
 
@@ -80,6 +87,41 @@ struct UpdateCheckView: View {
             .buttonStyle(.borderedProminent)
 
             Button("Later") {
+              self.dismiss()
+            }
+            .buttonStyle(.bordered)
+          }
+        }
+      } else if !self.securityError.isEmpty {
+        VStack(spacing: 16) {
+          Image(systemName: "lock.shield.fill")
+            .font(.system(size: 48))
+            .foregroundStyle(.red)
+
+          Text("Security Verification Failed")
+            .font(.headline.weight(.semibold))
+
+          Text(self.securityError)
+            .foregroundStyle(.secondary)
+            .multilineTextAlignment(.center)
+            .padding(.horizontal)
+
+          Text("This update cannot be trusted. Please download manually from the official website.")
+            .font(.caption)
+            .foregroundStyle(.secondary)
+            .multilineTextAlignment(.center)
+            .padding(.horizontal)
+
+          HStack(spacing: 12) {
+            Button("Open Website") {
+              if let url = URL(string: "https://apgi-framework.com/download") {
+                NSWorkspace.shared.open(url)
+              }
+              self.dismiss()
+            }
+            .buttonStyle(.borderedProminent)
+
+            Button("Dismiss") {
               self.dismiss()
             }
             .buttonStyle(.bordered)
@@ -203,31 +245,65 @@ struct UpdateCheckView: View {
   }
 
   private func processUpdateResult(_ result: UpdateResponse) {
-    self.isCheckingForUpdates = false
-    self.latestVersion = result.latestVersion
-    self.updateNotes = result.releaseNotes
-    self.isCriticalUpdate = result.isCritical ?? false
+    Task {
+      // Verify cryptographic signature before processing
+      let validationResult = await UpdateSignatureActor.sharedVerifier.validateUpdate(
+        result,
+        signature: result.signature,
+        keyId: result.keyId
+      )
 
-    if let downloadURLString = result.downloadURL {
-      self.downloadURL = URL(string: downloadURLString)
-    }
-
-    let comparison = compareVersions(self.currentVersion, result.latestVersion)
-
-    if comparison == .orderedAscending {
-      // Check minimum version requirement
-      if let minimumVersion = result.minimumVersion,
-        compareVersions(self.currentVersion, minimumVersion) == .orderedAscending
-      {
-        self.isCriticalUpdate = true
+      // Validate download URL if present (outside MainActor context)
+      var validDownloadURL: URL? = nil
+      if let downloadURLString = result.downloadURL {
+        let isValidURL = await UpdateSignatureActor.sharedVerifier.validateDownloadURL(
+          downloadURLString)
+        if isValidURL {
+          validDownloadURL = URL(string: downloadURLString)
+        } else {
+          await MainActor.run {
+            logSecurityEvent("Download URL rejected by policy: \(downloadURLString)")
+          }
+        }
       }
-      self.updateAvailable = true
-    } else {
-      self.updateAvailable = false
-    }
 
-    // Cache last check timestamp
-    UserDefaults.standard.set(Date(), forKey: "lastUpdateCheck")
+      await MainActor.run {
+        guard validationResult.isValid else {
+          self.isCheckingForUpdates = false
+          self.securityError =
+            validationResult.errorReason ?? "Update signature verification failed"
+          self.logSecurityEvent("Update rejected: \(self.securityError)")
+          return
+        }
+
+        self.downloadURL = validDownloadURL
+        self.isCheckingForUpdates = false
+        self.latestVersion = result.latestVersion
+        self.updateNotes = result.releaseNotes
+        self.isCriticalUpdate = result.isCritical ?? false
+
+        let comparison = compareVersions(self.currentVersion, result.latestVersion)
+
+        if comparison == .orderedAscending {
+          // Check minimum version requirement
+          if let minimumVersion = result.minimumVersion,
+            compareVersions(self.currentVersion, minimumVersion) == .orderedAscending
+          {
+            self.isCriticalUpdate = true
+          }
+          self.updateAvailable = true
+        } else {
+          self.updateAvailable = false
+        }
+
+        // Cache last check timestamp
+        UserDefaults.standard.set(Date(), forKey: "lastUpdateCheck")
+      }
+    }
+  }
+
+  private func logSecurityEvent(_ message: String) {
+    logInfo("[SECURITY] \(message)", context: "UpdateCheckView")
   }
 
   private func openDownloadURL() {
