@@ -80,9 +80,7 @@ class ClipboardManager {
 
   // MARK: - Helper Methods
 
-  private func buildCitation(title: String, authors: String?, year: String, source: String)
-    -> String
-  {
+  private func buildCitation(title: String, authors: String?, year: String, source: String) -> String {
     if let authors = authors, !authors.isEmpty {
       return "\(authors) (\(year)). \(title). \(source)."
     } else {
@@ -109,7 +107,7 @@ class ClipboardManager {
       string: text,
       attributes: [
         .font: NSFont.systemFont(ofSize: 12),
-        .foregroundColor: NSColor.textColor,
+        .foregroundColor: NSColor.textColor
       ]
     )
 
@@ -144,7 +142,7 @@ class ClipboardManager {
       string: fullText,
       attributes: [
         .font: NSFont.systemFont(ofSize: 12),
-        .foregroundColor: NSColor.textColor,
+        .foregroundColor: NSColor.textColor
       ]
     )
 

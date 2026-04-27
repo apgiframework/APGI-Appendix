@@ -12,6 +12,8 @@ struct APGIAppendixApp: App {
   @StateObject private var navigationManager = KeyboardNavigationManager.shared
   @StateObject private var memoryMonitor = MemoryMonitor.shared
   @StateObject private var bookmarkManager = BookmarkManager.shared
+  @AppStorage("enableSpotlightIndexing") private var enableSpotlightIndexing = true
+  @AppStorage("enableMemoryMonitoring") private var enableMemoryMonitoring = true
 
   init() {
     // StateObjects are automatically initialized by SwiftUI
@@ -28,11 +30,22 @@ struct APGIAppendixApp: App {
         .environmentObject(self.memoryMonitor)
         .environmentObject(self.bookmarkManager)
         .onAppear {
-          // Start memory monitoring when the view appears
-          self.memoryMonitor.startMonitoring(interval: 30.0)
+          // Conditionally start memory monitoring based on user preferences
+          if self.enableMemoryMonitoring {
+            // Defer startup to reduce launch time impact
+            DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+              self.memoryMonitor.startMonitoring(interval: 30.0)
+            }
+          }
 
-          // Index content for Spotlight search
-          SpotlightManager.shared.indexAllContent()
+          // Conditionally index content for Spotlight based on preferences
+          if self.enableSpotlightIndexing {
+            // Defer indexing to reduce launch time impact
+            Task { @MainActor in
+              try? await Task.sleep(nanoseconds: 3_000_000_000)
+              SpotlightManager.shared.indexAllContent()
+            }
+          }
         }
     }
     .commands {

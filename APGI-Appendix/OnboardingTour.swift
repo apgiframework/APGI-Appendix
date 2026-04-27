@@ -73,7 +73,7 @@ class OnboardingManager: ObservableObject {
         "Enhanced reading layout with key takeaways and collapsible subsections",
         "Glossary-highlighted terms for fast definitions",
         "APGI Simulator window for interactive modeling",
-        "Dark/light mode support",
+        "Dark/light mode support"
       ],
       highlightColor: .blue
     ),
@@ -88,7 +88,7 @@ class OnboardingManager: ObservableObject {
       tips: [
         "⌘1-9: Jump to main sections",
         "⌘F: Search",
-        "⌘↑/↓: Navigate between sections",
+        "⌘↑/↓: Navigate between sections"
       ],
       highlightColor: .purple
     ),
@@ -104,7 +104,7 @@ class OnboardingManager: ObservableObject {
         "⌘⇧M: Open simulator window",
         "Adjust parameters with sliders",
         "Real-time visualization updates",
-        "Save and load model configurations",
+        "Save and load model configurations"
       ],
       highlightColor: .teal
     ),
@@ -119,7 +119,7 @@ class OnboardingManager: ObservableObject {
       tips: [
         "Click and drag to explore",
         "Scroll/trackpad to zoom",
-        "Use labels to orient yourself",
+        "Use labels to orient yourself"
       ],
       highlightColor: .indigo
     ),
@@ -133,7 +133,7 @@ class OnboardingManager: ObservableObject {
       tips: [
         "⌘⇧T: Open timeline window",
         "Use zoom controls for scale",
-        "Tap/inspect events for details",
+        "Tap/inspect events for details"
       ],
       highlightColor: .orange
     ),
@@ -149,7 +149,7 @@ class OnboardingManager: ObservableObject {
         "⌘,: Open Settings",
         "⌘0: Reset zoom",
         "⌘++/--: Adjust text size",
-        "Full VoiceOver support",
+        "Full VoiceOver support"
       ],
       highlightColor: .green
     ),
@@ -164,7 +164,7 @@ class OnboardingManager: ObservableObject {
       tips: [
         "Start with the hero card for the key takeaway",
         "Expand only the subsections you need",
-        "Use Related links to jump across the framework",
+        "Use Related links to jump across the framework"
       ],
       highlightColor: .purple
     ),
@@ -180,10 +180,10 @@ class OnboardingManager: ObservableObject {
       tips: [
         "⌘?: Quick help anytime",
         "⌘F to search across all content",
-        "Check back for updates",
+        "Check back for updates"
       ],
       highlightColor: .blue
-    ),
+    )
   ]
 
   init() {
@@ -256,7 +256,7 @@ struct OnboardingTourView: View {
       LinearGradient(
         colors: [
           Color(red: 0.1, green: 0.1, blue: 0.2),
-          Color(red: 0.2, green: 0.1, blue: 0.3),
+          Color(red: 0.2, green: 0.1, blue: 0.3)
         ],
         startPoint: .topLeading,
         endPoint: .bottomTrailing
@@ -273,7 +273,7 @@ struct OnboardingTourView: View {
     .frame(width: 700, height: 550)
     .background(self.backgroundGradient)
     .clipShape(RoundedRectangle(cornerRadius: 20))
-    .shadow(color: .black.opacity(0.2), radius: 30)
+    .shadow(color: .black.opacity(0.15), radius: 30)
     .overlay(
       RoundedRectangle(cornerRadius: 20)
         .strokeBorder(Color.white.opacity(0.1), lineWidth: 1)
@@ -341,7 +341,7 @@ struct OnboardingTourView: View {
     LinearGradient(
       colors: [
         Color(red: 0.1, green: 0.1, blue: 0.2),
-        Color(red: 0.2, green: 0.1, blue: 0.3),
+        Color(red: 0.2, green: 0.1, blue: 0.3)
       ],
       startPoint: .topLeading,
       endPoint: .bottomTrailing

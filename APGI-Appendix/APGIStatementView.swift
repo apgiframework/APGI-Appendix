@@ -20,7 +20,7 @@ struct APGIStatementView: View {
       category: SectionCategory.theoretical,
       hasDataTable: false
     )
-    .padding()
+    .padding(APGISpacing.lg)
   }
 }
 

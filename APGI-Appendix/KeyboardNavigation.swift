@@ -66,7 +66,7 @@ struct KeyboardShortcutsView: View {
         ("⌘↓", "Next section"),
         ("⌘1-9", "Jump to section 1-9"),
         ("⌘[", "Back in history"),
-        ("⌘]", "Forward in history"),
+        ("⌘]", "Forward in history")
       ]
     ),
     (
@@ -76,7 +76,7 @@ struct KeyboardShortcutsView: View {
         ("⌘G", "Toggle glossary"),
         ("⌘B", "Toggle bookmarks"),
         ("⌘S", "Toggle sidebar"),
-        ("⌘/", "Show keyboard shortcuts"),
+        ("⌘/", "Show keyboard shortcuts")
       ]
     ),
     (
@@ -85,7 +85,7 @@ struct KeyboardShortcutsView: View {
         ("⌘⇧T", "Open timeline window"),
         ("⌘W", "Close current window"),
         ("⌘M", "Minimize window"),
-        ("⌘⌃F", "Toggle fullscreen"),
+        ("⌘⌃F", "Toggle fullscreen")
       ]
     ),
     (
@@ -95,7 +95,7 @@ struct KeyboardShortcutsView: View {
         ("⌘-", "Decrease font size"),
         ("⌘0", "Reset font size"),
         ("Space", "Scroll down"),
-        ("⇧Space", "Scroll up"),
+        ("⇧Space", "Scroll up")
       ]
     ),
     (
@@ -103,9 +103,9 @@ struct KeyboardShortcutsView: View {
       [
         ("⌘,", "Open settings"),
         ("⌘/", "Show this help"),
-        ("⌘Q", "Quit application"),
+        ("⌘Q", "Quit application")
       ]
-    ),
+    )
   ]
 
   var body: some View {
@@ -143,7 +143,7 @@ struct KeyboardShortcutsView: View {
         LazyVGrid(
           columns: [
             GridItem(.flexible(), spacing: 20),
-            GridItem(.flexible(), spacing: 20),
+            GridItem(.flexible(), spacing: 20)
           ], spacing: 24
         ) {
           ForEach(self.shortcuts, id: \.category) { section in
@@ -157,9 +157,7 @@ struct KeyboardShortcutsView: View {
     .background(Color(NSColor.windowBackgroundColor))
   }
 
-  private func shortcutSection(_ title: String, items: [(key: String, description: String)])
-    -> some View
-  {
+  private func shortcutSection(_ title: String, items: [(key: String, description: String)]) -> some View {
     VStack(alignment: .leading, spacing: 12) {
       Text(title)
         .font(.headline)
@@ -312,7 +310,7 @@ struct GlossarySlidePanel: View {
     .shadow(radius: 10)
     .padding()
     .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .trailing)
-    .background(Color.black.opacity(0.2).ignoresSafeArea())
+    .background(Color.black.opacity(0.15).ignoresSafeArea())
     .onTapGesture {
       withAnimation {
         self.isPresented = false
@@ -363,7 +361,8 @@ struct GlossaryTermRow: View {
     .clipShape(RoundedRectangle(cornerRadius: 8))
     .contentShape(Rectangle())
     .onTapGesture {
-    }  // Prevent background tap from dismissing
+      // Prevent background tap from dismissing
+    }
   }
 }
 

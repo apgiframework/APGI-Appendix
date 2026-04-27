@@ -25,8 +25,9 @@ class ContentCacheManager: ObservableObject {
       .appendingPathComponent("Cache", isDirectory: true)
 
     if appSupport == nil {
-      print(
-        "Warning: Unable to access application support directory. Using temporary directory for cache."
+      logWarning(
+        "Unable to access application support directory. Using temporary directory for cache.",
+        context: "ContentCacheManager"
       )
     }
 
@@ -172,7 +173,7 @@ class ContentCacheManager: ObservableObject {
             let metadata: [String: Any] = [
               "cachedAt": Date().timeIntervalSince1970,
               "sourceURL": url.absoluteString,
-              "contentType": httpResponse.mimeType ?? "unknown",
+              "contentType": httpResponse.mimeType ?? "unknown"
             ]
             self.cacheContent(data, for: cacheKey, metadata: metadata)
 

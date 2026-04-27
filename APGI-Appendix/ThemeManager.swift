@@ -28,7 +28,7 @@ enum AppTheme: String, CaseIterable, Identifiable {
 class ThemeManager: ObservableObject {
   static let shared = ThemeManager()
 
-  @Published var selectedTheme: AppTheme = .system {
+  @Published var selectedTheme: AppTheme = .light {
     didSet {
       // Immediately apply theme change across all windows
       self.applyTheme()
@@ -38,45 +38,43 @@ class ThemeManager: ObservableObject {
   }
 
   @AppStorage("highContrastMode") var highContrastMode: Bool = false
-  @AppStorage("contentFontSize") var fontSize: Double = 15.0
+  @AppStorage("contentFontSize") var fontSize: Double = 16.0
   @AppStorage("enableAnimations") var enableAnimations: Bool = true
   @AppStorage("sidebarVisible") var sidebarVisible: Bool = true
   @AppStorage("focusModeEnabled") var focusModeEnabled: Bool = false
-  @AppStorage("accentColorHex") private var accentColorHex: String = "#007AFF"
+  @AppStorage("accentColorHex") private var accentColorHex: String = "#00B4FF"
 
   var selectedThemeColor: Color {
     get {
-      Color(hex: accentColorHex) ?? .blue
+      Color(hex: accentColorHex) ?? .thresholdBlue
     }
     set {
-      accentColorHex = newValue.toHex() ?? "#007AFF"
+      accentColorHex = newValue.toHex() ?? "#00B4FF"
       objectWillChange.send()
     }
   }
   @AppStorage("autoSaveBookmarks") var autoSaveBookmarks: Bool = true
 
   // Dynamic Type scaled metrics
-  @ScaledMetric(relativeTo: .body) var bodyFontSize: CGFloat = 15
-  @ScaledMetric(relativeTo: .headline) var headlineFontSize: CGFloat = 17
-  @ScaledMetric(relativeTo: .title) var titleFontSize: CGFloat = 28
+  @ScaledMetric(relativeTo: .body) var bodyFontSize: CGFloat = 16
+  @ScaledMetric(relativeTo: .headline) var headlineFontSize: CGFloat = 20
+  @ScaledMetric(relativeTo: .title) var titleFontSize: CGFloat = 30
   @ScaledMetric(relativeTo: .title2) var title2FontSize: CGFloat = 22
   @ScaledMetric(relativeTo: .title3) var title3FontSize: CGFloat = 20
-  @ScaledMetric(relativeTo: .caption) var captionFontSize: CGFloat = 12
-  @ScaledMetric(relativeTo: .footnote) var footnoteFontSize: CGFloat = 13
+  @ScaledMetric(relativeTo: .caption) var captionFontSize: CGFloat = 14
+  @ScaledMetric(relativeTo: .footnote) var footnoteFontSize: CGFloat = 14
 
   var backgroundColor: Color {
-    switch self.selectedTheme {
-    case .light:
-      return Color(NSColor.textBackgroundColor)
-    case .dark:
-      return Color(NSColor.windowBackgroundColor)
-    case .system:
-      return Color.primary.opacity(0.05)
-    }
+    return Color.white
   }
 
   private init() {
-    self.loadSettings()
+    // Default to light mode
+    if UserDefaults.standard.string(forKey: "selectedTheme") == nil {
+        self.selectedTheme = .light
+    } else {
+        self.loadSettings()
+    }
     self.setupAutoSave()
   }
 
@@ -105,8 +103,7 @@ class ThemeManager: ObservableObject {
 
   private func loadSettings() {
     if let themeRaw = UserDefaults.standard.string(forKey: "selectedTheme"),
-      let theme = AppTheme(rawValue: themeRaw)
-    {
+      let theme = AppTheme(rawValue: themeRaw) {
       self.selectedTheme = theme
     }
 

@@ -16,7 +16,7 @@ struct BookmarkButton: View {
       self.toggleBookmark()
     } label: {
       Image(systemName: self.isBookmarked ? "bookmark.fill" : "bookmark")
-        .foregroundColor(self.isBookmarked ? .accentColor : .primary)
+        .foregroundColor(self.isBookmarked ? .thresholdBlue : .primary)
         .scaleEffect(self.showFeedback ? 1.2 : 1.0)
         .animation(.easeInOut(duration: 0.2), value: self.showFeedback)
     }

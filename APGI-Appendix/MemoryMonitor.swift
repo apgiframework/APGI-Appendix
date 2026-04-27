@@ -1,7 +1,10 @@
 import Combine
 import Foundation
+import Darwin
+import MachO
 
 /// Memory monitoring utility for leak detection and performance tracking
+/// Uses system-level APIs for accurate memory statistics
 @MainActor
 class MemoryMonitor: ObservableObject {
   static let shared = MemoryMonitor()
@@ -12,21 +15,26 @@ class MemoryMonitor: ObservableObject {
 
   struct MemoryStats {
     let timestamp: Date
-    let usedMemory: UInt64
-    let availableMemory: UInt64
-    let totalMemory: UInt64
+    let usedMemory: UInt64      // Process resident size
+    let availableMemory: UInt64 // System free memory
+    let totalMemory: UInt64     // System total physical memory
+    let systemUsedMemory: UInt64 // System-wide used memory
 
     var memoryPressure: Double {
-      return Double(self.usedMemory) / Double(self.totalMemory)
+      return Double(systemUsedMemory) / Double(totalMemory)
     }
 
     var formattedUsedMemory: String {
-      return ByteCountFormatter.string(fromByteCount: Int64(self.usedMemory), countStyle: .memory)
+      return ByteCountFormatter.string(fromByteCount: Int64(usedMemory), countStyle: .memory)
     }
 
     var formattedAvailableMemory: String {
       return ByteCountFormatter.string(
-        fromByteCount: Int64(self.availableMemory), countStyle: .memory)
+        fromByteCount: Int64(availableMemory), countStyle: .memory)
+    }
+
+    var formattedSystemUsed: String {
+      return ByteCountFormatter.string(fromByteCount: Int64(systemUsedMemory), countStyle: .memory)
     }
   }
 
@@ -110,11 +118,16 @@ class MemoryMonitor: ObservableObject {
   }
 
   private func recordMemoryStats() async {
+    let processUsed = getProcessUsedMemory()
+    let (systemUsed, systemFree) = getSystemMemoryStats()
+    let total = ProcessInfo.processInfo.physicalMemory
+
     let stats = MemoryStats(
       timestamp: Date(),
-      usedMemory: getUsedMemory(),
-      availableMemory: getAvailableMemory(),
-      totalMemory: ProcessInfo.processInfo.physicalMemory
+      usedMemory: processUsed,
+      availableMemory: systemFree,
+      totalMemory: total,
+      systemUsedMemory: systemUsed
     )
 
     self.memoryHistory.append(stats)
@@ -127,17 +140,18 @@ class MemoryMonitor: ObservableObject {
     // Log significant memory pressure changes
     if stats.memoryPressure > 0.8 {
       logWarning(
-        "High memory pressure detected: \(stats.formattedUsedMemory) used",
+        "High system memory pressure: \(stats.formattedSystemUsed) / \(ByteCountFormatter.string(fromByteCount: Int64(total), countStyle: .memory))",
         context: "MemoryMonitor.recordMemoryStats")
     }
 
     // Log memory stats at debug level
     logDebug(
-      "Memory: \(stats.formattedUsedMemory) used, \(stats.formattedAvailableMemory) available",
+      "Process: \(stats.formattedUsedMemory), System Free: \(stats.formattedAvailableMemory), System Used: \(stats.formattedSystemUsed)",
       context: "MemoryMonitor.recordMemoryStats")
   }
 
-  private func getUsedMemory() -> UInt64 {
+  /// Get process-specific memory usage (resident size)
+  private func getProcessUsedMemory() -> UInt64 {
     var info = mach_task_basic_info()
     var count = mach_msg_type_number_t(MemoryLayout<mach_task_basic_info>.size) / 4
 
@@ -150,21 +164,36 @@ class MemoryMonitor: ObservableObject {
     return kerr == KERN_SUCCESS ? info.resident_size : 0
   }
 
-  private func getAvailableMemory() -> UInt64 {
-    var info = mach_task_basic_info()
-    var count = mach_msg_type_number_t(MemoryLayout<mach_task_basic_info>.size) / 4
+  /// Get system-wide memory statistics using vm_statistics64
+  private func getSystemMemoryStats() -> (used: UInt64, free: UInt64) {
+    var stats = vm_statistics64()
+    var count = mach_msg_type_number_t(MemoryLayout<vm_statistics64>.size / MemoryLayout<integer_t>.size)
 
-    let kerr = withUnsafeMutablePointer(to: &info) {
+    let result = withUnsafeMutablePointer(to: &stats) {
       $0.withMemoryRebound(to: integer_t.self, capacity: Int(count)) {
-        task_info(mach_task_self_, task_flavor_t(MACH_TASK_BASIC_INFO), $0, &count)
+        host_statistics64(mach_host_self(), HOST_VM_INFO64, $0, &count)
       }
     }
 
-    if kerr == KERN_SUCCESS {
-      let total = ProcessInfo.processInfo.physicalMemory
-      return total - info.resident_size
+    guard result == KERN_SUCCESS else {
+      // Fallback to process-centric calculation if system call fails
+      _ = ProcessInfo.processInfo.physicalMemory
+      let pageSize = UInt64(getpagesize())
+      let used = UInt64(stats.active_count + stats.inactive_count + stats.wire_count) * pageSize
+      let free = UInt64(stats.free_count) * pageSize
+      return (used, free)
     }
 
-    return 0
+    let pageSize = UInt64(getpagesize())
+
+    // Calculate system memory usage
+    // Used = active + inactive + wired + compressor
+    let usedPages = stats.active_count + stats.inactive_count + stats.wire_count + stats.compressor_page_count
+    let freePages = stats.free_count
+
+    let usedBytes = UInt64(usedPages) * pageSize
+    let freeBytes = UInt64(freePages) * pageSize
+
+    return (usedBytes, freeBytes)
   }
 }

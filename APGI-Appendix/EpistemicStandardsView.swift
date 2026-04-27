@@ -57,7 +57,7 @@ struct EpistemicStandardsView: View {
         }
         .background(Color.primary.opacity(0.05))
         .cornerRadius(12)
-        .shadow(color: Color.black.opacity(0.1), radius: 8, x: 0, y: 4)
+        .shadow(color: Color.black.opacity(0.08), radius: 8, x: 0, y: 4)
         .padding()
       } else {
         // Fallback to original display if parsing fails

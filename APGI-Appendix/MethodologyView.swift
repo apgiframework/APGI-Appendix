@@ -126,7 +126,7 @@ struct MethodologyView: View {
           content: self.extractParagraphs(prefix: "Standard 7:", from: self.methodologyBody),
           category: .theoretical,
           hasDataTable: false
-        ),
+        )
       ],
       relatedSections: [.apgiStatement, .epistemicStandards, .mathematicalModel]
     )

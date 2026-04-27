@@ -73,7 +73,7 @@ class KeychainHelper {
       kSecClass as String: kSecClassGenericPassword,
       kSecAttrAccount as String: key,
       kSecValueData as String: data,
-      kSecAttrAccessible as String: accessibility,
+      kSecAttrAccessible as String: accessibility
     ]
 
     let status = SecItemAdd(query as CFDictionary, nil)
@@ -85,7 +85,7 @@ class KeychainHelper {
       kSecClass as String: kSecClassGenericPassword,
       kSecAttrAccount as String: key,
       kSecReturnData as String: true,
-      kSecMatchLimit as String: kSecMatchLimitOne,
+      kSecMatchLimit as String: kSecMatchLimitOne
     ]
 
     var result: AnyObject?
@@ -99,7 +99,7 @@ class KeychainHelper {
   private func deleteRaw(for key: String) -> Bool {
     let query: [String: Any] = [
       kSecClass as String: kSecClassGenericPassword,
-      kSecAttrAccount as String: key,
+      kSecAttrAccount as String: key
     ]
 
     let status = SecItemDelete(query as CFDictionary)
@@ -114,8 +114,7 @@ class KeychainHelper {
   /// - Returns: Success status
   @discardableResult
   func save(data: Data, for key: String, accessibility: CFString = kSecAttrAccessibleWhenUnlocked)
-    -> Bool
-  {
+    -> Bool {
     do {
       let encryptedData = try encrypt(data: data)
       return self.saveRaw(data: encryptedData, for: key, accessibility: accessibility)

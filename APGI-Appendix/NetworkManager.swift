@@ -13,40 +13,59 @@ class NetworkManager: ObservableObject {
   @Published var connectionType: NWInterface.InterfaceType?
   @Published var isMonitoring = false
 
-  private let monitor: NWPathMonitor
+  private var monitor: NWPathMonitor?
   private let queue = DispatchQueue(label: "NetworkMonitor")
   private var cancellables = Set<AnyCancellable>()
 
   private init() {
-    self.monitor = NWPathMonitor()
     self.setupMonitoring()
   }
 
   deinit {
-    monitor.cancel()
+    monitor?.cancel()
   }
 
   // MARK: - Network Monitoring
 
+  /// Start monitoring network connectivity
+  /// Creates a new monitor instance if needed (NWPathMonitor cannot be reused after cancel)
   func startMonitoring() {
     guard !self.isMonitoring else { return }
 
-    self.monitor.pathUpdateHandler = { [weak self] path in
+    // Create new monitor instance if none exists or previous was canceled
+    if self.monitor == nil {
+      self.monitor = NWPathMonitor()
+    }
+
+    self.monitor?.pathUpdateHandler = { [weak self] path in
       Task { @MainActor [weak self] in
         guard let self else { return }
         self.updateConnectionStatus(path)
       }
     }
 
-    self.monitor.start(queue: self.queue)
+    self.monitor?.start(queue: self.queue)
     self.isMonitoring = true
   }
 
+  /// Stop monitoring network connectivity
+  /// Note: Once canceled, the monitor cannot be restarted - a new instance will be created on next start
   func stopMonitoring() {
     guard self.isMonitoring else { return }
 
-    self.monitor.cancel()
+    self.monitor?.cancel()
+    self.monitor = nil  // Clear reference so new instance is created on restart
     self.isMonitoring = false
+  }
+
+  /// Restart monitoring with a fresh monitor instance
+  /// Use this when you need to ensure monitoring is working after network changes
+  func restartMonitoring() {
+    self.stopMonitoring()
+    // Small delay to ensure previous monitor is fully released
+    DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { [weak self] in
+      self?.startMonitoring()
+    }
   }
 
   private func setupMonitoring() {
@@ -221,7 +240,7 @@ struct NetworkSettingsView: View {
     .frame(width: 400, height: 300)
   }
 
-  private func testConnection() {
+  func testConnection() {
     // Simple connection test
     guard let url = URL(string: "https://api.apgi-framework.org") else {
       DispatchQueue.main.async {

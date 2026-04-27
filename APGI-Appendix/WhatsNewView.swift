@@ -13,7 +13,7 @@ struct WhatsNewView: View {
         "Remote glossary and bibliography fetching",
         "Automatic content updates",
         "Enhanced search capabilities",
-        "Network settings panel",
+        "Network settings panel"
       ]
     ),
     Update(
@@ -24,7 +24,7 @@ struct WhatsNewView: View {
         "Dynamic table parsing from multiple formats",
         "Markdown, CSV, TSV, and JSON support",
         "Export capabilities for all table formats",
-        "Eliminated hardcoded table data",
+        "Eliminated hardcoded table data"
       ]
     ),
     Update(
@@ -35,9 +35,9 @@ struct WhatsNewView: View {
         "Complete APGI framework reference",
         "Interactive navigation system",
         "Comprehensive search functionality",
-        "Accessibility features throughout",
+        "Accessibility features throughout"
       ]
-    ),
+    )
   ]
 
   var body: some View {
@@ -210,7 +210,7 @@ struct UpdateCard: View {
     .padding()
     .background(Color(NSColor.controlBackgroundColor))
     .cornerRadius(12)
-    .shadow(color: .black.opacity(0.05), radius: 2, x: 0, y: 1)
+    .shadow(color: .black.opacity(0.08), radius: 2, x: 0, y: 1)
   }
 }
 

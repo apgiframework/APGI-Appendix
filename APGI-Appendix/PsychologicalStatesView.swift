@@ -110,10 +110,8 @@ struct PsychologicalStatesView: View {
 
     var headerIndices: [Int] = []
     headerIndices.reserveCapacity(32)
-    for (idx, line) in lines.enumerated() {
-      if isStateHeader(line) {
-        headerIndices.append(idx)
-      }
+    for (idx, line) in lines.enumerated() where isStateHeader(line) {
+      headerIndices.append(idx)
     }
 
     let introEndIndex = headerIndices.first ?? lines.count
@@ -147,7 +145,7 @@ struct PsychologicalStatesView: View {
         LazyVStack(alignment: .leading, spacing: APGISpacing.sectionSpacing) {
           VStack(alignment: .leading, spacing: 12) {
             Text("Psychological States")
-              .font(APGITypography.titleLarge)
+              .font(APGITypography.h1)
               .foregroundStyle(.primary)
 
             if !self.parsedContent.introTitle.isEmpty {
@@ -156,8 +154,7 @@ struct PsychologicalStatesView: View {
                 .foregroundStyle(.primary)
             }
 
-            if !self.parsedContent.introBody.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-            {
+            if !self.parsedContent.introBody.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
               LazyGlossaryHighlightedContent(text: self.parsedContent.introBody)
                 .font(.system(size: self.fontSize, design: .default))
                 .lineSpacing(6)
@@ -168,12 +165,12 @@ struct PsychologicalStatesView: View {
           .frame(maxWidth: .infinity, alignment: .leading)
           .padding(APGISpacing.cardPadding)
           .background {
-            RoundedRectangle(cornerRadius: APGIRadius.lg, style: .continuous)
+            RoundedRectangle(cornerRadius: APGISpacing.lg, style: .continuous)
               .fill(.background)
               .shadow(color: Color.apgiBlue.opacity(0.08), radius: 10, y: 4)
           }
           .overlay {
-            RoundedRectangle(cornerRadius: APGIRadius.lg, style: .continuous)
+            RoundedRectangle(cornerRadius: APGISpacing.lg, style: .continuous)
               .strokeBorder(Color.apgiBlue.opacity(0.18), lineWidth: 1)
           }
 
@@ -213,7 +210,7 @@ struct PsychologicalStatesView: View {
             }
           )
         }
-        .padding(APGISpacing.screenMargin)
+        .padding(APGISpacing.xl)
       }
     }
   }

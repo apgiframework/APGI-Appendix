@@ -11,11 +11,37 @@ class ErrorLogger: ObservableObject {
 
   @Published var recentErrors: [LogEntry] = []
   @Published var isLoggingEnabled = true
+  @AppStorage("redactSensitiveData") var redactSensitiveData = true
+  @AppStorage("logRetentionDays") var logRetentionDays = 30
 
   private let logFileURL: URL
   private let maxLogFileSize: Int = 10 * 1024 * 1024  // 10MB
   private let maxLogEntries: Int = 1000
   private let osLog = OSLog(subsystem: "com.apgi.appendix", category: "Error")
+
+  // MARK: - Patterns
+  private static func makeCaseInsensitiveRegex(_ pattern: String) -> Regex<Substring> {
+    do {
+      return try Regex(pattern).ignoresCase()
+    } catch {
+      // Fallback: return regex that matches nothing on failure
+      return /.^/
+    }
+  }
+
+  // Patterns that may indicate sensitive data
+  private let sensitivePatterns: [SensitivePattern] = [
+    SensitivePattern(name: "API Key", regex: /[a-zA-Z0-9_-]{32,}/),
+    SensitivePattern(name: "Password", regex: makeCaseInsensitiveRegex("password[:\\s]+[^\\s]+")),
+    SensitivePattern(name: "Token", regex: makeCaseInsensitiveRegex("token[:\\s]+[a-zA-Z0-9_-]+")),
+    SensitivePattern(name: "Secret", regex: makeCaseInsensitiveRegex("secret[:\\s]+[^\\s]+")),
+    SensitivePattern(name: "Email", regex: /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/)
+  ]
+
+  private struct SensitivePattern {
+    let name: String
+    let regex: Regex<Substring>
+  }
 
   private init() {
     // Create log file in Application Support directory
@@ -51,11 +77,16 @@ class ErrorLogger: ObservableObject {
   ) {
     guard self.isLoggingEnabled else { return }
 
+    var message = error.localizedDescription
+    if self.redactSensitiveData {
+      message = self.redactSensitiveInfo(from: message)
+    }
+
     let entry = LogEntry(
       timestamp: Date(),
       level: .error,
-      message: error.localizedDescription,
-      context: context,
+      message: message,
+      context: self.redactSensitiveData ? self.redactSensitiveInfo(from: context) : context,
       function: function,
       file: file,
       line: line
@@ -63,8 +94,10 @@ class ErrorLogger: ObservableObject {
 
     self.writeLogEntry(entry)
 
-    // Also log to system logger
-    os_log("%{public}@", log: self.osLog, type: .error, "\(context): \(error.localizedDescription)")
+    // Also log to system logger (always redact for OS log)
+    let safeMessage = self.redactSensitiveInfo(from: error.localizedDescription)
+    let safeContext = self.redactSensitiveInfo(from: context)
+    os_log("%{public}@", log: self.osLog, type: .error, "\(safeContext): \(safeMessage)")
   }
 
   func success(
@@ -107,15 +140,23 @@ class ErrorLogger: ObservableObject {
 
   func log(
     _ message: String, level: LogLevel = .info, context: String = "", function: String = #function,
-    file: String = #fileID, line: Int = #line
+    file: String = #fileID, line: Int = #line, sensitive: Bool = false
   ) {
     guard self.isLoggingEnabled else { return }
+
+    var safeMessage = message
+    var safeContext = context
+
+    if self.redactSensitiveData || sensitive {
+      safeMessage = self.redactSensitiveInfo(from: message)
+      safeContext = self.redactSensitiveInfo(from: context)
+    }
 
     let entry = LogEntry(
       timestamp: Date(),
       level: level,
-      message: message,
-      context: context,
+      message: safeMessage,
+      context: safeContext,
       function: function,
       file: file,
       line: line
@@ -147,7 +188,32 @@ class ErrorLogger: ObservableObject {
     // Clear log file
     try? "".write(to: self.logFileURL, atomically: true, encoding: .utf8)
 
+    // Clear archived log if exists
+    let archiveURL = self.logFileURL.appendingPathExtension("old")
+    try? FileManager.default.removeItem(at: archiveURL)
+
     self.log("Error logs cleared", level: .info, context: "ErrorLogger")
+  }
+
+  /// Redact sensitive information from log messages
+  private func redactSensitiveInfo(from text: String) -> String {
+    var result = text
+    for pattern in sensitivePatterns {
+      result = result.replacing(pattern.regex, with: "[REDACTED-\(pattern.name)]")
+    }
+    return result
+  }
+
+  /// Apply retention policy - remove logs older than retention period
+  func applyRetentionPolicy() {
+    let cutoffDate = Calendar.current.date(byAdding: .day, value: -logRetentionDays, to: Date()) ?? Date()
+
+    // Filter recent errors in memory
+    self.recentErrors.removeAll { $0.timestamp < cutoffDate }
+
+    // The log file will be naturally rotated when it exceeds size limit
+    // Archive files older than retention period could be deleted here if needed
+    self.log("Applied log retention policy (\(logRetentionDays) days)", level: .debug, context: "ErrorLogger")
   }
 
   func exportLogs() -> URL? {
@@ -185,8 +251,7 @@ class ErrorLogger: ObservableObject {
       // Check file size and rotate if necessary
       if let attributes = try? FileManager.default.attributesOfItem(atPath: logFileURL.path),
         let fileSize = attributes[.size] as? Int,
-        fileSize > maxLogFileSize
-      {
+        fileSize > maxLogFileSize {
         self.rotateLogFile()
       }
 
@@ -324,13 +389,11 @@ struct LogEntry: Identifiable, Codable {
       firstColonIndex != remaining.startIndex,
       remaining[remaining.index(after: firstColonIndex)] == " "
         || remaining[remaining.index(after: firstColonIndex)] == "\n"
-        || firstColonIndex == remaining.index(before: remaining.endIndex)
-    {
+        || firstColonIndex == remaining.index(before: remaining.endIndex) {
       // Check if this looks like a context separator (word: message)
       let potentialContext = remaining[..<firstColonIndex]
       if potentialContext.rangeOfCharacter(from: .whitespaces) == nil
-        || potentialContext.trimmingCharacters(in: .whitespaces).count < 20
-      {
+        || potentialContext.trimmingCharacters(in: .whitespaces).count < 20 {
         // Likely a context: message pattern
         context = String(potentialContext).trimmingCharacters(in: .whitespaces)
         message = String(remaining[remaining.index(after: firstColonIndex)...]).trimmingCharacters(

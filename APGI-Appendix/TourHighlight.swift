@@ -20,7 +20,7 @@ struct TourHighlight: View {
     GeometryReader { geometry in
       ZStack {
         // Dark overlay
-        Color.black.opacity(0.65)
+        Color.black.opacity(0.5)
           .ignoresSafeArea()
 
         // Highlight cutout
@@ -54,7 +54,7 @@ struct TourHighlight: View {
     return ZStack {
       // Main overlay with cutout
       ZStack {
-        Color.black.opacity(0.65)
+        Color.black.opacity(0.5)
 
         // Cutout for highlighted area
         RoundedRectangle(cornerRadius: 8)
@@ -145,7 +145,7 @@ struct TourHighlight: View {
       .background(
         RoundedRectangle(cornerRadius: 12)
           .fill(Color(NSColor.controlBackgroundColor))
-          .shadow(color: .black.opacity(0.15), radius: 20, x: 0, y: 8)
+          .shadow(color: .black.opacity(0.1), radius: 20, x: 0, y: 8)
       )
       .frame(maxWidth: 280)
     }

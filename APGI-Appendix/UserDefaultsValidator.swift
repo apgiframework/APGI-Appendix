@@ -73,8 +73,7 @@ class UserDefaultsValidator: ObservableObject {
 
     // Validate window frame
     if rect.width < 400 || rect.width > 4000 || rect.height < 300 || rect.height > 3000
-      || rect.minX < -2000 || rect.minX > 4000 || rect.minY < -2000 || rect.minY > 4000
-    {
+      || rect.minX < -2000 || rect.minX > 4000 || rect.minY < -2000 || rect.minY > 4000 {
       self.addError(.windowFrameInvalid, value: "\(rect)")
       return NSRect(x: 100, y: 100, width: 1000, height: 800)  // Default
     }
@@ -87,8 +86,7 @@ class UserDefaultsValidator: ObservableObject {
     guard frame.width >= 400, frame.width <= 4000,
       frame.height >= 300, frame.height <= 3000,
       frame.minX >= -2000, frame.minX <= 4000,
-      frame.minY >= -2000, frame.minY <= 4000
-    else {
+      frame.minY >= -2000, frame.minY <= 4000 else {
       self.addError(.windowFrameInvalid, value: "\(frame)")
       return
     }
@@ -192,7 +190,7 @@ class UserDefaultsValidator: ObservableObject {
     // Validate boolean theme settings
     let booleanKeys = [
       "sidebarVisible", "focusModeEnabled", "enableAnimations", "highContrastMode",
-      "autoSaveBookmarks",
+      "autoSaveBookmarks"
     ]
 
     for key in booleanKeys {
@@ -210,8 +208,7 @@ class UserDefaultsValidator: ObservableObject {
   private func validateLoggingSettings() {
     // Validate logging enabled setting
     if self.defaults.object(forKey: "errorLoggingEnabled") != nil,
-      !(self.defaults.object(forKey: "errorLoggingEnabled") is Bool)
-    {
+      !(self.defaults.object(forKey: "errorLoggingEnabled") is Bool) {
       self.addError(.invalidBooleanSetting, value: "errorLoggingEnabled")
       self.defaults.removeObject(forKey: "errorLoggingEnabled")
     }
@@ -235,7 +232,7 @@ class UserDefaultsValidator: ObservableObject {
           userInfo: [
             NSLocalizedDescriptionKey: "Validation error: \(error.type.description)",
             "ValidationValue": error.value,
-            "ValidationTimestamp": error.timestamp,
+            "ValidationTimestamp": error.timestamp
           ]), context: "UserDefaultsValidator")
     }
   }

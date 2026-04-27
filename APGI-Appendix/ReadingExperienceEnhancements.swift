@@ -10,7 +10,7 @@ struct FocusModeView: View {
   var body: some View {
     GeometryReader { geometry in
       ZStack {
-        Color.black.opacity(0.4)
+        Color.black.opacity(0.3)
           .ignoresSafeArea()
           .onTapGesture {
             self.isEnabled = false
@@ -122,9 +122,7 @@ struct FontSizeControl: View {
 }
 
 extension View {
-  func apgiAccessibility(label: String, hint: String? = nil, traits: AccessibilityTraits = [])
-    -> some View
-  {
+  func apgiAccessibility(label: String, hint: String? = nil, traits: AccessibilityTraits = []) -> some View {
     self
       .accessibilityLabel(label)
       .accessibilityHint(hint ?? "")

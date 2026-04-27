@@ -49,7 +49,7 @@
 
       Task {
         do {
-          let _ = try await SCShareableContent.excludingDesktopWindows(
+          _ = try await SCShareableContent.excludingDesktopWindows(
             false, onScreenWindowsOnly: true)
           granted = true
         } catch {
@@ -68,8 +68,7 @@
               // Open System Preferences
               if let url = URL(
                 string:
-                  "x-apple.systempreferences:com.apple.preference.security?Privacy_ScreenCapture")
-              {
+                  "x-apple.systempreferences:com.apple.preference.security?Privacy_ScreenCapture") {
                 NSWorkspace.shared.open(url)
               }
             }
@@ -248,7 +247,7 @@
         identifier: "methodology",
         navigationPath: [
           NavigationStep(type: .category("Foundations"), target: "Foundations", delay: 0.5),
-          NavigationStep(type: .tab("Methodology"), target: "Methodology", delay: 0.5),
+          NavigationStep(type: .tab("Methodology"), target: "Methodology", delay: 0.5)
         ],
         requiresInteraction: false,
         interactionType: nil,
@@ -260,7 +259,7 @@
         navigationPath: [
           NavigationStep(type: .category("Foundations"), target: "Foundations", delay: 0.5),
           NavigationStep(
-            type: .tab("Mathematical Model"), target: "Mathematical Model", delay: 0.5),
+            type: .tab("Mathematical Model"), target: "Mathematical Model", delay: 0.5)
         ],
         requiresInteraction: false,
         interactionType: nil,
@@ -271,7 +270,7 @@
         identifier: "apgiMapping",
         navigationPath: [
           NavigationStep(type: .category("Foundations"), target: "Foundations", delay: 0.5),
-          NavigationStep(type: .tab("APGI Mapping"), target: "APGI Mapping", delay: 0.5),
+          NavigationStep(type: .tab("APGI Mapping"), target: "APGI Mapping", delay: 0.5)
         ],
         requiresInteraction: false,
         interactionType: nil,
@@ -284,7 +283,7 @@
           NavigationStep(type: .category("Foundations"), target: "Foundations", delay: 0.5),
           NavigationStep(
             type: .tab("Parameter Identifiability"), target: "Parameter Identifiability", delay: 0.5
-          ),
+          )
         ],
         requiresInteraction: false,
         interactionType: nil,
@@ -297,7 +296,7 @@
           NavigationStep(type: .category("Neurobiology"), target: "Neurobiology", delay: 0.5),
           NavigationStep(
             type: .tab("Biological Implementation"), target: "Biological Implementation", delay: 0.5
-          ),
+          )
         ],
         requiresInteraction: false,
         interactionType: nil,
@@ -309,12 +308,12 @@
         navigationPath: [
           NavigationStep(type: .category("Neurobiology"), target: "Neurobiology", delay: 0.5),
           NavigationStep(
-            type: .tab("Neuromodulator Effects"), target: "Neuromodulator Effects", delay: 0.5),
+            type: .tab("Neuromodulator Effects"), target: "Neuromodulator Effects", delay: 0.5)
         ],
         requiresInteraction: false,
         interactionType: nil,
         waitTime: 2.0
-      ),
+      )
     ]
   }
 
@@ -361,11 +360,9 @@
       }
 
       // Execute navigation path if it exists
-      for step in screen.navigationPath {
-        if !self.executeNavigationStep(step) {
-          self.logger.log("❌ Failed to execute navigation step: \(step)")
-          return false
-        }
+      for step in screen.navigationPath where !self.executeNavigationStep(step) {
+        self.logger.log("❌ Failed to execute navigation step: \(step)")
+        return false
       }
 
       // Execute any required interaction
@@ -412,8 +409,7 @@
       for element in windowElements {
         if let screenName = accessibilityManager.getElementTitle(element),
           !screenName.isEmpty,
-          !screens.contains(where: { $0.name == screenName })
-        {
+          !screens.contains(where: { $0.name == screenName }) {
           let navigation = ScreenNavigation(
             name: screenName,
             identifier: screenName.lowercased().replacingOccurrences(of: " ", with: "-"),
@@ -435,24 +431,22 @@
       let customPaths: [String: [NavigationStep]] = [
         "Settings": [
           NavigationStep(type: .menu("App > Preferences..."), target: "Preferences", delay: 1.0),
-          NavigationStep(type: .wait(1.0), target: "Wait for settings", delay: 1.0),
+          NavigationStep(type: .wait(1.0), target: "Wait for settings", delay: 1.0)
         ]
       ]
 
-      for (screenName, path) in customPaths {
-        if !screens.contains(where: { $0.name == screenName }) {
-          let navigation = ScreenNavigation(
-            name: screenName,
-            identifier: screenName.lowercased().replacingOccurrences(of: " ", with: "-"),
-            navigationPath: path,
-            requiresInteraction: false,
-            interactionType: nil,
-            waitTime: 2.0,
-            isDiscovered: true
-          )
-          screens.append(navigation)
-          self.logger.log("➕ Added custom screen path: \(screenName)")
-        }
+      for (screenName, path) in customPaths where !screens.contains(where: { $0.name == screenName }) {
+        let navigation = ScreenNavigation(
+          name: screenName,
+          identifier: screenName.lowercased().replacingOccurrences(of: " ", with: "-"),
+          navigationPath: path,
+          requiresInteraction: false,
+          interactionType: nil,
+          waitTime: 2.0,
+          isDiscovered: true
+        )
+        screens.append(navigation)
+        self.logger.log("➕ Added custom screen path: \(screenName)")
       }
     }
 
@@ -608,8 +602,7 @@
         if error == .success, let value = element {
           // If the attribute returns a single AXUIElement
           if CFGetTypeID(value) == AXUIElementGetTypeID(),
-            let single = unsafeBitCast(value, to: AXUIElement?.self)
-          {
+            let single = unsafeBitCast(value, to: AXUIElement?.self) {
             return single
           }
           // If the attribute returns an array of AXUIElement
@@ -1527,8 +1520,7 @@
     ///   - suffix: Optional suffix to append to the filename
     ///   - element: Optional AXUIElement to capture instead of the whole screen
     /// - Returns: Boolean indicating success or failure
-    func captureScreen(screenName: String, suffix: String = "", element: AXUIElement? = nil) -> Bool
-    {
+    func captureScreen(screenName: String, suffix: String = "", element: AXUIElement? = nil) -> Bool {
       self.logger.log("📸 ScreenshotManager.captureScreen called for: \(screenName)")
       var screenshot: NSImage?
       var success = false
@@ -1552,7 +1544,11 @@
         self.logger.log("📸 Screenshot capture result: \(screenshot != nil)")
         if screenshot != nil {
           self.logger.log("📸 About to save screenshot...")
-          success = self.saveScreenshot(screenshot!, screenName: screenName, suffix: suffix)
+          guard let screenshot = screenshot else {
+            self.logger.log("❌ Failed to capture screenshot - screenshot is nil")
+            continue
+          }
+          success = self.saveScreenshot(screenshot, screenName: screenName, suffix: suffix)
           self.logger.log("📸 Save result: \(success)")
           if success { break }
         }
@@ -1576,7 +1572,7 @@
         config.outputDirectory,
         "\(self.config.outputDirectory)/light-mode",
         "\(self.config.outputDirectory)/dark-mode",
-        "\(self.config.outputDirectory)/accessibility",
+        "\(self.config.outputDirectory)/accessibility"
       ]
 
       for dir in directories {
@@ -1611,8 +1607,7 @@
 
       // Safely bridge CFTypeRef to AXValue before extracting values
       if CFGetTypeID(positionValue) == AXValueGetTypeID(),
-        CFGetTypeID(sizeValue) == AXValueGetTypeID()
-      {
+        CFGetTypeID(sizeValue) == AXValueGetTypeID() {
         let posAX = unsafeDowncast(positionValue as AnyObject, to: AXValue.self)
         let sizeAX = unsafeDowncast(sizeValue as AnyObject, to: AXValue.self)
 
@@ -1782,10 +1777,10 @@
         "appearance": self.currentAppearance.rawValue,
         "resolution": [
           "width": self.currentResolution.size.width,
-          "height": self.currentResolution.size.height,
+          "height": self.currentResolution.size.height
         ],
         "screenshot_path": filePath,
-        "elements": [],  // This would be populated with actual element data
+        "elements": []  // This would be populated with actual element data
       ]
 
       do {
@@ -1815,8 +1810,8 @@
           "imageFormat": self.config.imageFormat.rawValue,
           "quality": self.config.quality,
           "appearanceModes": self.config.appearanceModes.map { $0.rawValue },
-          "resolutions": self.config.resolutions.map { $0.rawValue },
-        ],
+          "resolutions": self.config.resolutions.map { $0.rawValue }
+        ]
       ]
 
       do {
@@ -1824,7 +1819,7 @@
           withJSONObject: reportData, options: .prettyPrinted)
         try jsonData.write(to: URL(fileURLWithPath: path))
       } catch {
-        print("Failed to save report: \(error)")
+        logError(error, context: "ScreenshotAutomation.saveReport")
       }
     }
   }

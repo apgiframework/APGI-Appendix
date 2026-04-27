@@ -259,7 +259,7 @@ struct AdvancedTableUsage: View {
 
       self.tables = [
         markdownTable,
-        csvTable,
+        csvTable
       ]
     } catch {
       logError(
@@ -296,7 +296,7 @@ struct AdvancedTableUsage: View {
       "title": table.metadata.title ?? "",
       "format": String(describing: table.metadata.format),
       "headers": table.headers,
-      "rows": table.rows,
+      "rows": table.rows
     ]
 
     do {

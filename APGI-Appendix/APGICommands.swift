@@ -93,12 +93,24 @@ struct APGICommands: Commands {
 
       Divider()
 
-      Button("Next Section") {
+      Button("Next Section (⌘↓)") {
+        NotificationCenter.default.post(name: .navigateNext, object: nil)
+      }
+      .keyboardShortcut(.downArrow, modifiers: [.command])
+
+      Button("Previous Section (⌘↑)") {
+        NotificationCenter.default.post(name: .navigatePrevious, object: nil)
+      }
+      .keyboardShortcut(.upArrow, modifiers: [.command])
+
+      Divider()
+
+      Button("Next Section (⌘])") {
         NotificationCenter.default.post(name: .navigateNext, object: nil)
       }
       .keyboardShortcut("]", modifiers: [.command])
 
-      Button("Previous Section") {
+      Button("Previous Section (⌘[)") {
         NotificationCenter.default.post(name: .navigatePrevious, object: nil)
       }
       .keyboardShortcut("[", modifiers: [.command])

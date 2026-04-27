@@ -38,7 +38,7 @@ struct QuickStartPanel: View {
       description:
         "Use the Help menu to access documentation, report issues, and check for updates.",
       icon: "questionmark.circle"
-    ),
+    )
   ]
 
   var body: some View {
@@ -147,7 +147,7 @@ struct StepCard: View {
     .padding()
     .background(Color(NSColor.controlBackgroundColor))
     .cornerRadius(12)
-    .shadow(color: .black.opacity(0.05), radius: 2, x: 0, y: 1)
+    .shadow(color: .black.opacity(0.08), radius: 2, x: 0, y: 1)
   }
 }
 

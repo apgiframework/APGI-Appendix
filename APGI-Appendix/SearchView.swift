@@ -175,8 +175,7 @@ struct SearchView: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .padding()
       } else if self.searchResults.isEmpty
-        && !self.searchText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-      {
+        && !self.searchText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
         VStack(spacing: 12) {
           Image(systemName: "doc.text.magnifyingglass")
             .font(.system(size: 48))
@@ -260,8 +259,7 @@ struct SearchView: View {
   }
 
   private func generateCacheKey(query: String, scope: SearchScope, filters: Set<SectionCategory>)
-    -> String
-  {
+    -> String {
     let sortedFilters = Array(filters).sorted { $0.rawValue < $1.rawValue }.map { $0.rawValue }
       .joined(separator: ",")
     return "\(query)_\(scope.rawValue)_\(sortedFilters)"
@@ -399,7 +397,7 @@ struct SearchView: View {
       "\\[[^\\]]+\\]",  // Bracket formulas
       "α|β|γ|δ|ε|ζ|η|θ|λ|μ|π|σ|τ|φ|χ|ψ|ω",  // Greek letters
       "\\b[A-Z][a-z]*\\([a-zA-Z,\\s]*\\)",  // Function notation
-      "\\b\\d+\\.?\\d*\\s*[×÷±=<>≤≥]\\s*\\d+\\.?\\d*",  // Mathematical expressions
+      "\\b\\d+\\.?\\d*\\s*[×÷±=<>≤≥]\\s*\\d+\\.?\\d*"  // Mathematical expressions
     ]
 
     for pattern in formulaPatterns {
@@ -431,7 +429,7 @@ struct SearchView: View {
       "\\bTable\\s*\\d+",  // Table references
       "\\bChapter\\s*\\d+",  // Chapter references
       "\\bSection\\s*\\d+",  // Section references
-      "\\bPage\\s*\\d+",  // Page references
+      "\\bPage\\s*\\d+"  // Page references
     ]
 
     for pattern in referencePatterns {

@@ -651,18 +651,18 @@ enum NavigationSection: String, CaseIterable, Identifiable, Hashable {
     case .foundations:
       return [
         .methodology, .mathematicalModel, .apgiMapping,
-        .parameterIdentifiability, .apgiStatement,
+        .parameterIdentifiability, .apgiStatement
       ]
     case .neurobiology:
       return [
         .biologicalImplementation, .neuromodulatorEffects,
         .neuromodulatoryImplementation, .explicitNeuromodulator,
-        .neuromodulatoryControl,
+        .neuromodulatoryControl
       ]
     case .cognition:
       return [
         .mappingCognitiveToApgi, .apgiToCognitive,
-        .psychologicalStates, .apgiToPsyState, .lifeStages,
+        .psychologicalStates, .apgiToPsyState, .lifeStages
       ]
     case .clinical:
       return [.psychiatricDisorders, .disordersConditions]
@@ -671,7 +671,7 @@ enum NavigationSection: String, CaseIterable, Identifiable, Hashable {
     case .reference:
       return [
         .glossary, .bibliography, .epistemicStandards,
-        .thermodynamicEfficiency,
+        .thermodynamicEfficiency
       ]
     }
   }
@@ -691,12 +691,12 @@ extension NavigationSection {
 
   var color: Color {
     switch self {
-    case .foundations: return .apgiBlue
-    case .neurobiology: return .apgiGreen
-    case .cognition: return .apgiOrange
-    case .clinical: return .apgiRed
-    case .navigation: return .accentColor
-    case .reference: return .gray
+    case .foundations: return .thresholdBlue
+    case .neurobiology: return .neuromodGreen
+    case .cognition: return .inactiveSlate
+    case .clinical: return .precisionRed
+    case .navigation: return .workspacePurple
+    case .reference: return .secondary
     }
   }
 }

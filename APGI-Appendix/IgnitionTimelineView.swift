@@ -9,7 +9,12 @@ struct InteractiveTimelineView: View {
     let description: String
     let category: EventCategory
 
-    enum EventCategory {
+    var durationMs: Int {
+      max(0, timeRange.upperBound - timeRange.lowerBound)
+    }
+  }
+
+  enum EventCategory {
       case trigger
       case amplification
       case stabilization
@@ -30,11 +35,6 @@ struct InteractiveTimelineView: View {
         }
       }
     }
-
-    var durationMs: Int {
-      max(0, self.timeRange.upperBound - self.timeRange.lowerBound)
-    }
-  }
 
   private let maxTime: Int = 500
   private let tickMs: Int = 5
@@ -110,7 +110,7 @@ struct InteractiveTimelineView: View {
       description:
         "Activity returns toward baseline in non-maintained trials; theta-phase binding may group ignition into a ~3-second narrative window.",
       category: .memory
-    ),
+    )
   ]
 
   @State private var selectedEventID: TimelineEvent.ID?
@@ -214,8 +214,7 @@ struct InteractiveTimelineView: View {
         .accessibilityAction(named: "Move to previous event") {
           if let currentEvent = events.first(where: { $0.timeRange.contains(currentTime) }),
             let currentIndex = events.firstIndex(where: { $0.id == currentEvent.id }),
-            currentIndex > 0
-          {
+            currentIndex > 0 {
             let previousEvent = self.events[currentIndex - 1]
             self.currentTime = previousEvent.timeRange.lowerBound
             selectedEventID = previousEvent.id
@@ -224,8 +223,7 @@ struct InteractiveTimelineView: View {
         .accessibilityAction(named: "Move to next event") {
           if let currentEvent = events.first(where: { $0.timeRange.contains(currentTime) }),
             let currentIndex = events.firstIndex(where: { $0.id == currentEvent.id }),
-            currentIndex < events.count - 1
-          {
+            currentIndex < events.count - 1 {
             let nextEvent = self.events[currentIndex + 1]
             self.currentTime = nextEvent.timeRange.lowerBound
             selectedEventID = nextEvent.id
@@ -256,8 +254,7 @@ struct InteractiveTimelineView: View {
       }
 
       if let selectedEventID,
-        let event = events.first(where: { $0.id == selectedEventID })
-      {
+        let event = events.first(where: { $0.id == selectedEventID }) {
         VStack(alignment: .leading, spacing: 8) {
           HStack(alignment: .firstTextBaseline, spacing: 8) {
             Circle()
@@ -298,7 +295,7 @@ struct InteractiveTimelineView: View {
 struct IgnitionTimelineView: View {
   var body: some View {
     ScrollView {
-      EnhancedInteractiveTimeline()
+      InteractiveTimelineView()
     }
   }
 }

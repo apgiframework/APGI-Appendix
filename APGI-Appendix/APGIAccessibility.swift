@@ -95,9 +95,9 @@ extension View {
     Group {
       if enabled {
         self
-          .background(Color.black)
-          .foregroundColor(Color.white)
-          .colorScheme(.dark)
+          .background(Color.white)
+          .foregroundColor(Color.black)
+          .colorScheme(.light)
       } else {
         self
       }

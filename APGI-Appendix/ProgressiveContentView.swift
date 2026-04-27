@@ -10,8 +10,7 @@ struct ProgressiveContentView: View {
   var body: some View {
     VStack(spacing: 0) {
       // Render visible sections
-      ForEach(Array(self.sections.prefix(self.visibleSectionCount).enumerated()), id: \.element.id)
-      { index, section in
+      ForEach(Array(self.sections.prefix(self.visibleSectionCount).enumerated()), id: \.element.id) { index, section in
         SectionContentView(section: section)
           .id(section.id)
 
@@ -98,12 +97,12 @@ struct SectionContentView: View {
     }
     .padding(APGISpacing.cardPadding)
     .background {
-      RoundedRectangle(cornerRadius: APGIRadius.lg, style: .continuous)
+      RoundedRectangle(cornerRadius: APGISpacing.lg, style: .continuous)
         .fill(.background)
         .shadow(color: Color.apgiPurple.opacity(0.06), radius: 10, y: 4)
     }
     .overlay {
-      RoundedRectangle(cornerRadius: APGIRadius.lg, style: .continuous)
+      RoundedRectangle(cornerRadius: APGISpacing.lg, style: .continuous)
         .strokeBorder(Color.apgiPurple.opacity(0.16), lineWidth: 1)
     }
   }

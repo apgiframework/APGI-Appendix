@@ -65,22 +65,22 @@ enum Neuromodulator: String, CaseIterable, Identifiable {
     case .norepinephrine:
       return [
         ParameterValue(name: "κ_NE", min: 0.25, max: 0.35, unit: ""),
-        ParameterValue(name: "Πᵢ gain", min: 1.0, max: 5.0, unit: "×"),
+        ParameterValue(name: "Πᵢ gain", min: 1.0, max: 5.0, unit: "×")
       ]
     case .acetylcholine:
       return [
         ParameterValue(name: "κ_ACh", min: 0.10, max: 0.20, unit: ""),
-        ParameterValue(name: "Πₑ gain", min: 1.0, max: 3.0, unit: "×"),
+        ParameterValue(name: "Πₑ gain", min: 1.0, max: 3.0, unit: "×")
       ]
     case .serotonin:
       return [
         ParameterValue(name: "κ_5-HT", min: 0.35, max: 0.50, unit: ""),
-        ParameterValue(name: "δ refractoriness", min: 1.0, max: 2.0, unit: "×"),
+        ParameterValue(name: "δ refractoriness", min: 1.0, max: 2.0, unit: "×")
       ]
     case .dopamine:
       return [
         ParameterValue(name: "θₜ tonic", min: 0.8, max: 1.3, unit: "×"),
-        ParameterValue(name: "reward salience", min: 0.0, max: 1.0, unit: ""),
+        ParameterValue(name: "reward salience", min: 0.0, max: 1.0, unit: "")
       ]
     }
   }
@@ -214,7 +214,7 @@ private enum BrainRegionsSceneLoader {
   static let assetCandidates: [String] = [
     "BrainRegions.scn",
     "BrainRegions.usdz",
-    "BrainRegions.dae",
+    "BrainRegions.dae"
   ]
 
   private static let cachedScene: SCNScene? = {
@@ -255,7 +255,7 @@ private enum BrainRegionsSceneLoader {
       .basalForebrain: SCNVector3(0.20, -0.45, 0.55),
       .rapheNuclei: SCNVector3(0.00, -0.25, -0.15),
       .prefrontalCortex: SCNVector3(0.35, 0.75, 0.75),
-      .striatum: SCNVector3(0.65, -0.05, 0.35),
+      .striatum: SCNVector3(0.65, -0.05, 0.35)
     ]
 
     for (region, position) in locations {
@@ -448,7 +448,7 @@ extension SCNNode {
         SCNVector3(localMax.x, localMin.y, localMin.z),
         SCNVector3(localMax.x, localMin.y, localMax.z),
         SCNVector3(localMax.x, localMax.y, localMin.z),
-        SCNVector3(localMax.x, localMax.y, localMax.z),
+        SCNVector3(localMax.x, localMax.y, localMax.z)
       ]
 
       for corner in corners {
@@ -555,6 +555,23 @@ struct GraphNode: Identifiable, Hashable {
   var connections: [UUID]
 }
 
+// MARK: - Drawing Context
+
+/// Groups drawing parameters to reduce function parameter count
+struct DrawingContext {
+  let graphicsContext: GraphicsContext
+  let viewport: ViewportParams
+}
+
+// MARK: - Viewport Parameters
+
+/// Groups viewport parameters to reduce function parameter count
+struct ViewportParams {
+  let center: CGPoint
+  let offset: CGSize
+  let zoom: CGFloat
+}
+
 struct NetworkGraphView: View {
   @State private var nodes: [GraphNode] = NetworkGraphView.makeDefaultNodes()
   @State private var selectedNode: GraphNode?
@@ -573,20 +590,20 @@ struct NetworkGraphView: View {
         )
         let effectiveZoom = self.clampedZoom(self.zoom * self.gestureZoom)
 
+        let viewport = ViewportParams(center: center, offset: offset, zoom: effectiveZoom)
+
+        let drawingContext = DrawingContext(graphicsContext: context, viewport: viewport)
+
         for node in self.nodes {
           for connectionId in node.connections {
             if let target = nodes.first(where: { $0.id == connectionId }) {
-              self.drawConnection(
-                context, from: node, to: target, center: center, offset: offset, zoom: effectiveZoom
-              )
+              self.drawConnection(drawingContext, from: node, to: target)
             }
           }
         }
 
         for node in self.nodes {
-          self.drawNode(
-            context, node: node, center: center, offset: offset, zoom: effectiveZoom,
-            isSelected: node.id == self.selectedNode?.id)
+          self.drawNode(drawingContext, node: node, isSelected: node.id == self.selectedNode?.id)
         }
       }
       .onAppear {
@@ -658,43 +675,37 @@ struct NetworkGraphView: View {
     })
   }
 
-  private func drawConnection(
-    _ context: GraphicsContext, from: GraphNode, to: GraphNode, center: CGPoint, offset: CGSize,
-    zoom: CGFloat
-  ) {
+  private func drawConnection(_ drawingContext: DrawingContext, from: GraphNode, to: GraphNode) {
     let start = CGPoint(
-      x: center.x + (from.position.x * zoom) + offset.width,
-      y: center.y + (from.position.y * zoom) + offset.height
+      x: drawingContext.viewport.center.x + (from.position.x * drawingContext.viewport.zoom) + drawingContext.viewport.offset.width,
+      y: drawingContext.viewport.center.y + (from.position.y * drawingContext.viewport.zoom) + drawingContext.viewport.offset.height
     )
     let end = CGPoint(
-      x: center.x + (to.position.x * zoom) + offset.width,
-      y: center.y + (to.position.y * zoom) + offset.height
+      x: drawingContext.viewport.center.x + (to.position.x * drawingContext.viewport.zoom) + drawingContext.viewport.offset.width,
+      y: drawingContext.viewport.center.y + (to.position.y * drawingContext.viewport.zoom) + drawingContext.viewport.offset.height
     )
 
     var path = Path()
     path.move(to: start)
     path.addLine(to: end)
 
-    context.stroke(path, with: .color(.secondary.opacity(0.25)), lineWidth: 1)
+    drawingContext.graphicsContext.stroke(path, with: .color(.secondary.opacity(0.25)), lineWidth: 1)
   }
 
-  private func drawNode(
-    _ context: GraphicsContext, node: GraphNode, center: CGPoint, offset: CGSize, zoom: CGFloat,
-    isSelected: Bool
-  ) {
+  private func drawNode(_ drawingContext: DrawingContext, node: GraphNode, isSelected: Bool) {
     let p = CGPoint(
-      x: center.x + (node.position.x * zoom) + offset.width,
-      y: center.y + (node.position.y * zoom) + offset.height
+      x: drawingContext.viewport.center.x + (node.position.x * drawingContext.viewport.zoom) + drawingContext.viewport.offset.width,
+      y: drawingContext.viewport.center.y + (node.position.y * drawingContext.viewport.zoom) + drawingContext.viewport.offset.height
     )
 
     let r: CGFloat = 10 + CGFloat(max(0, min(1, node.strength))) * 10
     let rect = CGRect(x: p.x - r, y: p.y - r, width: r * 2, height: r * 2)
 
-    context.fill(
+    drawingContext.graphicsContext.fill(
       Path(ellipseIn: rect), with: .color(isSelected ? .accentColor : .primary.opacity(0.65)))
 
     let text = Text(node.title).font(.caption2.weight(.semibold)).foregroundStyle(.primary)
-    context.draw(text, at: CGPoint(x: p.x, y: p.y - r - 10), anchor: .center)
+    drawingContext.graphicsContext.draw(text, at: CGPoint(x: p.x, y: p.y - r - 10), anchor: .center)
   }
 
   private func clampedZoom(_ value: CGFloat) -> CGFloat {
@@ -726,7 +737,7 @@ struct NetworkGraphView: View {
       GraphNode(
         title: d.title, position: d.position, strength: d.strength, connections: [ids[0], ids[4]]),
       GraphNode(
-        title: e.title, position: e.position, strength: e.strength, connections: [ids[2], ids[3]]),
+        title: e.title, position: e.position, strength: e.strength, connections: [ids[2], ids[3]])
     ]
   }
 }

@@ -34,8 +34,7 @@ class GlossaryManager: ObservableObject {
     if let cachedEntries: [GlossaryEntry] = cacheManager.cachedObject(for: cacheKey) {
       self.entries = cachedEntries
       if let metadata = cacheManager.cacheMetadata(for: cacheKey),
-        let timestamp = metadata["cachedAt"] as? TimeInterval
-      {
+        let timestamp = metadata["cachedAt"] as? TimeInterval {
         self.lastUpdate = Date(timeIntervalSince1970: timestamp)
       }
       logInfo(
@@ -55,7 +54,10 @@ class GlossaryManager: ObservableObject {
 
     do {
       // Try to fetch from remote source
-      let remoteURL = URL(string: "https://api.apgi-framework.org/glossary.json")!
+      guard let remoteURL = URL(string: "https://api.apgi-framework.org/glossary.json") else {
+        logInfo("Invalid remote URL for glossary", context: "GlossaryManager.refreshContent")
+        return
+      }
       let data = try await cacheManager.fetchAndCache(from: remoteURL, cacheKey: self.cacheKey)
 
       // Parse remote data
@@ -67,10 +69,8 @@ class GlossaryManager: ObservableObject {
       let remoteTerms = Set(remoteEntries.map { $0.term.lowercased() })
 
       // Add local entries that aren't in remote
-      for localEntry in GlossaryData.entries {
-        if !remoteTerms.contains(localEntry.term.lowercased()) {
-          mergedEntries.append(localEntry)
-        }
+      for localEntry in GlossaryData.entries where !remoteTerms.contains(localEntry.term.lowercased()) {
+        mergedEntries.append(localEntry)
       }
 
       // Remove duplicates and sort
@@ -292,12 +292,12 @@ enum GlossaryData {
       term: "Workspace Capacity",
       definition:
         "The limited amount of information that can be simultaneously maintained in the global workspace. This capacity is constrained by the winner-take-all nature of the ignition process and the post-ignition refractory period (elevated θₜ) which underlies phenomena like the attentional blink."
-    ),
+    )
   ]
 
   static let termToDefinition: [String: String] = {
     var result: [String: String] = [:]
-    for entry in entries {
+    for entry in entries where !entry.term.isEmpty {
       result[entry.term.lowercased()] = entry.definition
     }
     return result
@@ -479,8 +479,8 @@ struct GlossaryHighlightedText: View {
     GlossaryAttributedStringBuilder.build(
       from: self.text,
       terms: self.terms,
-      baseFont: .system(size: self.fontSize, design: .default),
-      highlightColor: .accentColor
+      baseFont: .custom("Inter-Regular", size: CGFloat(self.fontSize)),
+      highlightColor: .thresholdBlue
     )
   }
 }
@@ -506,9 +506,7 @@ struct LazyGlossaryHighlightedContent: View {
 }
 
 private enum GlossaryAttributedStringBuilder {
-  static func build(from text: String, terms: [String], baseFont: Font, highlightColor: Color)
-    -> AttributedString
-  {
+  static func build(from text: String, terms: [String], baseFont: Font, highlightColor: Color) -> AttributedString {
     var attributed = AttributedString(text)
     attributed.font = baseFont
     attributed.foregroundColor = .primary
@@ -527,13 +525,10 @@ private enum GlossaryAttributedStringBuilder {
       var searchStart = lower.startIndex
 
       while searchStart < lower.endIndex {
-        guard
-          let found = lower.range(of: termLower, options: [], range: searchStart..<lower.endIndex)
-        else { break }
+        guard let found = lower.range(of: termLower, options: [], range: searchStart..<lower.endIndex) else { break }
 
         let nsRange = NSRange(found, in: lower)
-        if !occupied.intersects(integersIn: nsRange.location..<(nsRange.location + nsRange.length))
-        {
+        if !occupied.intersects(integersIn: nsRange.location..<(nsRange.location + nsRange.length)) {
           if let attrRange = Range(nsRange, in: attributed) {
             attributed[attrRange].foregroundColor = highlightColor
             attributed[attrRange].underlineStyle = .single

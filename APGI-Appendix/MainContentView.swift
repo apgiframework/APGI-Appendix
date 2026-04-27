@@ -10,6 +10,7 @@ struct MainContentView: View {
 
   @State private var selectedCategory: ContentCategory? = Tab.methodology.category
   @State private var selectedSection: ContentSection? = .methodology
+  @State private var selectedTab: Tab = .methodology
   @State private var showInspector = true
   @State private var columnVisibility = NavigationSplitViewVisibility.all
   @State private var searchPresented: Bool = false
@@ -100,8 +101,7 @@ struct MainContentView: View {
           self.selectedCategory = tab.category
         }
       }
-      .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("HandleDeepLink"))) {
-        notification in
+      .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("HandleDeepLink"))) { notification in
         if let url = notification.object as? URL {
           self.handleDeepLink(url)
         }
@@ -182,7 +182,7 @@ struct MainContentView: View {
         if self.showKeyboardShortcuts {
           KeyboardShortcutsView(isPresented: self.$showKeyboardShortcuts)
             .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .background(Color.black.opacity(0.4).ignoresSafeArea())
+            .background(Color.black.opacity(0.3).ignoresSafeArea())
         }
       }
   }
@@ -206,21 +206,29 @@ struct MainContentView: View {
 
   private var detailView: some View {
     ZStack {
-      self.detailContentView
-      self.focusModeOverlay
-      self.searchOverlay
-    }
-    .focusable()
-    .focused(self.$detailFocused)
-    .onKeyPress(.tab, phases: .down) { press in
-      if press.modifiers.contains(.shift) {
-        self.sidebarFocused = true
-        self.detailFocused = false
-        return .handled
+      Color.spaceBlack.ignoresSafeArea()
+
+      if let section = selectedSection {
+        TabContentView(tab: section, selectedTab: $selectedTab)
+          .id(section.id)
+          .transition(.opacity.combined(with: .move(edge: .trailing)))
+      } else {
+        VStack(spacing: 20) {
+          Image(systemName: "book.closed")
+            .font(.system(size: 48))
+            .foregroundStyle(.secondary)
+          Text("Select a topic to begin")
+            .font(.title2)
+            .foregroundStyle(.secondary)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
       }
-      return .ignored
     }
     .toolbar {
+      ToolbarItem(placement: .principal) {
+          APGIEquationView(fontSize: 18)
+      }
+
       ToolbarItemGroup {
         NetworkStatusView()
 
@@ -273,7 +281,9 @@ struct MainContentView: View {
       }
 
       ToolbarItem(placement: .automatic) {
-        Button(action: { self.showInspector.toggle() }) {
+        Button {
+          self.showInspector.toggle()
+        } label: {
           Label("Toggle Inspector", systemImage: SFSymbols.sidebarRight)
         }
       }
@@ -337,7 +347,7 @@ struct MainContentView: View {
     activity.title = "Reading: \(section.shortTitle)"
     activity.userInfo = [
       "section": section.rawValue,
-      "category": section.category.rawValue,
+      "category": section.category.rawValue
     ]
     activity.isEligibleForHandoff = true
     activity.isEligibleForSearch = true
@@ -397,8 +407,7 @@ struct MainContentView: View {
         // Move to next category
         let allCategories = SectionCategory.allCases
         if let categoryIndex = allCategories.firstIndex(of: currentCategory),
-          categoryIndex < allCategories.count - 1
-        {
+          categoryIndex < allCategories.count - 1 {
           let nextCategory = allCategories[categoryIndex + 1]
           self.selectedCategory = nextCategory
           self.selectedSection = nextCategory.sections.first
@@ -421,8 +430,7 @@ struct MainContentView: View {
         // Move to previous category
         let allCategories = SectionCategory.allCases
         if let categoryIndex = allCategories.firstIndex(of: currentCategory),
-          categoryIndex > 0
-        {
+          categoryIndex > 0 {
           let prevCategory = allCategories[categoryIndex - 1]
           self.selectedCategory = prevCategory
           self.selectedSection = prevCategory.sections.last
@@ -432,8 +440,7 @@ struct MainContentView: View {
   }
 
   private func navigateToSection(_ sectionName: String) {
-    if let tab = Tab.allCases.first(where: { $0.rawValue.lowercased() == sectionName.lowercased() })
-    {
+    if let tab = Tab.allCases.first(where: { $0.rawValue.lowercased() == sectionName.lowercased() }) {
       self.selectedCategory = tab.category
       self.selectedSection = tab
     }

@@ -71,14 +71,14 @@ class AccessibilityAuditor {
         severity: .low,
         description: "Keyboard navigation could be improved with better focus management",
         location: "SidebarView.swift"
-      ),
+      )
     ]
 
     let recommendations = [
       "Add accessibility labels to all navigation items",
       "Implement proper focus management for keyboard navigation",
       "Add accessibility hints for complex navigation patterns",
-      "Ensure all interactive elements have sufficient touch targets (44x44 points minimum)",
+      "Ensure all interactive elements have sufficient touch targets (44x44 points minimum)"
     ]
 
     return AccessibilityAuditResult(
@@ -99,7 +99,7 @@ class AccessibilityAuditor {
         severity: .medium,
         description: "Images and diagrams may lack alternative text",
         location: "Various content views"
-      ),
+      )
     ]
 
     let recommendations = [
@@ -107,7 +107,7 @@ class AccessibilityAuditor {
       "Provide alternative text for all images and diagrams",
       "Implement text resizing support for Dynamic Type",
       "Add accessibility labels for mathematical equations",
-      "Ensure proper reading order for complex layouts",
+      "Ensure proper reading order for complex layouts"
     ]
 
     return AccessibilityAuditResult(
@@ -128,7 +128,7 @@ class AccessibilityAuditor {
         severity: .medium,
         description: "Custom controls may not be accessible",
         location: "Custom SwiftUI components"
-      ),
+      )
     ]
 
     let recommendations = [
@@ -136,7 +136,7 @@ class AccessibilityAuditor {
       "Implement accessibility actions for custom gestures",
       "Provide accessibility values for sliders and progress indicators",
       "Ensure all interactive elements are keyboard accessible",
-      "Add accessibility hints for complex interactions",
+      "Add accessibility hints for complex interactions"
     ]
 
     return AccessibilityAuditResult(
@@ -159,7 +159,7 @@ class AccessibilityAuditor {
       "Add accessibility labels for all settings options",
       "Implement accessibility values for toggle states",
       "Ensure settings are properly grouped and ordered",
-      "Add accessibility hints for complex settings",
+      "Add accessibility hints for complex settings"
     ]
 
     return AccessibilityAuditResult(
@@ -183,7 +183,7 @@ class AccessibilityAuditor {
       "Add accessibility labels for table content",
       "Ensure table navigation works with VoiceOver",
       "Provide table summaries and captions",
-      "Implement sorting and filtering accessibility",
+      "Implement sorting and filtering accessibility"
     ]
 
     return AccessibilityAuditResult(
@@ -272,8 +272,7 @@ struct AccessibleSlider: View {
   let range: ClosedRange<Double>
   let hint: String?
 
-  init(_ title: String, value: Binding<Double>, in range: ClosedRange<Double>, hint: String? = nil)
-  {
+  init(_ title: String, value: Binding<Double>, in range: ClosedRange<Double>, hint: String? = nil) {
     self.title = title
     self._value = value
     self.range = range

@@ -1,5 +1,6 @@
 import AppKit
 import Combine
+import CoreSpotlight
 import SwiftUI
 
 struct EnhancedSettingsView: View {
@@ -119,24 +120,18 @@ struct SettingsView: View {
 
         BookmarkListView()
 
-        Divider()
-
-        Button("Clear All Bookmarks") {
-          self.clearAllBookmarks()
-        }
-        .foregroundColor(.red)
-
-        Button("Reset to Defaults") {
-          self.themeManager.resetToDefaults()
-        }
-        .foregroundColor(.orange)
-
         Spacer()
       }
       .padding()
       .tabItem {
         Label("Bookmarks", systemImage: "bookmark")
       }
+
+      // Privacy & Data
+      PrivacySettingsView()
+        .tabItem {
+          Label("Privacy", systemImage: "shield")
+        }
 
       // Network
       NetworkSettingsView()
@@ -240,6 +235,178 @@ struct BookmarkListView: View {
       .frame(height: min(CGFloat(self.bookmarkManager.bookmarks.count) * 60 + 20, 200))
       .listStyle(.plain)
     }
+  }
+}
+
+// MARK: - Privacy Settings View
+
+/// Privacy and data management settings
+/// Provides granular control over data collection, retention, and privacy features
+struct PrivacySettingsView: View {
+  @AppStorage("enableAutoUpdateChecks") var enableAutoUpdateChecks = true
+  @AppStorage("updateCheckInterval") var updateCheckInterval: Double = 24  // hours
+  @AppStorage("enableSpotlightIndexing") var enableSpotlightIndexing = true
+  @AppStorage("enableMemoryMonitoring") var enableMemoryMonitoring = true
+  @AppStorage("redactSensitiveData") var redactSensitiveData = true
+  @AppStorage("logRetentionDays") var logRetentionDays: Double = 30
+  @State private var showingResetConfirmation = false
+  @State private var showingClearConfirmation = false
+
+  var body: some View {
+    VStack(alignment: .leading, spacing: 20) {
+      Text("Privacy & Data")
+        .font(.title2.bold())
+        .padding(.bottom)
+
+      // Update Check Settings
+      VStack(alignment: .leading, spacing: 12) {
+        Text("Update Checks")
+          .font(.headline)
+
+        Toggle("Automatically check for updates", isOn: $enableAutoUpdateChecks)
+          .help("Periodically check for new versions of the app")
+
+        if enableAutoUpdateChecks {
+          VStack(alignment: .leading, spacing: 4) {
+            Text("Check interval: \(formatInterval(updateCheckInterval))")
+              .font(.subheadline)
+            Picker("Interval", selection: $updateCheckInterval) {
+              Text("Every hour").tag(1.0)
+              Text("Every 6 hours").tag(6.0)
+              Text("Every 12 hours").tag(12.0)
+              Text("Every 24 hours").tag(24.0)
+              Text("Every 3 days").tag(72.0)
+              Text("Every week").tag(168.0)
+            }
+            .pickerStyle(.menu)
+            .labelsHidden()
+          }
+        }
+      }
+
+      Divider()
+
+      // Data Collection Controls
+      VStack(alignment: .leading, spacing: 12) {
+        Text("Data Collection")
+          .font(.headline)
+
+        Toggle("Enable Spotlight indexing", isOn: $enableSpotlightIndexing)
+          .help("Allow content to appear in macOS Spotlight search results")
+
+        Toggle("Enable memory monitoring", isOn: $enableMemoryMonitoring)
+          .help("Track memory usage for performance diagnostics (uses minimal resources)")
+
+        Toggle("Redact sensitive data in logs", isOn: $redactSensitiveData)
+          .help("Automatically remove potentially sensitive information from error logs")
+
+        VStack(alignment: .leading, spacing: 4) {
+          Text("Log retention: \(Int(logRetentionDays)) days")
+            .font(.subheadline)
+          Slider(value: $logRetentionDays, in: 7...90, step: 1)
+        }
+      }
+
+      Divider()
+
+      // Data Management
+      VStack(alignment: .leading, spacing: 12) {
+        Text("Data Management")
+          .font(.headline)
+
+        VStack(alignment: .leading, spacing: 8) {
+          Button("Clear All App Data...") {
+            showingClearConfirmation = true
+          }
+          .foregroundColor(.red)
+          .help("Remove all bookmarks, settings, and cached data")
+
+          Text("This will reset bookmarks, appearance settings, and preferences to defaults. Log files and Spotlight index will also be cleared.")
+            .font(.caption)
+            .foregroundStyle(.secondary)
+        }
+
+        VStack(alignment: .leading, spacing: 8) {
+          Button("Reset to Factory Defaults...") {
+            showingResetConfirmation = true
+          }
+          .foregroundColor(.red)
+
+          Text("Completely reset the app to its initial state. This action cannot be undone.")
+            .font(.caption)
+            .foregroundStyle(.secondary)
+        }
+      }
+
+      Spacer()
+    }
+    .padding()
+    .frame(width: 500, height: 400)
+    .alert("Clear All Data?", isPresented: $showingClearConfirmation) {
+      Button("Cancel", role: .cancel) {}
+      Button("Clear", role: .destructive) {
+        clearAllAppData()
+      }
+    } message: {
+      Text("This will permanently delete all your bookmarks, settings, and log history. This action cannot be undone.")
+    }
+    .alert("Reset to Factory Defaults?", isPresented: $showingResetConfirmation) {
+      Button("Cancel", role: .cancel) {}
+      Button("Reset", role: .destructive) {
+        resetToFactoryDefaults()
+      }
+    } message: {
+      Text("This will completely reset the app to its initial state, removing all data and preferences. This action cannot be undone.")
+    }
+  }
+
+  private func formatInterval(_ hours: Double) -> String {
+    switch hours {
+    case 1: return "Every hour"
+    case 6: return "Every 6 hours"
+    case 12: return "Every 12 hours"
+    case 24: return "Every day"
+    case 72: return "Every 3 days"
+    case 168: return "Every week"
+    default: return "Every \(Int(hours)) hours"
+    }
+  }
+
+  private func clearAllAppData() {
+    // Clear bookmarks
+    NotificationCenter.default.post(name: .clearAllBookmarks, object: nil)
+
+    // Clear settings
+    let defaults = UserDefaults.standard
+    defaults.removeObject(forKey: "contentFontSize")
+    defaults.removeObject(forKey: "sidebarVisible")
+    defaults.removeObject(forKey: "focusModeEnabled")
+    defaults.removeObject(forKey: "highContrastMode")
+
+    // Clear logs
+    ErrorLogger.shared.clearLogs()
+
+    // Apply log retention
+    ErrorLogger.shared.applyRetentionPolicy()
+
+    // Reset theme to defaults
+    ThemeManager.shared.resetToDefaults()
+
+    logInfo("All app data cleared by user", context: "PrivacySettingsView")
+  }
+
+  private func resetToFactoryDefaults() {
+    // First clear all data
+    clearAllAppData()
+
+    // Remove all app-specific UserDefaults
+    let bundleId = Bundle.main.bundleIdentifier ?? "com.apgi.appendix"
+    UserDefaults.standard.removePersistentDomain(forName: bundleId)
+
+    // Clear Spotlight index
+    CSSearchableIndex.default().deleteAllSearchableItems()
+
+    logInfo("Factory reset completed by user", context: "PrivacySettingsView")
   }
 }
 

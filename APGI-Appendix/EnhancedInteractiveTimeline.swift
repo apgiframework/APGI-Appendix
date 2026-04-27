@@ -64,7 +64,7 @@ struct EnhancedTimelineView: View {
       }
       .frame(height: 180)
       .background(.quaternary.opacity(0.2))
-      .clipShape(RoundedRectangle(cornerRadius: APGIRadius.lg))
+      .clipShape(RoundedRectangle(cornerRadius: APGISpacing.lg))
 
       TimeMarkers()
 
@@ -110,17 +110,17 @@ struct EventDetailsPanel: View {
           .frame(width: 12, height: 12)
 
         Text(self.event.title)
-          .font(APGITypography.titleMedium)
+          .font(APGITypography.h3)
           .fontWeight(.semibold)
 
         Text("\(self.event.timeRange.lowerBound)–\(self.event.timeRange.upperBound)ms")
-          .font(APGITypography.bodySmall)
+          .font(APGITypography.body)
           .foregroundStyle(.secondary)
 
         Spacer()
 
         Text(self.event.phase.rawValue)
-          .font(APGITypography.labelSmall)
+          .font(APGITypography.micro)
           .padding(.horizontal, APGISpacing.sm)
           .padding(.vertical, APGISpacing.xs)
           .background(self.event.phase.color.opacity(0.2))
@@ -129,15 +129,15 @@ struct EventDetailsPanel: View {
       }
 
       GlossaryHighlightedText(text: self.event.description)
-        .font(APGITypography.bodyMedium)
+        .font(APGITypography.body)
         .foregroundStyle(.secondary)
         .lineSpacing(4)
     }
     .padding(APGISpacing.lg)
     .background(.ultraThinMaterial)
-    .clipShape(RoundedRectangle(cornerRadius: APGIRadius.lg))
+    .clipShape(RoundedRectangle(cornerRadius: APGISpacing.lg))
     .overlay {
-      RoundedRectangle(cornerRadius: APGIRadius.lg)
+      RoundedRectangle(cornerRadius: APGISpacing.lg)
         .strokeBorder(self.event.category.color.opacity(0.3), lineWidth: 1.5)
     }
     .shadow(color: self.event.category.color.opacity(0.2), radius: 8, y: 4)
@@ -149,7 +149,7 @@ struct TimeMarkers: View {
     HStack(spacing: 0) {
       ForEach([0, 100, 200, 300, 400, 500], id: \.self) { time in
         Text("\(time)ms")
-          .font(APGITypography.labelSmall)
+          .font(APGITypography.micro)
           .foregroundStyle(.secondary)
           .frame(
             maxWidth: .infinity,
@@ -209,14 +209,14 @@ struct EnhancedInteractiveTimeline: View {
     VStack(spacing: APGISpacing.md) {
       HStack {
         Text("Ignition Timeline")
-          .font(APGITypography.titleLarge)
+          .font(APGITypography.h2)
           .fontWeight(.bold)
 
         Spacer()
 
         Toggle(isOn: self.$showPhaseIndicators) {
           Label("Show Phases", systemImage: "square.3.layers.3d")
-            .font(APGITypography.labelMedium)
+            .font(APGITypography.label)
         }
         .toggleStyle(.button)
         .accessibilityLabel("Show phase indicators")
@@ -239,11 +239,11 @@ struct EnhancedInteractiveTimeline: View {
     }
     .frame(height: 200)
     .background(
-      RoundedRectangle(cornerRadius: APGIRadius.lg)
+      RoundedRectangle(cornerRadius: APGISpacing.lg)
         .fill(.ultraThinMaterial)
     )
     .overlay {
-      RoundedRectangle(cornerRadius: APGIRadius.lg)
+      RoundedRectangle(cornerRadius: APGISpacing.lg)
         .strokeBorder(Color.accentColor.opacity(0.2), lineWidth: 1)
     }
   }
@@ -317,8 +317,7 @@ struct EnhancedInteractiveTimeline: View {
   private func moveToPreviousEvent() {
     if let currentEvent = events.first(where: { $0.timeRange.contains(currentTime) }),
       let currentIndex = events.firstIndex(where: { $0.id == currentEvent.id }),
-      currentIndex > 0
-    {
+      currentIndex > 0 {
       let previousEvent = self.events[currentIndex - 1]
       self.currentTime = previousEvent.timeRange.lowerBound
       self.selectedEvent = previousEvent
@@ -328,8 +327,7 @@ struct EnhancedInteractiveTimeline: View {
   private func moveToNextEvent() {
     if let currentEvent = events.first(where: { $0.timeRange.contains(currentTime) }),
       let currentIndex = events.firstIndex(where: { $0.id == currentEvent.id }),
-      currentIndex < events.count - 1
-    {
+      currentIndex < events.count - 1 {
       let nextEvent = self.events[currentIndex + 1]
       self.currentTime = nextEvent.timeRange.lowerBound
       self.selectedEvent = nextEvent
@@ -340,7 +338,7 @@ struct EnhancedInteractiveTimeline: View {
     HStack(spacing: 0) {
       ForEach([0, 100, 200, 300, 400, 500], id: \.self) { time in
         Text("\(time)ms")
-          .font(APGITypography.labelSmall)
+          .font(APGITypography.micro)
           .foregroundStyle(.secondary)
           .frame(
             maxWidth: .infinity,
@@ -366,17 +364,17 @@ struct EnhancedInteractiveTimeline: View {
           .frame(width: 12, height: 12)
 
         Text(event.title)
-          .font(APGITypography.titleMedium)
+          .font(APGITypography.h3)
           .fontWeight(.semibold)
 
         Text("(\(event.timeRange.lowerBound)–\(event.timeRange.upperBound)ms)")
-          .font(APGITypography.bodySmall)
+          .font(APGITypography.body)
           .foregroundStyle(.secondary)
 
         Spacer()
 
         Text(event.phase.rawValue)
-          .font(APGITypography.labelSmall)
+          .font(APGITypography.micro)
           .padding(.horizontal, APGISpacing.sm)
           .padding(.vertical, APGISpacing.xs)
           .background(event.phase.color.opacity(0.2))
@@ -385,13 +383,12 @@ struct EnhancedInteractiveTimeline: View {
       }
 
       GlossaryHighlightedText(text: event.description)
-        .font(APGITypography.bodyMedium)
+        .font(APGITypography.body)
         .foregroundStyle(.secondary)
         .lineSpacing(4)
 
       if self.currentTime >= event.timeRange.lowerBound
-        && self.currentTime <= event.timeRange.upperBound
-      {
+        && self.currentTime <= event.timeRange.upperBound {
         EventProgressBar(
           currentTime: self.currentTime,
           event: event
@@ -400,9 +397,9 @@ struct EnhancedInteractiveTimeline: View {
     }
     .padding(APGISpacing.lg)
     .background(.ultraThinMaterial)
-    .clipShape(RoundedRectangle(cornerRadius: APGIRadius.lg))
+    .clipShape(RoundedRectangle(cornerRadius: APGISpacing.lg))
     .overlay {
-      RoundedRectangle(cornerRadius: APGIRadius.lg)
+      RoundedRectangle(cornerRadius: APGISpacing.lg)
         .strokeBorder(event.category.color.opacity(0.3), lineWidth: 1.5)
     }
     .shadow(color: event.category.color.opacity(0.2), radius: 8, y: 4)
@@ -442,11 +439,11 @@ struct PlaybackControls: View {
 
   var body: some View {
     HStack(spacing: APGISpacing.lg) {
-      Button(action: { self.isPlaying.toggle() }) {
+      Button(action: { self.isPlaying.toggle() }, label: {
         Image(systemName: self.isPlaying ? "pause.circle.fill" : "play.circle.fill")
           .font(.title)
           .foregroundStyle(Color.accentColor)
-      }
+      })
       .buttonStyle(.plain)
       .accessibilityLabel(self.isPlaying ? "Pause timeline animation" : "Play timeline animation")
       .accessibilityHint("Controls the automatic progression through the ignition timeline")
@@ -470,14 +467,14 @@ struct PlaybackControls: View {
 
       HStack(spacing: APGISpacing.sm) {
         Text("Speed:")
-          .font(APGITypography.labelMedium)
+          .font(APGITypography.label)
           .foregroundStyle(.secondary)
           .accessibilityHidden(true)  // Label for the speed controls
 
         ForEach([0.5, 1.0, 2.0], id: \.self) { speed in
-          Button(action: { self.playbackSpeed = speed }) {
+          Button(action: { self.playbackSpeed = speed }, label: {
             Text("\(speed, specifier: "%.1f")x")
-              .font(APGITypography.labelMedium)
+              .font(APGITypography.label)
               .foregroundStyle(self.playbackSpeed == speed ? .white : .primary)
               .padding(.horizontal, APGISpacing.sm)
               .padding(.vertical, APGISpacing.xs)
@@ -487,7 +484,7 @@ struct PlaybackControls: View {
                   : Color.clear
               )
               .clipShape(Capsule())
-          }
+          })
           .buttonStyle(.plain)
           .accessibilityLabel("Playback speed \(speed, specifier: "%.1f") times")
           .accessibilityHint("Changes the speed of timeline animation")
@@ -516,16 +513,16 @@ struct EventBlock: View {
 
     VStack(alignment: .leading, spacing: 4) {
       Text(self.event.title)
-        .font(APGITypography.labelSmall)
+        .font(APGITypography.micro)
         .foregroundStyle(self.isSelected ? .white : .primary)
         .lineLimit(1)
 
-      RoundedRectangle(cornerRadius: APGIRadius.sm)
+      RoundedRectangle(cornerRadius: APGISpacing.sm)
         .fill(
           LinearGradient(
             colors: [
               self.event.category.color.opacity(isActive ? 1.0 : 0.7),
-              self.event.category.color.opacity(isActive ? 0.8 : 0.5),
+              self.event.category.color.opacity(isActive ? 0.8 : 0.5)
             ],
             startPoint: .leading,
             endPoint: .trailing
@@ -534,7 +531,7 @@ struct EventBlock: View {
         .frame(width: max(width, 40), height: 36)
         .overlay {
           if isActive {
-            RoundedRectangle(cornerRadius: APGIRadius.sm)
+            RoundedRectangle(cornerRadius: APGISpacing.sm)
               .stroke(self.event.category.color, lineWidth: 2)
               .opacity(0.5)
               .scaleEffect(1.1)
@@ -553,7 +550,7 @@ struct EventBlock: View {
     .padding(.horizontal, APGISpacing.xs)
     .padding(.vertical, APGISpacing.xs)
     .background(self.isSelected ? self.event.category.color.opacity(0.35) : Color.clear)
-    .clipShape(RoundedRectangle(cornerRadius: APGIRadius.md))
+    .clipShape(RoundedRectangle(cornerRadius: APGISpacing.md))
     .offset(x: startX, y: 20)
     .scaleEffect(
       {
@@ -591,16 +588,16 @@ struct EnhancedEventBlock: View {
 
     VStack(alignment: .leading, spacing: 4) {
       Text(self.event.title)
-        .font(APGITypography.labelSmall)
+        .font(APGITypography.micro)
         .foregroundStyle(self.isSelected ? .white : .primary)
         .lineLimit(1)
 
-      RoundedRectangle(cornerRadius: APGIRadius.sm)
+      RoundedRectangle(cornerRadius: APGISpacing.sm)
         .fill(
           LinearGradient(
             colors: [
               self.event.category.color.opacity(isActive ? 1.0 : 0.7),
-              self.event.category.color.opacity(isActive ? 0.8 : 0.5),
+              self.event.category.color.opacity(isActive ? 0.8 : 0.5)
             ],
             startPoint: .leading,
             endPoint: .trailing
@@ -609,7 +606,7 @@ struct EnhancedEventBlock: View {
         .frame(width: max(width, 40), height: 32)
         .overlay {
           if isActive {
-            RoundedRectangle(cornerRadius: APGIRadius.sm)
+            RoundedRectangle(cornerRadius: APGISpacing.sm)
               .stroke(self.event.category.color, lineWidth: 2)
               .opacity(0.5)
               .scaleEffect(1.1)
@@ -624,7 +621,7 @@ struct EnhancedEventBlock: View {
     .padding(.horizontal, APGISpacing.xs)
     .padding(.vertical, APGISpacing.xs)
     .background(self.isSelected ? self.event.category.color.opacity(0.35) : Color.clear)
-    .clipShape(RoundedRectangle(cornerRadius: APGIRadius.md))
+    .clipShape(RoundedRectangle(cornerRadius: APGISpacing.md))
     .offset(x: startX, y: 20)
     .scaleEffect(
       {
@@ -703,7 +700,7 @@ struct PhaseRegion: View {
   var body: some View {
     VStack {
       Text(self.label)
-        .font(APGITypography.labelSmall)
+        .font(APGITypography.micro)
         .foregroundStyle(self.color)
         .opacity(0.7)
 
@@ -753,13 +750,13 @@ struct EventProgressBar: View {
     VStack(alignment: .leading, spacing: APGISpacing.xs) {
       HStack {
         Text("Progress")
-          .font(APGITypography.labelSmall)
+          .font(APGITypography.micro)
           .foregroundStyle(.secondary)
 
         Spacer()
 
         Text("\(Int(self.progress * 100))%")
-          .font(APGITypography.labelSmall)
+          .font(APGITypography.micro)
           .foregroundStyle(.primary)
       }
 
@@ -830,7 +827,7 @@ struct TimelineEvent: Identifiable {
       timeRange: 300...500,
       category: .broadcast,
       phase: .conscious
-    ),
+    )
   ]
 }
 

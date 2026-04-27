@@ -36,7 +36,7 @@ class StoreManager: ObservableObject {
       let storeProducts = try await Product.products(for: [
         Self.premiumFeature,
         Self.advancedAnalytics,
-        Self.cloudSync,
+        Self.cloudSync
       ])
 
       self.products = storeProducts.sorted { $0.price < $1.price }
@@ -245,9 +245,7 @@ extension StoreManager {
     return .failure(.receiptValidationFailed)
   }
 
-  private func validateWithApple(receiptBase64: String, sandbox: Bool) async
-    -> ReceiptValidationResult?
-  {
+  private func validateWithApple(receiptBase64: String, sandbox: Bool) async -> ReceiptValidationResult? {
     let endpoint =
       sandbox
       ? "https://sandbox.itunes.apple.com/verifyReceipt"
@@ -259,7 +257,7 @@ extension StoreManager {
     let payload: [String: Any] = [
       "receipt-data": receiptBase64,
       "password": getSharedSecret(),  // For auto-renewable subscriptions (optional)
-      "exclude-old-transactions": false,
+      "exclude-old-transactions": false
     ]
 
     guard let jsonData = try? JSONSerialization.data(withJSONObject: payload) else {
@@ -292,8 +290,7 @@ extension StoreManager {
       case 0:
         // Valid receipt
         if let receipt = json["receipt"] as? [String: Any],
-          let inApp = receipt["in_app"] as? [[String: Any]]
-        {
+          let inApp = receipt["in_app"] as? [[String: Any]] {
           let validatedProducts = extractValidatedProducts(from: inApp)
           return .success(validatedProducts)
         }
@@ -324,8 +321,7 @@ extension StoreManager {
 
     for purchase in inAppPurchases {
       if let productID = purchase["product_id"] as? String,
-        let transactionState = purchase["transaction_state"] as? String
-      {
+        let transactionState = purchase["transaction_state"] as? String {
         // Only include completed transactions
         if transactionState == "purchased" || transactionState == "restored" {
           productIDs.append(productID)
@@ -368,7 +364,7 @@ extension StoreManager {
 
     case .failure(let error):
       // Log error but don't block user - StoreKit validation is primary
-      print("Server receipt validation failed: \(error.localizedDescription)")
+      logError(error, context: "StoreManager.validatePurchasesComprehensive")
       // Still return true if StoreKit validation succeeded
       return !self.purchasedProductIDs.isEmpty
     }
@@ -417,7 +413,7 @@ struct StoreView: View {
         if self.storeManager.isLoading {
           ProgressView("Loading...")
             .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .background(Color.black.opacity(0.3))
+            .background(Color.black.opacity(0.2))
         }
       }
       .alert("Error", isPresented: .constant(self.storeManager.errorMessage != nil)) {
@@ -463,14 +459,14 @@ struct ProductRow: View {
           Task {
             try? await self.storeManager.purchase(self.product)
           }
-        }) {
+        }, label: {
           Text(self.product.displayPrice)
             .padding(.horizontal, 12)
             .padding(.vertical, 6)
             .background(Color.blue)
             .foregroundColor(.white)
             .cornerRadius(8)
-        }
+        })
         .disabled(self.storeManager.isLoading)
       }
     }

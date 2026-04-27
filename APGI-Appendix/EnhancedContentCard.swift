@@ -48,8 +48,7 @@ final class SimpleTableParser {
           if let lastTextLine = currentTextLines.last?.trimmingCharacters(in: .whitespaces),
             !lastTextLine.isEmpty,
             !lastTextLine.contains("|"),
-            !currentTextLines.isEmpty
-          {
+            !currentTextLines.isEmpty {
             tableTitle = lastTextLine
             currentTextLines.removeLast()
           }
@@ -452,8 +451,7 @@ struct APGITableView: View {
       iconColor = .red
       textColor = .secondary
     } else if text.lowercased().contains("well-supported")
-      || text.lowercased().contains("plausible")
-    {
+      || text.lowercased().contains("plausible") {
       icon = "checkmark.circle"
       iconColor = .green
     } else if text.lowercased().contains("incomplete") || text.lowercased().contains("contested") {
@@ -517,6 +515,7 @@ struct EnhancedContentCard: View {
   @State private var isExpanded = true
   @State private var isFocusMode = false
   @State private var copyFeedback = false
+  @FocusState private var isCardFocused: Bool
 
   var body: some View {
     VStack(alignment: .leading, spacing: 0) {
@@ -531,44 +530,58 @@ struct EnhancedContentCard: View {
               content: self.content,
               terms: GlossaryData.terms
             )
-            .padding(20)
+            .padding(APGISpacing.lg)
           } else {
             GlossaryHighlightedText(text: self.content, terms: GlossaryData.terms)
-              .font(.system(size: self.fontSize))
+              .font(APGITypography.body)
               .textSelection(.enabled)
-              .padding(20)
+              .padding(APGISpacing.lg)
           }
         }
         .frame(maxHeight: 600)
         .transition(.opacity.combined(with: .move(edge: .top)))
+        .accessibilityLabel("Content of \(self.title)")
       }
     }
-    .background(self.cardBackground)
-    .clipShape(RoundedRectangle(cornerRadius: 12))
+    .background(Color.darkNavy)
+    .clipShape(RoundedRectangle(cornerRadius: APGIRadius.standard))
     .overlay(
-      RoundedRectangle(cornerRadius: 12)
-        .strokeBorder(self.borderColor, lineWidth: self.highContrastMode ? 2 : 1)
+      RoundedRectangle(cornerRadius: APGIRadius.standard)
+        .strokeBorder(
+          self.isCardFocused ? Color.thresholdBlue : self.borderColor,
+          lineWidth: self.isCardFocused || self.highContrastMode ? 2 : 1
+        )
     )
     .shadow(color: self.shadowColor, radius: self.highContrastMode ? 0 : 4, y: 2)
+    .focusable()
+    .focused(self.$isCardFocused)
+    .accessibilityElement(children: .contain)
+    .accessibilityLabel(self.title)
+    .accessibilityHint(self.isExpanded ? "Double tap to collapse section" : "Double tap to expand section")
+    .accessibilityAction {
+        withAnimation(.spring(response: 0.3)) {
+            self.isExpanded.toggle()
+        }
+    }
     .sheet(isPresented: self.$isFocusMode) {
       FocusModeView(isEnabled: self.$isFocusMode, content: self.content, title: self.title)
     }
   }
 
   private var cardHeader: some View {
-    HStack(spacing: 12) {
+    HStack(spacing: APGISpacing.md) {
       // Category indicator
       Circle()
         .fill(self.category.color)
-        .frame(width: 10, height: 10)
+        .frame(width: 8, height: 8)
 
       Text(self.title)
-        .font(.system(size: self.themeManager.headlineFontSize, weight: .semibold))
+        .font(APGITypography.h3)
         .foregroundStyle(.primary)
 
       if self.hasDataTable {
         Image(systemName: SFSymbols.table)
-          .font(.system(size: 12))
+          .font(APGITypography.micro)
           .foregroundStyle(.secondary)
           .accessibilityLabel("Table content")
       }
@@ -576,12 +589,12 @@ struct EnhancedContentCard: View {
       Spacer()
 
       // Action buttons
-      HStack(spacing: 8) {
+      HStack(spacing: APGISpacing.sm) {
         Button {
           self.copyToClipboard()
         } label: {
           Image(systemName: self.copyFeedback ? SFSymbols.confirm : SFSymbols.copy)
-            .font(.system(size: 12))
+            .font(APGITypography.micro)
             .foregroundStyle(self.copyFeedback ? .green : .secondary)
             .accessibilityLabel(self.copyFeedback ? "Copied" : "Copy")
         }
@@ -592,7 +605,7 @@ struct EnhancedContentCard: View {
           self.isFocusMode = true
         } label: {
           Image(systemName: SFSymbols.focusMode)
-            .font(.system(size: 12))
+            .font(APGITypography.micro)
             .foregroundStyle(.secondary)
             .accessibilityLabel("Focus mode")
         }
@@ -608,7 +621,7 @@ struct EnhancedContentCard: View {
             systemName: self.isExpanded
               ? SFSymbols.Navigation.up.symbol : SFSymbols.Navigation.down.symbol
           )
-          .font(.system(size: 12, weight: .semibold))
+          .font(APGITypography.label.weight(.semibold))
           .foregroundStyle(.secondary)
           .accessibilityLabel(self.isExpanded ? "Collapse" : "Expand")
         }
@@ -616,8 +629,8 @@ struct EnhancedContentCard: View {
         .help(self.isExpanded ? "Collapse" : "Expand")
       }
     }
-    .padding(.horizontal, 16)
-    .padding(.vertical, 12)
+    .padding(.horizontal, APGISpacing.md)
+    .padding(.vertical, APGISpacing.md)
     .background(self.headerBackground)
   }
 
@@ -726,8 +739,7 @@ struct EnhancedSectionView: View {
       .onReceive(NotificationCenter.default.publisher(for: .scrollToTables)) { notification in
         if let targetTab = notification.object as? Tab,
           targetTab.id == self.section.id
-            || self.section.id.contains(targetTab.rawValue.lowercased())
-        {
+            || self.section.id.contains(targetTab.rawValue.lowercased()) {
           self.scrollToFirstTable(proxy: proxy)
         }
       }
@@ -761,8 +773,8 @@ struct SectionHeroCard: View {
   @Environment(\.colorScheme) private var colorScheme
 
   var body: some View {
-    VStack(alignment: .leading, spacing: 12) {
-      HStack(alignment: .top, spacing: 12) {
+    VStack(alignment: .leading, spacing: APGISpacing.md) {
+      HStack(alignment: .top, spacing: APGISpacing.md) {
         Image(systemName: self.icon)
           .font(.system(size: 22, weight: .semibold))
           .foregroundStyle(.primary)
@@ -772,34 +784,34 @@ struct SectionHeroCard: View {
               .fill(Color.primary.opacity(self.colorScheme == .dark ? 0.18 : 0.06))
           )
 
-        VStack(alignment: .leading, spacing: 4) {
+        VStack(alignment: .leading, spacing: APGISpacing.xs) {
           Text(self.title)
-            .font(APGITypography.titleLarge)
+            .font(APGITypography.h2)
             .fontWeight(.bold)
 
           Text(self.readingTime)
-            .font(APGITypography.labelSmall)
+            .font(APGITypography.micro)
             .foregroundStyle(.secondary)
         }
 
         Spacer()
       }
 
-      VStack(alignment: .leading, spacing: 6) {
+      VStack(alignment: .leading, spacing: APGISpacing.sm) {
         Text("Key takeaway")
-          .font(APGITypography.labelMedium)
+          .font(APGITypography.label)
           .foregroundStyle(.secondary)
 
         Text(self.keyTakeaway)
-          .font(APGITypography.bodyLarge)
+          .font(APGITypography.body)
           .foregroundStyle(.primary)
           .fixedSize(horizontal: false, vertical: true)
       }
     }
-    .padding(16)
+    .padding(APGISpacing.md)
     .background(
       RoundedRectangle(cornerRadius: 14)
-        .fill(Color(NSColor.controlBackgroundColor))
+        .fill(Color.darkNavy)
     )
     .overlay(
       RoundedRectangle(cornerRadius: 14)
@@ -895,9 +907,9 @@ struct CollapsibleSubsection<Content: View>: View {
   @ViewBuilder let content: () -> Content
 
   var body: some View {
-    VStack(alignment: .leading, spacing: 10) {
+    VStack(alignment: .leading, spacing: APGISpacing.md) {
       Button(action: self.onToggle) {
-        HStack(spacing: 10) {
+        HStack(spacing: APGISpacing.md) {
           Image(systemName: SFSymbols.forward)
             .font(.caption.weight(.semibold))
             .rotationEffect(.degrees(self.isExpanded ? 90 : 0))
@@ -905,15 +917,15 @@ struct CollapsibleSubsection<Content: View>: View {
             .accessibilityLabel("Expand section")
 
           Text(self.title)
-            .font(APGITypography.labelLarge)
+            .font(APGITypography.label)
             .foregroundStyle(.primary)
 
           Spacer()
         }
-        .padding(.vertical, 10)
-        .padding(.horizontal, 12)
+        .padding(.vertical, APGISpacing.md)
+        .padding(.horizontal, APGISpacing.md)
         .background(
-          RoundedRectangle(cornerRadius: 12)
+          RoundedRectangle(cornerRadius: APGIRadius.standard)
             .fill(Color.secondary.opacity(0.10))
         )
       }
@@ -933,46 +945,44 @@ struct SubsectionContentCard: View {
   let category: SectionCategory
   let hasDataTable: Bool
 
-  @AppStorage("contentFontSize") private var fontSize: Double = 15.0
-
   var body: some View {
     VStack(alignment: .leading, spacing: 0) {
-      HStack(spacing: 10) {
+      HStack(spacing: APGISpacing.md) {
         Circle()
           .fill(self.category.color)
           .frame(width: 8, height: 8)
 
         Text(self.title)
-          .font(APGITypography.labelLarge)
+          .font(APGITypography.label)
           .foregroundStyle(.primary)
 
         Spacer()
 
         if self.hasDataTable {
           Image(systemName: SFSymbols.table)
-            .font(.system(size: 12))
+            .font(APGITypography.micro)
             .foregroundStyle(.secondary)
             .accessibilityLabel("Table content")
         }
       }
-      .padding(.horizontal, 14)
-      .padding(.vertical, 12)
+      .padding(.horizontal, APGISpacing.md)
+      .padding(.vertical, APGISpacing.md)
       .background(self.category.color.opacity(0.06))
 
       if self.hasDataTable {
         ParsedContentView(content: self.content, terms: GlossaryData.terms)
-          .padding(16)
+          .padding(APGISpacing.md)
       } else {
         GlossaryHighlightedText(text: self.content, terms: GlossaryData.terms)
-          .font(.system(size: self.fontSize))
+          .font(APGITypography.body)
           .textSelection(.enabled)
-          .padding(16)
+          .padding(APGISpacing.md)
       }
     }
-    .background(Color(NSColor.controlBackgroundColor))
-    .clipShape(RoundedRectangle(cornerRadius: 12))
+    .background(Color.darkNavy)
+    .clipShape(RoundedRectangle(cornerRadius: APGIRadius.standard))
     .overlay(
-      RoundedRectangle(cornerRadius: 12)
+      RoundedRectangle(cornerRadius: APGIRadius.standard)
         .strokeBorder(Color.primary.opacity(0.10), lineWidth: 1)
     )
   }
@@ -982,41 +992,41 @@ struct RelatedSectionsCarousel: View {
   let related: [Tab]
 
   var body: some View {
-    VStack(alignment: .leading, spacing: 10) {
+    VStack(alignment: .leading, spacing: APGISpacing.md) {
       Text("Related")
-        .font(APGITypography.labelLarge)
+        .font(APGITypography.label)
         .foregroundStyle(.secondary)
 
       ScrollView(.horizontal, showsIndicators: false) {
-        HStack(spacing: 10) {
+        HStack(spacing: APGISpacing.md) {
           ForEach(self.related, id: \.self) { tab in
             Button {
               NotificationCenter.default.post(name: .navigateToTab, object: tab)
             } label: {
-              HStack(spacing: 8) {
+              HStack(spacing: APGISpacing.sm) {
                 Image(systemName: tab.icon)
-                  .font(.system(size: 12))
+                  .font(APGITypography.micro)
                   .foregroundStyle(tab.category.color)
                 Text(tab.shortTitle)
-                  .font(APGITypography.labelMedium)
+                  .font(APGITypography.micro)
                   .foregroundStyle(.primary)
               }
-              .padding(.horizontal, 12)
-              .padding(.vertical, 10)
-              .background(Color(NSColor.controlBackgroundColor))
-              .clipShape(RoundedRectangle(cornerRadius: 12))
+              .padding(.horizontal, APGISpacing.md)
+              .padding(.vertical, APGISpacing.md)
+              .background(Color.darkNavy)
+              .clipShape(RoundedRectangle(cornerRadius: APGIRadius.standard))
               .overlay(
-                RoundedRectangle(cornerRadius: 12)
+                RoundedRectangle(cornerRadius: APGIRadius.standard)
                   .strokeBorder(Color.primary.opacity(0.10), lineWidth: 1)
               )
             }
             .buttonStyle(.plain)
           }
         }
-        .padding(.vertical, 4)
+        .padding(.vertical, APGISpacing.xs)
       }
     }
-    .padding(16)
+    .padding(APGISpacing.md)
     .background(
       RoundedRectangle(cornerRadius: 14)
         .fill(Color.secondary.opacity(0.06))

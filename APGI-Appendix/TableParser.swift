@@ -140,16 +140,11 @@ final class TableParser: ObservableObject {
     return EnhancedDataTableView(columns: columns, rows: rows)
   }
 
-  private func convertTextToHorizontalAlignment(_ textAlignment: TextAlignment)
-    -> HorizontalAlignment
-  {
+  private func convertTextToHorizontalAlignment(_ textAlignment: TextAlignment) -> HorizontalAlignment {
     switch textAlignment {
-    case .leading:
-      return .leading
-    case .center:
-      return .center
-    case .trailing:
-      return .trailing
+    case .leading: return .leading
+    case .center: return .center
+    case .trailing: return .trailing
     }
   }
 
@@ -164,13 +159,13 @@ final class TableParser: ObservableObject {
 
     // Check for JSON
     if content.trimmingCharacters(in: .whitespaces).hasPrefix("{")
-      || content.trimmingCharacters(in: .whitespaces).hasPrefix("[")
-    {
+      || content.trimmingCharacters(in: .whitespaces).hasPrefix("[") {
       return .json
     }
 
     // Check for markdown table (has | separator and --- line)
-    if lines.count >= 2 && lines[0].contains("|") && lines[1].contains("---") {
+    if lines.contains(where: { $0.contains("|") }),
+      lines.contains(where: { $0.contains("---") }) {
       return .markdown
     }
 
@@ -348,8 +343,7 @@ final class TableParser: ObservableObject {
     } else if let dict = jsonObject as? [String: Any] {
       // Single object or structured format
       if let headers = dict["headers"] as? [String],
-        let rows = dict["rows"] as? [[String]]
-      {
+        let rows = dict["rows"] as? [[String]] {
         let metadata = TableMetadata(
           title: dict["title"] as? String,
           source: dict["source"] as? String,

@@ -17,7 +17,7 @@ struct NavigationHeader: View {
           GridItem(.flexible()),
           GridItem(.flexible()),
           GridItem(.flexible()),
-          GridItem(.flexible()),
+          GridItem(.flexible())
         ], spacing: 8
       ) {
         ForEach(Tab.allCases) { tab in

@@ -77,7 +77,7 @@ final class ErrorHandler: ObservableObject {
     self.showError = true
 
     // Log error for debugging
-    print("App Error: \(appError.errorDescription ?? "Unknown error")")
+    logError(appError, context: "ErrorHandler")
   }
 
   func clearError() {

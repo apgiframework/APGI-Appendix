@@ -254,7 +254,7 @@ struct UpdateCheckView: View {
       )
 
       // Validate download URL if present (outside MainActor context)
-      var validDownloadURL: URL? = nil
+      var validDownloadURL: URL?
       if let downloadURLString = result.downloadURL {
         let isValidURL = await UpdateSignatureActor.sharedVerifier.validateDownloadURL(
           downloadURLString)
@@ -287,8 +287,7 @@ struct UpdateCheckView: View {
         if comparison == .orderedAscending {
           // Check minimum version requirement
           if let minimumVersion = result.minimumVersion,
-            compareVersions(self.currentVersion, minimumVersion) == .orderedAscending
-          {
+            compareVersions(self.currentVersion, minimumVersion) == .orderedAscending {
             self.isCriticalUpdate = true
           }
           self.updateAvailable = true

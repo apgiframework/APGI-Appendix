@@ -133,7 +133,7 @@ class CloudKitManager: ObservableObject {
           bookmarks.append(bookmark)
         }
       case .failure(let error):
-        print("Failed to fetch record: \(error)")
+        logError(error, context: "CloudKitManager.fetchBookmarks")
       }
     }
 
@@ -187,7 +187,7 @@ class CloudKitManager: ObservableObject {
           return settings
 
         case .failure(let error):
-          print("Failed to fetch settings: \(error)")
+          logError(error, context: "CloudKitManager.syncSettings")
         }
       }
     } catch {

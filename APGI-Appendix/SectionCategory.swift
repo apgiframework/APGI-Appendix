@@ -25,13 +25,13 @@ extension SectionCategory {
 
   var color: Color {
     switch self {
-    case .navigation: return .accentColor
-    case .theoretical: return .apgiBlue
-    case .mathematical: return .apgiPurple
-    case .biological: return .apgiGreen
-    case .cognitive: return .apgiOrange
-    case .applications: return .apgiRed
-    case .reference: return .gray
+    case .navigation: return .workspacePurple
+    case .theoretical: return .thresholdBlue
+    case .mathematical: return .errorYellow
+    case .biological: return .neuromodGreen
+    case .cognitive: return .inactiveSlate
+    case .applications: return .precisionRed
+    case .reference: return .secondary
     }
   }
 

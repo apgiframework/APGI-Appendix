@@ -74,7 +74,7 @@ final class PerformanceManager: ObservableObject {
     }
     guard result == KERN_SUCCESS else { return 0 }
     // Use NSProcessInfo for page size to avoid concurrency issues with vm_kernel_page_size
-    let pageSize: UInt64 = UInt64(getpagesize())
+    let pageSize = UInt64(getpagesize())
     return (UInt64(vmStats.free_count) + UInt64(vmStats.inactive_count)) * pageSize
   }
 

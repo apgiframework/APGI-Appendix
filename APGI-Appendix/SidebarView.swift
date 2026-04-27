@@ -14,7 +14,7 @@ struct SidebarView: View {
             .font(.largeTitle)
             .foregroundStyle(
               LinearGradient(
-                colors: [.apgiPrimary, .apgiSecondary],
+                colors: [.apgiBlue, .apgiPurple],
                 startPoint: .topLeading,
                 endPoint: .bottomTrailing
               )
@@ -23,11 +23,11 @@ struct SidebarView: View {
 
           VStack(alignment: .leading, spacing: 2) {
             Text("APGI")
-              .font(APGITypography.titleLarge)
+              .font(APGITypography.h1)
               .fontWeight(.bold)
 
             Text("Consciousness Framework")
-              .font(APGITypography.labelSmall)
+              .font(APGITypography.micro)
               .foregroundStyle(.secondary)
           }
 
@@ -49,7 +49,7 @@ struct SidebarView: View {
         }
         .padding(APGISpacing.sm)
         .background(.quaternary.opacity(0.5))
-        .clipShape(RoundedRectangle(cornerRadius: APGIRadius.sm))
+        .clipShape(RoundedRectangle(cornerRadius: APGISpacing.sm))
         .padding(.horizontal, APGISpacing.lg)
       }
       .background(.ultraThinMaterial)
@@ -62,10 +62,11 @@ struct SidebarView: View {
             NavigationSectionView(
               section: section,
               selection: self.$selectedTab,
-              isExpanded: self.isExpanded(for: section.section)
-            ) {
-              self.toggleSection(section.section)
-            }
+              isExpanded: self.isExpanded(for: section.section),
+              onToggle: {
+                self.toggleSection(section.section)
+              }
+            )
           }
         }
         .padding(APGISpacing.md)
@@ -87,20 +88,20 @@ struct SidebarView: View {
           if let url = URL(string: "https://docs.apgi-framework.org") {
             NSWorkspace.shared.open(url)
           }
-        }) {
+        }, label: {
           Label("Help", systemImage: "questionmark.circle")
-        }
+        })
         .buttonStyle(.plain)
         .accessibilityLabel("Open help documentation")
         .accessibilityHint("View user guide and documentation")
       }
-      .font(APGITypography.labelMedium)
+      .font(APGITypography.label)
       .foregroundStyle(.secondary)
       .padding(APGISpacing.lg)
       .background(.ultraThinMaterial)
     }
     .frame(minWidth: 240, idealWidth: 280)
-    .background(Color.surfacePrimary)
+    .background(Color.white.opacity(0.95))
     .onReceive(NotificationCenter.default.publisher(for: .toggleAllSections)) { _ in
       if self.expandedSections.count == NavigationSection.allCases.count {
         self.expandedSections.removeAll()
@@ -209,7 +210,7 @@ struct NavigationSectionView: View {
             .accessibilityHidden(true)
 
           Text(self.section.title)
-            .font(APGITypography.labelLarge)
+            .font(APGITypography.h2)
             .foregroundStyle(.primary)
 
           Spacer()
@@ -223,7 +224,7 @@ struct NavigationSectionView: View {
         .padding(.vertical, APGISpacing.sm)
         .padding(.horizontal, APGISpacing.md)
         .background(
-          RoundedRectangle(cornerRadius: APGIRadius.sm)
+          RoundedRectangle(cornerRadius: APGISpacing.sm)
             .fill(.quaternary.opacity(0.3))
         )
       }
@@ -259,10 +260,11 @@ struct NavigationSectionView: View {
           ForEach(self.section.tabs, id: \.self) { tab in
             NavigationItemRow(
               item: tab,
-              isSelected: self.selection == tab
-            ) {
-              self.selection = tab
-            }
+              isSelected: self.selection == tab,
+              onSelect: {
+                self.selection = tab
+              }
+            )
           }
         }
         .padding(.leading, APGISpacing.xl)
@@ -305,14 +307,14 @@ struct NavigationItemRow: View {
         .accessibilityHidden(true)
 
       Text(self.item.shortTitle)
-        .font(APGITypography.bodyMedium)
+        .font(APGITypography.body)
         .foregroundStyle(self.isSelected ? .primary : .secondary)
 
       Spacer()
 
       if self.item.hasTables {
         Circle()
-          .fill(Color.apgiAccent)
+          .fill(Color.neuromodGreen)
           .frame(width: 8, height: 8)
           .accessibilityLabel("Contains data tables")
       }
@@ -320,7 +322,7 @@ struct NavigationItemRow: View {
     .padding(.vertical, APGISpacing.sm)
     .padding(.horizontal, APGISpacing.md)
     .background {
-      RoundedRectangle(cornerRadius: APGIRadius.sm)
+      RoundedRectangle(cornerRadius: APGISpacing.sm)
         .fill(self.backgroundColor)
     }
   }

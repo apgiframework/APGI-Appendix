@@ -106,7 +106,7 @@ struct MathematicalModelView: View {
             from: self.modelBody),
           category: .mathematical,
           hasDataTable: true
-        ),
+        )
       ],
       relatedSections: [.apgiMapping, .parameterIdentifiability, .neuromodulatoryControl]
     )
@@ -128,8 +128,7 @@ struct MathematicalModelView: View {
     var i = startIndex
     while i < lines.count {
       let trimmed = lines[i].trimmingCharacters(in: .whitespaces)
-      if i != startIndex, !endMarkers.isEmpty, endMarkers.contains(where: { trimmed.hasPrefix($0) })
-      {
+      if i != startIndex, !endMarkers.isEmpty, endMarkers.contains(where: { trimmed.hasPrefix($0) }) {
         break
       }
       collected.append(lines[i])

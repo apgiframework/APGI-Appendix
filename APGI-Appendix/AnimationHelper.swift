@@ -44,9 +44,7 @@ struct AnimatedModifier: ViewModifier {
 // MARK: - View Extensions
 
 extension View {
-  func animatedTransition(_ transition: AnyTransition? = nil, animation: Animation? = nil)
-    -> some View
-  {
+  func animatedTransition(_ transition: AnyTransition? = nil, animation: Animation? = nil) -> some View {
     self.modifier(AnimatedModifier(animation: animation, transition: transition))
   }
 

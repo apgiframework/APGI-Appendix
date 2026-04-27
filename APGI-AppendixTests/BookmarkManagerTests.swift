@@ -7,7 +7,7 @@ import XCTest
 @MainActor
 final class BookmarkManagerTests: XCTestCase {
 
-  var bookmarkManager: BookmarkManager!
+  var bookmarkManager: BookmarkManager
 
   override func setUp() {
     super.setUp()

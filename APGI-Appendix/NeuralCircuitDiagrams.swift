@@ -174,7 +174,7 @@ struct APGINeuralCircuitDiagram: View {
       color: .pink,
       size: 40,
       nodeType: .variable
-    ),
+    )
   ]
 
   /// Define connections
@@ -231,7 +231,7 @@ struct APGINeuralCircuitDiagram: View {
       NeuralConnection(
         fromNode: self.nodes[6].id, toNode: self.nodes[9].id,
         connectionType: .modulatory, label: "↓θₜ", strength: 0.6
-      ),
+      )
     ]
   }
 
@@ -339,7 +339,7 @@ struct APGINeuralCircuitDiagram: View {
           ("Excitatory", Color.green),
           ("Inhibitory", Color.red),
           ("Modulatory", Color.purple),
-          ("Bidirectional", Color.blue),
+          ("Bidirectional", Color.blue)
         ], id: \.0
       ) { item in
         HStack(spacing: 6) {
@@ -444,7 +444,7 @@ struct APGINeuralCircuitDiagram: View {
       LinearGradient(
         colors: [
           Color(NSColor.controlBackgroundColor),
-          Color(NSColor.controlBackgroundColor).opacity(0.95),
+          Color(NSColor.controlBackgroundColor).opacity(0.95)
         ],
         startPoint: .topLeading,
         endPoint: .bottomTrailing
@@ -682,13 +682,19 @@ struct IgnitionProcessDiagram: View {
   @State private var currentPhase = 0
   @State private var isAnimating = false
 
-  private let phases: [(title: String, description: String, color: Color)] = [
-    ("Stimulus", "External/internal event generates prediction error", .blue),
-    ("Accumulation", "Sₜ builds via PPC L2/3 ramping activity", .purple),
-    ("Threshold Check", "Compare Sₜ against dynamic θₜ", .orange),
-    ("Ignition", "NMDA Ca²⁺ spike in L5 apical dendrites", .red),
-    ("Broadcast", "Global workspace activation via long-range connections", .green),
-    ("Refractory", "θₜ elevated, preventing immediate re-ignition", .gray),
+  private struct Phase {
+    let title: String
+    let description: String
+    let color: Color
+  }
+
+  private let phases: [Phase] = [
+    Phase(title: "Stimulus", description: "External/internal event generates prediction error", color: .blue),
+    Phase(title: "Accumulation", description: "Sₜ builds via PPC L2/3 ramping activity", color: .purple),
+    Phase(title: "Threshold Check", description: "Compare Sₜ against dynamic θₜ", color: .orange),
+    Phase(title: "Ignition", description: "NMDA Ca²⁺ spike in L5 apical dendrites", color: .red),
+    Phase(title: "Broadcast", description: "Global workspace activation via long-range connections", color: .green),
+    Phase(title: "Refractory", description: "θₜ elevated, preventing immediate re-ignition", color: .gray)
   ]
 
   var body: some View {

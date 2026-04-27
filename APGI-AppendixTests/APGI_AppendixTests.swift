@@ -21,7 +21,11 @@ final class APGI_AppendixTests: XCTestCase {
     let tab = Tab.mathematicalModel
     let urlString =
       "apgi-appendix://content?section=\(tab.rawValue.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? "")"
-    let url = URL(string: urlString)!
+    let url = URL(string: urlString)
+    guard let url = url else {
+      XCTFail("Failed to create URL from string: \(urlString)")
+      return
+    }
 
     let parsedTab = DeepLinkManager.shared.parseTab(from: url)
     XCTAssertEqual(parsedTab, tab)
@@ -33,11 +37,14 @@ final class APGI_AppendixTests: XCTestCase {
       "apgi-appendix://wrong-host?section=Methodology",
       "wrong-scheme://content?section=Methodology",
       "apgi-appendix://content?wrong-param=Methodology",
-      "apgi-appendix://content?section=NonExistentSection",
+      "apgi-appendix://content?section=NonExistentSection"
     ]
 
     for urlString in invalidUrls {
-      let url = URL(string: urlString)!
+      guard let url = URL(string: urlString) else {
+        XCTFail("Failed to create URL from string: \(urlString)")
+        continue
+      }
       XCTAssertNil(DeepLinkManager.shared.parseTab(from: url), "Should be nil for: \(urlString)")
     }
   }
@@ -46,7 +53,7 @@ final class APGI_AppendixTests: XCTestCase {
     for tab in Tab.allCases {
       let url = DeepLinkManager.shared.createURL(for: tab)
       XCTAssertNotNil(url)
-      let parsedTab = DeepLinkManager.shared.parseTab(from: url!)
+      let parsedTab = DeepLinkManager.shared.parseTab(from: url)
       XCTAssertEqual(parsedTab, tab, "Round trip failed for: \(tab.rawValue)")
     }
   }

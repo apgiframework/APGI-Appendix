@@ -249,8 +249,9 @@ struct LazySimulationView: View {
         if let minimalEngine = try? APGIInferenceEngine(configuration: minimalConfig) {
           self._simulationEngine = StateObject(wrappedValue: minimalEngine)
         } else {
-          let baseEngine = try! APGIInferenceEngine(configuration: minimalConfig)
-          self._simulationEngine = StateObject(wrappedValue: baseEngine)
+          // Absolute last resort: if even minimal config fails, the app cannot function
+          // This should never happen with valid hardcoded defaults
+          fatalError("Critical: Unable to initialize APGI engine even with minimal configuration")
         }
         self.engineError =
           "Critical: Failed to initialize APGI engine: \(error.localizedDescription)"

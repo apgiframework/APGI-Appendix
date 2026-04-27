@@ -795,7 +795,7 @@ actor StateManager {
       self.currentState = try await APGIState.initial(configuration: configuration)
     } catch {
       // Handle error appropriately - could log or set error state
-      print("Failed to reset APGI state: \(error)")
+      await ErrorLogger.shared.log(error, context: "Failed to reset APGI state")
     }
   }
 }
@@ -963,7 +963,7 @@ final class APGIInferenceEngine: ObservableObject {
 
       if let timer = fpsUpdateTimer, timer.isValid {
       } else {
-        self.averageInferenceTime = await self.performanceMonitor.averageInferenceTime
+        self.averageInferenceTime = await self.performanceMonitor.getAverageInferenceTime()
       }
 
       // Memory cleanup after inference
@@ -985,7 +985,7 @@ final class APGIInferenceEngine: ObservableObject {
 
   private func validateContext(context: APGIContext) throws {
     let values = [
-      context.metabolic, context.cognitive, context.affective, context.arousal, context.attention,
+      context.metabolic, context.cognitive, context.affective, context.arousal, context.attention
     ]
 
     for value in values {
@@ -1004,7 +1004,7 @@ final class APGIInferenceEngine: ObservableObject {
     // Check for valid state values
     let stateValues = [
       result.newState.piIntero, result.newState.piExtero, result.newState.theta,
-      result.newState.energyReserves, result.newState.allostaticLoad,
+      result.newState.energyReserves, result.newState.allostaticLoad
     ]
 
     for value in stateValues {
@@ -1051,11 +1051,10 @@ final class APGIInferenceEngine: ObservableObject {
 
   func startFPSMonitoring() {
     self.fpsUpdateTimer?.invalidate()
-    self.fpsUpdateTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) {
-      [weak self] _ in
+    self.fpsUpdateTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] _ in
       Task { @MainActor [weak self] in
         guard let self else { return }
-        self.averageInferenceTime = await self.performanceMonitor.averageInferenceTime
+        self.averageInferenceTime = await self.performanceMonitor.getAverageInferenceTime()
       }
     }
   }
@@ -1326,13 +1325,9 @@ struct APGISimulatorView: View {
         if let minimalEngine = try? APGIInferenceEngine(configuration: minimalConfig) {
           self._engine = StateObject(wrappedValue: minimalEngine)
         } else {
-          // This is truly a catastrophic failure, but we still shouldn't crash
-          // We'll use an unsafe initialization as an absolute last resort if possible,
-          // or just accept that the app will be in a broken state but not crashed.
-          // For now, let's assume try APGIInferenceEngine(configuration: minimalConfig)
-          // is extremely unlikely to fail if the previous one didn't.
-          let baseEngine = try! APGIInferenceEngine(configuration: minimalConfig)
-          self._engine = StateObject(wrappedValue: baseEngine)
+          // Absolute last resort: if even minimal config fails, the app cannot function
+          // This should never happen with valid hardcoded defaults
+          fatalError("Critical: Unable to initialize APGI engine even with minimal configuration")
         }
         self.engineError =
           "Critical: Failed to initialize APGI engine: \(error.localizedDescription)"

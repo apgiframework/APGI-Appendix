@@ -4,7 +4,7 @@ import Foundation
 // MARK: - Performance Monitor Actor
 
 @globalActor
-struct PerformanceMonitorActor {
+actor PerformanceMonitorActor {
   static let shared = PerformanceMonitor()
 }
 
@@ -16,19 +16,33 @@ actor PerformanceMonitor {
   private var memoryUsageHistory: [Double] = []
   private let maxHistorySize = 100
 
-  var averageInferenceTime: TimeInterval {
-    guard !self.inferenceTimes.isEmpty else { return 0.0 }
-    return self.inferenceTimes.reduce(0, +) / Double(self.inferenceTimes.count)
+  // Thread-safe computed properties using async/await pattern
+  func getAverageInferenceTime() async -> TimeInterval {
+    return await PerformanceMonitorActor.shared.calculateAverageInferenceTime()
   }
 
-  var currentFPS: Double {
-    guard !self.fpsHistory.isEmpty else { return 0.0 }
-    return self.fpsHistory.reduce(0, +) / Double(self.fpsHistory.count)
+  func getCurrentFPS() async -> Double {
+    return await PerformanceMonitorActor.shared.calculateCurrentFPS()
   }
 
-  var averageMemoryUsage: Double {
-    guard !self.memoryUsageHistory.isEmpty else { return 0.0 }
-    return self.memoryUsageHistory.reduce(0, +) / Double(self.memoryUsageHistory.count)
+  func getAverageMemoryUsage() async -> Double {
+    return await PerformanceMonitorActor.shared.calculateAverageMemoryUsage()
+  }
+
+  // Private calculation methods
+  private func calculateAverageInferenceTime() -> TimeInterval {
+    guard !inferenceTimes.isEmpty else { return 0.0 }
+    return inferenceTimes.reduce(0, +) / Double(inferenceTimes.count)
+  }
+
+  private func calculateCurrentFPS() -> Double {
+    guard !fpsHistory.isEmpty else { return 0.0 }
+    return fpsHistory.reduce(0, +) / Double(fpsHistory.count)
+  }
+
+  private func calculateAverageMemoryUsage() -> Double {
+    guard !memoryUsageHistory.isEmpty else { return 0.0 }
+    return memoryUsageHistory.reduce(0, +) / Double(memoryUsageHistory.count)
   }
 
   func recordInference(duration: TimeInterval) {
@@ -62,13 +76,15 @@ actor PerformanceMonitor {
     self.clearCaches()
   }
 
-  func getStatistics() -> PerformanceStats {
-    guard !self.inferenceTimes.isEmpty else {
+  func getStatistics() async -> PerformanceStats {
+    let times = self.inferenceTimes
+
+    guard !times.isEmpty else {
       return PerformanceStats(meanLatency: 0.0, p50Latency: 0.0, p95Latency: 0.0, throughput: 0.0)
     }
 
-    let mean = self.inferenceTimes.reduce(0, +) / Double(self.inferenceTimes.count)
-    let sorted = self.inferenceTimes.sorted()
+    let mean = times.reduce(0, +) / Double(times.count)
+    let sorted = times.sorted()
     let p50 = sorted[sorted.count / 2]
     let p95Index = min(Int(Double(sorted.count) * 0.95), sorted.count - 1)
     let p95 = sorted[p95Index]
@@ -82,27 +98,28 @@ actor PerformanceMonitor {
     )
   }
 
-  func getPerformanceReport() -> PerformanceReport {
-    let avgInference =
-      self.inferenceTimes.isEmpty
-      ? 0.0 : self.inferenceTimes.reduce(0, +) / Double(self.inferenceTimes.count)
-    let avgFPS =
-      self.fpsHistory.isEmpty ? 0.0 : self.fpsHistory.reduce(0, +) / Double(self.fpsHistory.count)
-    let avgMem =
-      self.memoryUsageHistory.isEmpty
-      ? 0.0 : self.memoryUsageHistory.reduce(0, +) / Double(self.memoryUsageHistory.count)
+  func getPerformanceReport() async -> PerformanceReport {
+    let (inferenceTimes, fpsHistory, memoryHistory) = (self.inferenceTimes, self.fpsHistory, self.memoryUsageHistory)
+
+    let avgInference = inferenceTimes.isEmpty
+      ? 0.0 : inferenceTimes.reduce(0, +) / Double(inferenceTimes.count)
+    let avgFPS = fpsHistory.isEmpty
+      ? 0.0 : fpsHistory.reduce(0, +) / Double(fpsHistory.count)
+    let avgMem = memoryHistory.isEmpty
+      ? 0.0 : memoryHistory.reduce(0, +) / Double(memoryHistory.count)
 
     return PerformanceReport(
       averageInferenceTime: avgInference,
       currentFPS: avgFPS,
       averageMemoryUsage: avgMem,
-      totalInferences: self.inferenceTimes.count,
+      totalInferences: inferenceTimes.count,
       isPerformanceOptimal: avgInference < 0.1 && avgFPS > 30 && avgMem < 100
     )
   }
 
-  private func isPerformanceOptimal() -> Bool {
-    return self.averageInferenceTime < 0.1 && self.currentFPS > 30 && self.averageMemoryUsage < 100
+  private func isPerformanceOptimal() async -> Bool {
+    let report = await getPerformanceReport()
+    return report.averageInferenceTime < 0.1 && report.currentFPS > 30 && report.averageMemoryUsage < 100
   }
 }
 
