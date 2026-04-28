@@ -24,7 +24,6 @@ struct SidebarView: View {
           VStack(alignment: .leading, spacing: 2) {
             Text("APGI")
               .font(APGITypography.h1)
-              .fontWeight(.bold)
 
             Text("Consciousness Framework")
               .font(APGITypography.micro)

@@ -5,7 +5,7 @@ import XCTest
 @MainActor
 final class TableParserTests: XCTestCase {
 
-  var parser: TableParser
+  var parser = TableParser()
 
   override func setUp() {
     super.setUp()

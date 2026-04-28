@@ -787,7 +787,6 @@ struct SectionHeroCard: View {
         VStack(alignment: .leading, spacing: APGISpacing.xs) {
           Text(self.title)
             .font(APGITypography.h2)
-            .fontWeight(.bold)
 
           Text(self.readingTime)
             .font(APGITypography.micro)

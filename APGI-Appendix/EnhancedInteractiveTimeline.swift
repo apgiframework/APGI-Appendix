@@ -111,7 +111,6 @@ struct EventDetailsPanel: View {
 
         Text(self.event.title)
           .font(APGITypography.h3)
-          .fontWeight(.semibold)
 
         Text("\(self.event.timeRange.lowerBound)–\(self.event.timeRange.upperBound)ms")
           .font(APGITypography.body)
@@ -210,7 +209,6 @@ struct EnhancedInteractiveTimeline: View {
       HStack {
         Text("Ignition Timeline")
           .font(APGITypography.h2)
-          .fontWeight(.bold)
 
         Spacer()
 
@@ -365,7 +363,6 @@ struct EnhancedInteractiveTimeline: View {
 
         Text(event.title)
           .font(APGITypography.h3)
-          .fontWeight(.semibold)
 
         Text("(\(event.timeRange.lowerBound)–\(event.timeRange.upperBound)ms)")
           .font(APGITypography.body)

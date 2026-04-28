@@ -1,18 +1,14 @@
 import Combine
 import Foundation
-import Network
 import SwiftUI
 
-/// Manages offline caching of remote content
+/// Manages local caching for app content
+/// Note: Remote content fetching removed - app uses local data only
 @MainActor
 class ContentCacheManager: ObservableObject {
   static let shared = ContentCacheManager()
 
-  @Published var isOfflineMode = false
-
   private let cacheDirectory: URL
-  private let networkManager = NetworkManager.shared
-  private var cancellables = Set<AnyCancellable>()
 
   private init() {
     // Create cache directory in application support
@@ -33,22 +29,6 @@ class ContentCacheManager: ObservableObject {
 
     try? FileManager.default.createDirectory(
       at: self.cacheDirectory, withIntermediateDirectories: true)
-
-    self.setupNetworkMonitoring()
-  }
-
-  private func setupNetworkMonitoring() {
-    self.networkManager.$isConnected
-      .receive(on: DispatchQueue.main)
-      .sink { [weak self] isConnected in
-        self?.isOfflineMode = !isConnected
-        if isConnected {
-          logInfo("Network restored - exiting offline mode", context: "ContentCacheManager")
-        } else {
-          logInfo("Network lost - entering offline mode", context: "ContentCacheManager")
-        }
-      }
-      .store(in: &self.cancellables)
   }
 
   /// Cache content with metadata
@@ -153,54 +133,7 @@ class ContentCacheManager: ObservableObject {
     }
   }
 
-  /// Cache remote content with fallback to cached version
-  func fetchAndCache(from url: URL, cacheKey: String) async throws -> Data {
-    let enableRemoteContent = UserDefaults.standard.bool(forKey: "enableRemoteContent")
-    let useCellularData = UserDefaults.standard.bool(forKey: "useCellularData")
-
-    // Try to fetch fresh content if online and allowed
-    if self.networkManager.isConnected && enableRemoteContent {
-      // Check cellular data restriction
-      if self.networkManager.connectionType == .cellular && !useCellularData {
-        logInfo(
-          "Skipping remote fetch on cellular data per settings", context: "ContentCacheManager")
-      } else {
-        do {
-          let (data, response) = try await URLSession.shared.data(from: url)
-
-          if let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 {
-            // Cache the fresh content
-            let metadata: [String: Any] = [
-              "cachedAt": Date().timeIntervalSince1970,
-              "sourceURL": url.absoluteString,
-              "contentType": httpResponse.mimeType ?? "unknown"
-            ]
-            self.cacheContent(data, for: cacheKey, metadata: metadata)
-
-            logInfo(
-              "Fetched and cached fresh content for: \(url)",
-              context: "ContentCacheManager.fetchAndCache")
-            return data
-          }
-        } catch {
-          logWarning(
-            "Failed to fetch fresh content from \(url): \(error.localizedDescription)",
-            context: "ContentCacheManager.fetchAndCache")
-        }
-      }
-    }
-
-    // Fall back to cached content
-    if let cachedData = cachedContent(for: cacheKey) {
-      logInfo("Serving cached content for: \(url)", context: "ContentCacheManager.fetchAndCache")
-      return cachedData
-    }
-
-    // No cached content available
-    throw NSError(
-      domain: "ContentCacheManager", code: -1,
-      userInfo: [NSLocalizedDescriptionKey: "No content available (offline and not cached)"])
-  }
+  // Note: fetchAndCache method removed - app no longer fetches remote content
 
   /// Cache string content
   func cacheString(

@@ -133,12 +133,6 @@ struct SettingsView: View {
           Label("Privacy", systemImage: "shield")
         }
 
-      // Network
-      NetworkSettingsView()
-        .tabItem {
-          Label("Network", systemImage: "wifi")
-        }
-
       // Advanced/Diagnostics
       AdvancedSettingsView()
         .tabItem {
@@ -243,8 +237,6 @@ struct BookmarkListView: View {
 /// Privacy and data management settings
 /// Provides granular control over data collection, retention, and privacy features
 struct PrivacySettingsView: View {
-  @AppStorage("enableAutoUpdateChecks") var enableAutoUpdateChecks = true
-  @AppStorage("updateCheckInterval") var updateCheckInterval: Double = 24  // hours
   @AppStorage("enableSpotlightIndexing") var enableSpotlightIndexing = true
   @AppStorage("enableMemoryMonitoring") var enableMemoryMonitoring = true
   @AppStorage("redactSensitiveData") var redactSensitiveData = true
@@ -258,33 +250,7 @@ struct PrivacySettingsView: View {
         .font(.title2.bold())
         .padding(.bottom)
 
-      // Update Check Settings
-      VStack(alignment: .leading, spacing: 12) {
-        Text("Update Checks")
-          .font(.headline)
-
-        Toggle("Automatically check for updates", isOn: $enableAutoUpdateChecks)
-          .help("Periodically check for new versions of the app")
-
-        if enableAutoUpdateChecks {
-          VStack(alignment: .leading, spacing: 4) {
-            Text("Check interval: \(formatInterval(updateCheckInterval))")
-              .font(.subheadline)
-            Picker("Interval", selection: $updateCheckInterval) {
-              Text("Every hour").tag(1.0)
-              Text("Every 6 hours").tag(6.0)
-              Text("Every 12 hours").tag(12.0)
-              Text("Every 24 hours").tag(24.0)
-              Text("Every 3 days").tag(72.0)
-              Text("Every week").tag(168.0)
-            }
-            .pickerStyle(.menu)
-            .labelsHidden()
-          }
-        }
-      }
-
-      Divider()
+      // Note: Auto-update checks removed - app no longer depends on external API
 
       // Data Collection Controls
       VStack(alignment: .leading, spacing: 12) {

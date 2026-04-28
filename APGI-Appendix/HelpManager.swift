@@ -1,70 +1,18 @@
 import Combine
 import SwiftUI
 
+// HelpContentManager simplified - no external API dependency
+// Uses local help content only
+
 class HelpContentManager: ObservableObject {
   static let shared = HelpContentManager()
 
   @Published var version: String = Bundle.main.appVersion
-  @Published var remoteHelpMarkdown: String?
-  @Published var isLoading = false
-  @Published var lastUpdate: Date?
 
-  private let cacheManager = ContentCacheManager.shared
-  private let cacheKey = "help_content_remote"
-  private var cancellables = Set<AnyCancellable>()
-
-  private init() {
-    self.loadCachedContent()
-    self.setupAutoRefresh()
-  }
-
-  private func setupAutoRefresh() {
-    self.cacheManager.$isOfflineMode
-      .filter { !$0 }
-      .debounce(for: .seconds(5), scheduler: DispatchQueue.main)
-      .sink { [weak self] _ in
-        Task {
-          await self?.refreshContent()
-        }
-      }
-      .store(in: &self.cancellables)
-  }
-
-  private func loadCachedContent() {
-    if let cachedHelp: String = cacheManager.cachedObject(for: cacheKey) {
-      self.remoteHelpMarkdown = cachedHelp
-      if let metadata = cacheManager.cacheMetadata(for: cacheKey),
-        let timestamp = metadata["cachedAt"] as? TimeInterval {
-        self.lastUpdate = Date(timeIntervalSince1970: timestamp)
-      }
-    }
-  }
-
-  func refreshContent() async {
-    guard !self.isLoading else { return }
-
-    self.isLoading = true
-    defer { isLoading = false }
-
-    do {
-      guard let remoteURL = URL(string: "https://api.apgi-framework.org/help.md") else {
-        logInfo("Invalid remote URL for help", context: "HelpManager.refreshContent")
-        return
-      }
-      let data = try await cacheManager.fetchAndCache(from: remoteURL, cacheKey: self.cacheKey)
-      if let markdown = String(data: data, encoding: .utf8) {
-        await MainActor.run {
-          self.remoteHelpMarkdown = markdown
-          self.lastUpdate = Date()
-        }
-      }
-    } catch {
-      logWarning("Failed to refresh help content: \(error.localizedDescription)", context: "HelpContentManager")
-    }
-  }
+  private init() {}
 
   var currentHelpMarkdown: String {
-    return remoteHelpMarkdown ?? canonicalHelpMarkdown
+    return canonicalHelpMarkdown
   }
 
   var canonicalHelpMarkdown: String {
@@ -118,34 +66,10 @@ struct HelpView: View {
   var body: some View {
     VStack(spacing: 0) {
       HStack {
-        VStack(alignment: .leading, spacing: 4) {
-          Text("Help & Documentation")
-            .font(.title.bold())
-          
-          if let lastUpdate = helpManager.lastUpdate {
-            Text("Last updated: \(lastUpdate.formatted(.relative(presentation: .named)))")
-              .font(.caption)
-              .foregroundStyle(.secondary)
-          }
-        }
+        Text("Help & Documentation")
+          .font(.title.bold())
 
         Spacer()
-
-        if helpManager.isLoading {
-          ProgressView()
-            .controlSize(.small)
-            .padding(.trailing, 8)
-        }
-
-        Button {
-          Task {
-            await helpManager.refreshContent()
-          }
-        } label: {
-          Image(systemName: "arrow.clockwise")
-        }
-        .disabled(helpManager.isLoading)
-        .help("Refresh help content")
       }
       .padding()
       .background(.thinMaterial)
@@ -164,11 +88,6 @@ struct HelpView: View {
           }
         }
         .padding()
-      }
-    }
-    .task {
-      if !ContentCacheManager.shared.isOfflineMode {
-        await helpManager.refreshContent()
       }
     }
   }

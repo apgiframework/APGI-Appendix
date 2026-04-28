@@ -26,7 +26,7 @@ class UserDefaultsValidator: ObservableObject {
     self.validateFontSize()
     self.validateWindowSettings()
     self.validateThemeSettings()
-    self.validateNetworkSettings()
+    // Note: NetworkSettings validation removed - app no longer depends on external API
     self.validateLoggingSettings()
 
     self.isValidated = self.validationErrors.isEmpty
@@ -127,35 +127,7 @@ class UserDefaultsValidator: ObservableObject {
     self.defaults.set(themeName, forKey: "selectedTheme")
   }
 
-  func getValidatedNetworkSettings() -> NetworkSettings {
-    let settings = NetworkSettings(
-      enableRemoteContent: defaults.bool(forKey: "enableRemoteContent"),
-      autoRefreshInterval: self.defaults.double(forKey: "autoRefreshInterval"),
-      useCellularData: self.defaults.bool(forKey: "useCellularData")
-    )
-
-    // Validate auto refresh interval (1-168 hours)
-    if settings.autoRefreshInterval < 1 || settings.autoRefreshInterval > 168 {
-      self.addError(.invalidRefreshInterval, value: settings.autoRefreshInterval)
-      return NetworkSettings(
-        enableRemoteContent: settings.enableRemoteContent,
-        autoRefreshInterval: 24,  // Default
-        useCellularData: settings.useCellularData)
-    }
-
-    return settings
-  }
-
-  func setValidatedNetworkSettings(_ settings: NetworkSettings) {
-    guard settings.autoRefreshInterval >= 1, settings.autoRefreshInterval <= 168 else {
-      self.addError(.invalidRefreshInterval, value: settings.autoRefreshInterval)
-      return
-    }
-
-    self.defaults.set(settings.enableRemoteContent, forKey: "enableRemoteContent")
-    self.defaults.set(settings.autoRefreshInterval, forKey: "autoRefreshInterval")
-    self.defaults.set(settings.useCellularData, forKey: "useCellularData")
-  }
+  // Note: NetworkSettings validation removed - app no longer depends on external API
 
   func resetToDefaults() {
     // Clear all app-specific settings
@@ -165,7 +137,6 @@ class UserDefaultsValidator: ObservableObject {
     // Reset to known good defaults
     self.setValidatedFontSize(15.0)
     self.setValidatedThemeName("system")
-    self.setValidatedNetworkSettings(NetworkSettings())
 
     self.validateAllSettings()
   }
@@ -201,9 +172,7 @@ class UserDefaultsValidator: ObservableObject {
     }
   }
 
-  private func validateNetworkSettings() {
-    _ = self.getValidatedNetworkSettings()
-  }
+  // Note: NetworkSettings validation removed - app no longer depends on external API
 
   private func validateLoggingSettings() {
     // Validate logging enabled setting
@@ -286,20 +255,7 @@ enum ValidationErrorType {
 
 // MARK: - Network Settings
 
-struct NetworkSettings {
-  let enableRemoteContent: Bool
-  let autoRefreshInterval: Double
-  let useCellularData: Bool
-
-  init(
-    enableRemoteContent: Bool = true, autoRefreshInterval: Double = 24,
-    useCellularData: Bool = false
-  ) {
-    self.enableRemoteContent = enableRemoteContent
-    self.autoRefreshInterval = autoRefreshInterval
-    self.useCellularData = useCellularData
-  }
-}
+// Note: NetworkSettings struct removed - app no longer depends on external API
 
 // MARK: - UserDefaults Validation View
 

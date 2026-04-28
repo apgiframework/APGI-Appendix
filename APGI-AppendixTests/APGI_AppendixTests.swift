@@ -2,6 +2,7 @@ import XCTest
 
 @testable import APGI_Appendix
 
+@MainActor
 final class APGI_AppendixTests: XCTestCase {
 
   func testDeepLinkCreation() throws {
@@ -53,6 +54,10 @@ final class APGI_AppendixTests: XCTestCase {
     for tab in Tab.allCases {
       let url = DeepLinkManager.shared.createURL(for: tab)
       XCTAssertNotNil(url)
+      guard let url = url else {
+        XCTFail("URL should not be nil for tab: \(tab.rawValue)")
+        continue
+      }
       let parsedTab = DeepLinkManager.shared.parseTab(from: url)
       XCTAssertEqual(parsedTab, tab, "Round trip failed for: \(tab.rawValue)")
     }

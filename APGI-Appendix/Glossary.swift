@@ -1,108 +1,7 @@
-import Combine
 import SwiftUI
 
-@MainActor
-class GlossaryManager: ObservableObject {
-  static let shared = GlossaryManager()
-
-  @Published var entries: [GlossaryEntry] = []
-  @Published var isLoading = false
-  @Published var lastUpdate: Date?
-
-  private let cacheManager = ContentCacheManager.shared
-  private let cacheKey = "glossary_remote"
-  private var cancellables = Set<AnyCancellable>()
-
-  private init() {
-    self.loadCachedContent()
-    self.setupAutoRefresh()
-  }
-
-  private func setupAutoRefresh() {
-    self.cacheManager.$isOfflineMode
-      .filter { !$0 }  // When coming back online
-      .debounce(for: .seconds(2), scheduler: DispatchQueue.main)
-      .sink { [weak self] _ in
-        Task {
-          await self?.refreshContent()
-        }
-      }
-      .store(in: &self.cancellables)
-  }
-
-  private func loadCachedContent() {
-    if let cachedEntries: [GlossaryEntry] = cacheManager.cachedObject(for: cacheKey) {
-      self.entries = cachedEntries
-      if let metadata = cacheManager.cacheMetadata(for: cacheKey),
-        let timestamp = metadata["cachedAt"] as? TimeInterval {
-        self.lastUpdate = Date(timeIntervalSince1970: timestamp)
-      }
-      logInfo(
-        "Loaded \(cachedEntries.count) glossary entries from cache", context: "GlossaryManager")
-    } else {
-      // Fall back to local data
-      self.entries = GlossaryData.entries
-      logInfo("Using local glossary data (no cache available)", context: "GlossaryManager")
-    }
-  }
-
-  func refreshContent() async {
-    guard !self.isLoading else { return }
-
-    self.isLoading = true
-    defer { isLoading = false }
-
-    do {
-      // Try to fetch from remote source
-      guard let remoteURL = URL(string: "https://api.apgi-framework.org/glossary.json") else {
-        logInfo("Invalid remote URL for glossary", context: "GlossaryManager.refreshContent")
-        return
-      }
-      let data = try await cacheManager.fetchAndCache(from: remoteURL, cacheKey: self.cacheKey)
-
-      // Parse remote data
-      let remoteEntries = try JSONDecoder().decode([RemoteGlossaryEntry].self, from: data)
-        .map { GlossaryEntry(term: $0.term, definition: $0.definition) }
-
-      // Merge with local data, preferring remote
-      var mergedEntries = remoteEntries
-      let remoteTerms = Set(remoteEntries.map { $0.term.lowercased() })
-
-      // Add local entries that aren't in remote
-      for localEntry in GlossaryData.entries where !remoteTerms.contains(localEntry.term.lowercased()) {
-        mergedEntries.append(localEntry)
-      }
-
-      // Remove duplicates and sort
-      mergedEntries = mergedEntries.removingDuplicates(by: { $0.term.lowercased() })
-        .sorted { $0.term < $1.term }
-
-      self.entries = mergedEntries
-      self.lastUpdate = Date()
-
-      logInfo(
-        "Refreshed glossary with \(mergedEntries.count) entries from remote",
-        context: "GlossaryManager")
-    } catch {
-      logWarning(
-        "Failed to refresh glossary content: \(error.localizedDescription)",
-        context: "GlossaryManager")
-      // Keep existing cached/local data
-    }
-  }
-}
-
-private struct RemoteGlossaryEntry: Codable {
-  let term: String
-  let definition: String
-}
-
-extension Array {
-  func removingDuplicates<T: Hashable>(by key: (Element) -> T) -> [Element] {
-    var seen: Set<T> = []
-    return filter { seen.insert(key($0)).inserted }
-  }
-}
+// GlossaryManager removed - app now uses local glossary data only
+// This eliminates the external API dependency on api.apgi-framework.org
 
 struct GlossaryEntry: Identifiable, Hashable, Codable {
   let id: UUID
@@ -311,7 +210,8 @@ enum GlossaryData {
 }
 
 struct GlossaryView: View {
-  @StateObject private var glossaryManager = GlossaryManager.shared
+  // Glossary now uses local data only - no external API dependency
+  private let entries = GlossaryData.entries
 
   var body: some View {
     VStack(spacing: 0) {
@@ -321,43 +221,20 @@ struct GlossaryView: View {
 
         Spacer()
 
-        if self.glossaryManager.isLoading {
-          ProgressView()
-            .controlSize(.small)
-        }
-
-        Button {
-          Task {
-            await self.glossaryManager.refreshContent()
-          }
-        } label: {
-          Image(systemName: "arrow.clockwise")
-        }
-        .disabled(self.glossaryManager.isLoading)
-        .help("Refresh glossary content")
-
-        if let lastUpdate = glossaryManager.lastUpdate {
-          Text("Updated \(lastUpdate.formatted(.relative(presentation: .named)))")
-            .font(.caption)
-            .foregroundStyle(.secondary)
-        }
+        Text("\(entries.count) entries")
+          .font(.caption)
+          .foregroundStyle(.secondary)
       }
       .padding()
       .background(.thinMaterial)
 
       ScrollView {
         LazyVStack(alignment: .leading, spacing: 12) {
-          let entries = self.glossaryManager.entries
-
           if entries.isEmpty {
             HStack {
               Spacer()
-              if self.glossaryManager.isLoading {
-                ProgressView("Loading glossary...")
-              } else {
-                Text("No glossary entries available")
-                  .foregroundStyle(.secondary)
-              }
+              Text("No glossary entries available")
+                .foregroundStyle(.secondary)
               Spacer()
             }
             .padding()
@@ -368,12 +245,6 @@ struct GlossaryView: View {
           }
         }
         .padding()
-      }
-    }
-    .task {
-      // Auto-refresh on first load if we have network
-      if !ContentCacheManager.shared.isOfflineMode {
-        await self.glossaryManager.refreshContent()
       }
     }
   }
