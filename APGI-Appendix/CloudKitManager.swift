@@ -101,7 +101,7 @@ class CloudKitManager: ObservableObject {
       // Upload new/updated bookmarks
       for bookmark in bookmarks {
         let record = bookmark.toCKRecord()
-        try await self.privateDatabase.save(record)
+        _ = try await self.privateDatabase.save(record)
       }
 
       // Download bookmarks from iCloud
@@ -155,7 +155,7 @@ class CloudKitManager: ObservableObject {
 
       record["lastModified"] = Date()
 
-      try await self.privateDatabase.save(record)
+      _ = try await self.privateDatabase.save(record)
 
       await MainActor.run {
         self.lastSyncDate = Date()
@@ -221,7 +221,7 @@ class CloudKitManager: ObservableObject {
       notificationInfo.shouldSendContentAvailable = true  // Silent notification
       subscription.notificationInfo = notificationInfo
 
-      try await privateDatabase.save(subscription)
+      _ = try await privateDatabase.save(subscription)
 
       await MainActor.run {
         self.syncStatus = "Background sync active"
