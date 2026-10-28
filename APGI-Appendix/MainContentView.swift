@@ -544,7 +544,7 @@ struct MainContentView: View {
   // MARK: - Help and Updates
 
   private func showHelpGuide() {
-    URLValidator.shared.openSafely("https://docs.apgi-framework.org") {
+    URLValidator.shared.openSafely("https://apgiframework.com") {
       // Fallback: show local help content
       self.showLocalHelp()
     }

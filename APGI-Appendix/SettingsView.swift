@@ -23,6 +23,8 @@ struct SettingsView: View {
           .font(.title2.bold())
           .padding(.bottom)
 
+        APGIConnectionView()
+
         // Font Size
         VStack(alignment: .leading, spacing: 8) {
           Text("Font Size")
@@ -147,12 +149,17 @@ struct SettingsView: View {
 
         VStack(alignment: .leading, spacing: 8) {
           VersionInfoView()
+          Text("Allostatic Precision-Gated Ignition")
+          Text("Website: https://apgiframework.com")
+          Text("API: https://api.apgiframework.com")
+          Text("Source: https://github.com/apgiframework/APGI-Appendix")
+            .font(.caption).textSelection(.enabled)
         }
 
         Divider()
 
         Text(
-          "The Adaptive Precision-Gated Ignition (APGI) Framework provides a comprehensive computational model "
+          "The Allostatic Precision-Gated Ignition (APGI) Framework provides a comprehensive computational model "
             + "of conscious access, integrating predictive coding, precision weighting, "
             + "and metabolic constraints."
         )

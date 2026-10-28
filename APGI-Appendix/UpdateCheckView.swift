@@ -31,16 +31,11 @@ struct UpdateCheckView: View {
   @State private var retryCount = 0
   private let maxRetries = 3
   @State private var securityError = ""
-  @State private var requiresSignatureVerification = true
 
   @Environment(\.dismiss) private var dismiss
 
   private var updateEndpoint: String {
-    "https://api.apgi-framework.org/updates.json"
-  }
-
-  private var fallbackEndpoint: String {
-    "https://raw.githubusercontent.com/apgi/framework/main/updates.json"
+    "https://api.apgiframework.com/updates.json"
   }
 
   var body: some View {
@@ -114,7 +109,7 @@ struct UpdateCheckView: View {
 
           HStack(spacing: 12) {
             Button("Open Website") {
-              if let url = URL(string: "https://apgi-framework.com/download") {
+              if let url = URL(string: "https://apgiframework.com") {
                 NSWorkspace.shared.open(url)
               }
               self.dismiss()
@@ -183,6 +178,9 @@ struct UpdateCheckView: View {
 
     self.isCheckingForUpdates = true
     self.errorMessage = ""
+    self.securityError = ""
+    self.updateAvailable = false
+    self.downloadURL = nil
     self.currentVersion = Bundle.main.appVersion
 
     Task {
@@ -192,7 +190,7 @@ struct UpdateCheckView: View {
 
   private func performUpdateCheck() async {
     // Try primary endpoint first, then fallback
-    let endpoints = [updateEndpoint, fallbackEndpoint]
+    let endpoints = [updateEndpoint]
 
     for endpoint in endpoints {
       if let result = await checkEndpoint(endpoint) {
@@ -229,7 +227,7 @@ struct UpdateCheckView: View {
     request.setValue("APGI-Appendix/\(currentVersion)", forHTTPHeaderField: "User-Agent")
 
     do {
-      let (data, response) = try await URLSession.shared.data(for: request)
+      let (data, response) = try await APGIAPI.session.data(for: request)
 
       guard let httpResponse = response as? HTTPURLResponse,
         httpResponse.statusCode == 200
@@ -308,13 +306,13 @@ struct UpdateCheckView: View {
   private func openDownloadURL() {
     if let url = self.downloadURL {
       URLValidator.shared.openSafely(url.absoluteString) {
-        if let fallbackURL = URL(string: "https://apgi-framework.com/download") {
+        if let fallbackURL = URL(string: "https://apgiframework.com") {
           NSWorkspace.shared.open(fallbackURL)
         }
       }
     } else {
       // Fallback to website
-      if let url = URL(string: "https://apgi-framework.com/download") {
+      if let url = URL(string: "https://apgiframework.com") {
         NSWorkspace.shared.open(url)
       }
     }

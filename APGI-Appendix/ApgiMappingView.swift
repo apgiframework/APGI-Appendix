@@ -30,13 +30,13 @@ struct ApgiMappingView: View {
     Ignition Probability (Bₜ)
     Probability of a self-sustaining, metastable attractor state in the frontoparietal network.
 
-    Biological Implementation of σ(α(Sₜ – θₜ)): The "switch" is the NMDA-receptor-mediated calcium spike in the apical tuft of L5 pyramidal cells.
+    Biological Implementation of σ(gamma_sig(Sₜ – θₜ)): The "switch" is the NMDA-receptor-mediated calcium spike in the apical tuft of L5 pyramidal cells.
 
     – When Sₜ > θₜ, the disinhibited matrix thalamus (pulvinar/MD) delivers sufficient coordinated drive to L1 to trigger a regenerative dendritic calcium spike.
 
     – This spike propagates to the soma; if coincident with perisomatic input from basal dendrites, it triggers a burst of output spikes—implementing coincidence detection as the nonlinear sigmoid.
 
-    – Steepness α is determined by apical NMDA receptor density and the degree of thalamic input synchrony.
+    – Steepness gamma_sig is determined by apical NMDA receptor density and the degree of thalamic input synchrony.
 
     Surprise Accumulation
     Sₜ = Πₑ·|εₑ| + β·Πᵢ·|εᵢ|
@@ -50,12 +50,12 @@ struct ApgiMappingView: View {
     - β: Somatic bias factor (β ≈ 1.2-1.5 baseline, context-modulated)
 
     Ignition Probability
-    Bₜ = σ(α(Sₜ - θₜ))
+    Bₜ = σ(gamma_sig(Sₜ - θₜ))
 
     Where:
     - Bₜ: Probability of ignition at time t (0 to 1)
     - σ: Sigmoid function σ(x) = 1 / (1 + e^(-x))
-    - α: Slope parameter determining steepness of transition
+    - gamma_sig: Slope parameter determining steepness of transition
     - θₜ: Dynamic ignition threshold at time t
 
     Ignition Decision Rule

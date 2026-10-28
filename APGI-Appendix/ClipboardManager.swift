@@ -97,7 +97,7 @@ class ClipboardManager {
 
     var components = URLComponents()
     components.scheme = "https"
-    components.host = "apgi-framework.com"
+    components.host = "apgiframework.com"
     components.path = "/content/\(sanitizedTitle)"
     return components.url
   }

@@ -521,6 +521,10 @@ struct EnhancedContentCard: View {
     VStack(alignment: .leading, spacing: 0) {
       // Header
       self.cardHeader
+      Text("Illustrative reference • pack 2026.10.27 • not clinically validated")
+        .font(.caption)
+        .foregroundStyle(.secondary)
+        .padding(.horizontal)
 
       // Content
       if self.isExpanded {

@@ -29,6 +29,7 @@ struct APGIAppendixApp: App {
         .environmentObject(self.navigationManager)
         .environmentObject(self.memoryMonitor)
         .environmentObject(self.bookmarkManager)
+        .task { await APGIConnection.shared.checkOnce() }
         .onAppear {
           // Conditionally start memory monitoring based on user preferences
           if self.enableMemoryMonitoring {
@@ -114,7 +115,7 @@ struct APGIAppendixApp: App {
   }
 
   private func showHelp() {
-    URLValidator.shared.openSafely("https://apgi-framework.com/help") {
+    URLValidator.shared.openSafely("https://apgiframework.com") {
       // Fallback: show local help content
       self.showLocalHelp()
     }

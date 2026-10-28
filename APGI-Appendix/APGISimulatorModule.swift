@@ -322,17 +322,17 @@ struct APGICore {
   /// Computes probability of conscious ignition using sigmoid function
   ///
   /// Implements the threshold-based ignition decision from APGI framework:
-  /// B_t = σ(α(S_t - θ_t))
+  /// B_t = σ(gamma_sig(S_t - θ_t))
   ///
   /// Mathematical formulation:
   /// - B_t: Ignition probability (0.0 to 1.0)
   /// - S_t: Accumulated precision-weighted surprise
   /// - θ_t: Dynamic ignition threshold that adapts over time
-  /// - α: Sigmoid steepness parameter (typically 5-10) controlling decision certainty
+  /// - gamma_sig: Sigmoid steepness parameter (typically 5-10) controlling decision certainty
   /// - σ(x): Logistic sigmoid function 1/(1 + e^(-x))
   ///
   /// This implements a stochastic decision rule where ignition probability
-  /// increases sharply when surprise exceeds threshold. The α parameter
+  /// increases sharply when surprise exceeds threshold. The gamma_sig parameter
   /// controls the "sharpness" of this transition - higher values create
   /// more binary-like behavior, lower values create more graded responses
   ///
@@ -672,7 +672,7 @@ final class SimpleAPGIModel {
     let newTheta = self.core.updateThreshold(params: params)
 
     // Step 7: Compute ignition probability using sigmoid decision rule
-    // B_t = σ(α(S_t - θ_t)) - threshold-based stochastic ignition
+    // B_t = σ(gamma_sig(S_t - θ_t)) - threshold-based stochastic ignition
     let ignitionProb = self.core.computeIgnitionProbability(
       surprise: sTotal,
       threshold: newTheta,
@@ -1172,6 +1172,9 @@ enum IgnitionState: String, Codable {
 struct APGIDiagnostics: Identifiable, Codable, Equatable {
   var id = UUID()
   var timestamp = Date()
+  var data_origin = "synthetic"
+  var evidence_status = "illustrative"
+  var content_pack_version = "2026.10.27"
 
   let sTotal: Double
   let sIntero: Double
@@ -1376,7 +1379,7 @@ struct APGISimulatorView: View {
           .font(.title)
           .fontWeight(.bold)
 
-        Text("Allostatic Precision-Gated Ignition")
+        Text("Illustrative simulation • synthetic data • pack 2026.10.27")
           .font(.subheadline)
           .foregroundColor(.secondary)
       }

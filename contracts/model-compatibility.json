@@ -1,0 +1,12 @@
+{
+  "implementation": "APGISimulatorModule.swift",
+  "model_family": "apgi_extended",
+  "evidence_status": "illustrative",
+  "data_origin": "synthetic",
+  "reference_parity": "pending qualified mathematical-contracts.yaml and registered fixtures",
+  "parameters": {
+    "alpha (ignition sigmoid only)": "gamma_sig",
+    "marker-weighted interoceptive precision": "unqualified extension; not asserted equivalent to pi_i_rel_eff"
+  },
+  "scope_layers": {"broadcast_cost": "thermodynamic", "maintenance_cost": "thermodynamic"}
+}

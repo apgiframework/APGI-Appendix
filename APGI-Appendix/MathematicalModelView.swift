@@ -24,13 +24,13 @@ struct MathematicalModelView: View {
     dθₜ/dt = γ(θ₀ − θₜ) + δ·Bₜ₋₁ − λ·|dSₜ/dt|
 
     Ignition Probability
-    The probability of conscious ignition (Bₜ) is determined by a sigmoid function (σ) of the difference between accumulated surprise and the current threshold, with α controlling the steepness of this transition:
-    Bₜ = σ(α(Sₜ - θₜ))
+    The probability of conscious ignition (Bₜ) is determined by a sigmoid function (σ) of the difference between accumulated surprise and the current threshold, with gamma_sig controlling the steepness of this transition:
+    Bₜ = σ(gamma_sig(Sₜ - θₜ))
 
     Empirically Constrained Parameters and Control Inputs
     The model's behavior is fine-tuned by parameters that define its characteristic time scales and sensitivities:
     τ ≈ 200 ms: Time constant for surprise decay.
-    α ≈ 5–10: Controls the steepness of the ignition sigmoid switch.
+    gamma_sig ≈ 5–10: Controls the steepness of the ignition sigmoid switch.
     γ ≈ 2 s⁻¹: Rate of homeostatic recovery for the threshold.
     δ ≈ 0.3–0.5·θ₀: Magnitude of post-ignition threshold elevation (refractory effect).
     λ ≈ 0.1–0.3 (dimensionless): Sensitivity to urgency gain, scaling how rapidly increasing surprise lowers the threshold.
@@ -41,7 +41,7 @@ struct MathematicalModelView: View {
     Parameters of the APGI Dynamical System for Simulation
     Parameter | Description | Empirical Constraint | Neural Implementation
     τ | Surprise decay time constant | ~200 ms | NMDA receptor decay, synaptic facilitation
-    α | Sigmoid steepness (decision certainty) | 5–10 | Neural population gain in frontoparietal cortex
+    gamma_sig | Sigmoid steepness (decision certainty) | 5–10 | Neural population gain in frontoparietal cortex
     γ | Threshold homeostatic recovery rate | ~2 s⁻¹ | Slow adaptive currents in thalamocortical circuits
     δ | Post-ignition refractory scalar | 0.3–0.5 · θ₀ | Short-term depression in thalamocortical loops
     λ | Urgency gain factor (dimensionless) | 0.1–0.3 | Phasic LC-NE response to surprise rate-of-change

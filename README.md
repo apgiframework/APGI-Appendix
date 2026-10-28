@@ -1,6 +1,34 @@
+# Current release status — October 27, 2026
+
+Appendix requests public metadata from **https://api.apgiframework.com/v1/meta**
+at launch and through Settings → General → APGI API → Check connection.
+It sends no bookmarks, simulation outputs, or usage analytics to APGI.
+The live metadata endpoint returned HTTP 500 during verification; the app shows
+that failure and keeps bundled reference content available.
+
+The bundled reference pack is versioned `2026.10.27` and labelled illustrative.
+Simulator outputs are synthetic. Qualified framework parity and published gate
+results are pending; local sign regression tests do not establish scientific parity.
+Treatment recommendations have been removed from the psychiatric section.
+
+Build with Xcode supporting the macOS 26.3 deployment target:
+
+```sh
+python3 scripts/check_appendix_contracts.py
+xcodebuild test -project APGI-Appendix.xcodeproj -scheme APGI-Appendix \
+  -destination 'platform=macOS' -derivedDataPath build \
+  CODE_SIGNING_ALLOWED=NO -parallel-testing-enabled NO
+```
+
+See [the current audit](docs/APPENDIX_AUDIT.md) for acceptance coverage and
+remaining upstream dependencies. Older feature descriptions below are background;
+they do not establish scientific validation or configured cloud services.
+
+---
+
 # APGI Appendix – User Guide
 
-The APGI Appendix app provides a comprehensive, interconnected resource for understanding the Adaptive Predictive Gamma Integration framework and its applications. By exploring the theoretical foundations, mathematical models, biological implementations, cognitive integrations, and practical applications, users can build a deep understanding of this complex system and its relevance to neuroscience, psychiatry, and clinical practice.
+The APGI Appendix app provides a comprehensive, interconnected resource for understanding the Allostatic Precision-Gated Ignition framework and its applications. By exploring the theoretical foundations, mathematical models, biological implementations, cognitive integrations, and practical applications, users can build a deep understanding of this complex system and its relevance to neuroscience, psychiatry, and clinical practice.
 
 ---
 
@@ -20,7 +48,7 @@ The **APGI Appendix** app is an interactive reference and learning tool that bri
 
 The app features **dynamic content loading** with remote updates for glossary terms, bibliography references, and help documentation. Network connectivity is monitored in real-time with graceful offline functionality.
 
-The app is designed for students, educators, and clinicians who need quick, curated access to content related to APGI (Adaptive Predictive Gamma Integration) and neuromodulatory systems.
+The app is designed for students, educators, and clinicians who need quick, curated access to content related to APGI (Allostatic Precision-Gated Ignition) and neuromodulatory systems.
 
 ---
 

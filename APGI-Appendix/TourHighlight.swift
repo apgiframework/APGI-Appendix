@@ -260,7 +260,7 @@ struct TourHighlight: View {
 
 // MARK: - Arrow Shape
 
-struct ArrowShape: Shape {
+nonisolated struct ArrowShape: Shape {
   enum Direction {
     case up, down, left, right
   }

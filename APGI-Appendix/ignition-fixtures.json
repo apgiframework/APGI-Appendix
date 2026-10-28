@@ -1,0 +1,11 @@
+{
+  "provenance": "Local regression vectors, not qualified framework parity fixtures",
+  "data_origin": "synthetic",
+  "evidence_status": "illustrative",
+  "tolerance": 0.000001,
+  "vectors": [
+    {"surprise": 0, "threshold": 1, "gamma_sig": 10, "expected": 0.0000453978687},
+    {"surprise": 1, "threshold": 1, "gamma_sig": 10, "expected": 0.5},
+    {"surprise": 2, "threshold": 1, "gamma_sig": 10, "expected": 0.9999546021313}
+  ]
+}

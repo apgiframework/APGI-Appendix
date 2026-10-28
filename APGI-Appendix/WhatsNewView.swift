@@ -97,7 +97,7 @@ struct WhatsNewView: View {
       HStack(spacing: 24) {
         SafeLink(
           title: "Online Documentation",
-          urlString: "https://docs.apgi-framework.org",
+          urlString: "https://apgiframework.com",
           fallbackTitle: "Local Documentation"
         ) {
           self.showLocalDocumentation()
@@ -105,7 +105,7 @@ struct WhatsNewView: View {
 
         SafeLink(
           title: "Report Issues",
-          urlString: "https://github.com/apgi/framework/issues",
+          urlString: "https://github.com/apgiframework/APGI-Appendix/issues",
           fallbackTitle: "Local Support"
         ) {
           self.showLocalSupport()

@@ -98,7 +98,7 @@ struct QuickStartPanel: View {
       HStack(spacing: 16) {
         Button("Open Documentation") {
           // Open online documentation
-          if let url = URL(string: "https://docs.apgi-framework.org") {
+          if let url = URL(string: "https://apgiframework.com") {
             NSWorkspace.shared.open(url)
           }
         }

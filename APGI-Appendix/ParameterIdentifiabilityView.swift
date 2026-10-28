@@ -1,34 +1,38 @@
+import Foundation
 import SwiftUI
 
-struct ParameterIdentifiabilityView: View {
-  private let identifiabilityBody = """
+struct IdentifiabilityGateTable: Decodable {
+  struct Gate: Decodable {
+    let id: String
+    let status: String
+    let description: String
+  }
+  let version: String
+  let evidenceStatus: String
+  let gates: [Gate]
 
-    Parameter Recovery and Recoverability Tiers
+  var renderedText: String {
+    "Gate table \(version) • \(evidenceStatus)\n\n" + gates.map {
+      "\($0.id): \($0.status) — \($0.description)"
+    }.joined(separator: "\n\n") + "\n\nθₜ is the dynamic ignition threshold. θ₀ is its baseline. gamma_sig denotes sigmoid steepness. No identifiability or recovery claim is enabled until the qualified framework contract and published gate results are available."
+  }
 
-    Reduced, Structurally Identifiable Model
-
-    - Sₜ (precision-weighted surprise signal)
-    - θₜ (baseline ignition threshold)
-    - Πₑ⁰ (baseline exteroceptive precision)
-    - β·Πᵢ⁰ (baseline weighted interoceptive precision as a product term)
-    - α (sigmoid steepness)
-    - τ (surprise decay constant, fixed at 200 ms based on empirical literature)
-    - γ (homeostatic recovery rate)
-    - δ (post-ignition elevation magnitude)
-    - σ (noise amplitude)
-    """
-
-  var body: some View {
-    EnhancedContentCard(
-      title: "Parameter Identifiability and the Reduced Model",
-      content: self.identifiabilityBody,
-      category: .mathematical,
-      hasDataTable: false
-    )
-    .padding()
+  static func load() throws -> Self {
+    guard let url = Bundle.main.url(forResource: "gate-table", withExtension: "json") else {
+      throw CocoaError(.fileNoSuchFile)
+    }
+    return try JSONDecoder().decode(Self.self, from: Data(contentsOf: url))
   }
 }
 
-#Preview {
-  ParameterIdentifiabilityView()
+struct ParameterIdentifiabilityView: View {
+  var body: some View {
+    EnhancedContentCard(
+      title: "Parameter Identifiability and the Reduced Model",
+      content: (try? IdentifiabilityGateTable.load().renderedText)
+        ?? "Gate results unavailable. Identifiability and parameter recovery are not established.",
+      category: .mathematical,
+      hasDataTable: false
+    ).padding()
+  }
 }

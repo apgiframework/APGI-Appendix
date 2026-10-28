@@ -1,7 +1,7 @@
 import SwiftUI
 
 // GlossaryManager removed - app now uses local glossary data only
-// This eliminates the external API dependency on api.apgi-framework.org
+// This eliminates the external API dependency on the retired API
 
 struct GlossaryEntry: Identifiable, Hashable, Codable {
   let id: UUID

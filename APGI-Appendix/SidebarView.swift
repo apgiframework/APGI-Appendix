@@ -84,7 +84,7 @@ struct SidebarView: View {
         Spacer()
 
         Button(action: {
-          if let url = URL(string: "https://docs.apgi-framework.org") {
+          if let url = URL(string: "https://apgiframework.com") {
             NSWorkspace.shared.open(url)
           }
         }, label: {

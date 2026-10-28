@@ -1,0 +1,26 @@
+name: Appendix checks
+on:
+  push:
+  pull_request:
+jobs:
+  contracts:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 scripts/check_appendix_contracts.py
+  macos-tests:
+    runs-on: macos-26
+    steps:
+      - uses: actions/checkout@v4
+      - name: Select newest installed Xcode
+        run: |
+          XCODE_PATH=$(find /Applications -maxdepth 1 -name 'Xcode*.app' | sort -V | tail -1)
+          sudo xcode-select -s "$XCODE_PATH/Contents/Developer"
+          xcodebuild -version
+      - name: Build and test
+        run: >-
+          xcodebuild test -project APGI-Appendix.xcodeproj -scheme APGI-Appendix
+          -destination 'platform=macOS' -derivedDataPath build
+          CODE_SIGNING_ALLOWED=NO -parallel-testing-enabled NO
+          -test-timeouts-enabled YES -default-test-execution-time-allowance 30
+          -maximum-test-execution-time-allowance 60

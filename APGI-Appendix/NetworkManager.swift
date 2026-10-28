@@ -168,6 +168,3 @@ struct NetworkStatusView: View {
     }
   }
 }
-
-// Note: NetworkSettingsView removed - app no longer requires network connectivity
-// All content is now bundled locally, eliminating the external API dependency

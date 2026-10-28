@@ -7,11 +7,6 @@ final class TableParserTests: XCTestCase {
 
   var parser = TableParser()
 
-  override func setUp() {
-    super.setUp()
-    parser = TableParser()
-  }
-
   func testMarkdownTableParsing() throws {
     let markdown = """
       | Header 1 | Header 2 | Header 3 |

@@ -1,0 +1,8 @@
+{
+  "version": "2026.10.27-pending",
+  "evidenceStatus": "illustrative",
+  "gates": [
+    {"id": "K7a", "status": "PENDING", "description": "Structural identifiability has not been established by a published gate result."},
+    {"id": "K7c", "status": "PENDING", "description": "Parameter recovery has not been established by a published gate result."}
+  ]
+}

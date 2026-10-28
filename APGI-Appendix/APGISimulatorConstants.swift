@@ -142,7 +142,7 @@ enum APGISimulatorConstants {
  These constants are based on empirical constraints from neuroscience literature:
 
  • τ ≈ 200 ms: Time constant for surprise decay (NMDA receptor decay, synaptic facilitation)
- • α ≈ 5–10: Controls the steepness of the ignition sigmoid switch (Neural population gain)
+ • gamma_sig ≈ 5–10: Controls the steepness of the ignition sigmoid switch (Neural population gain)
  • γ ≈ 2 s⁻¹: Rate of homeostatic recovery for the threshold (Adaptive currents in thalamocortical circuits)
  • δ ≈ 0.3–0.5·θ₀: Post-ignition refractory scalar (Short-term depression in thalamocortical loops)
  • λ ≈ 0.1–0.3: Urgency gain factor (Phasic LC-NE response to surprise rate-of-change)

@@ -10,7 +10,7 @@ struct BiologicalImplementationView: View {
 
     θₜ | NMDA-spike threshold in L5 apical dendrites; modulated by TRN (homeostasis), AHP/synaptic depression (refractoriness), LC-NE (urgency)
 
-    Bₜ | Metastable frontoparietal attractor; NMDA Ca²⁺ spike as sigmoid switch; α set by NMDA density + thalamic synchrony
+    Bₜ | Metastable frontoparietal attractor; NMDA Ca²⁺ spike as sigmoid switch; gamma_sig set by NMDA density + thalamic synchrony
 
     Πₑ, Πᵢ | ACh ↑ Πₑ; NE ↑ Πᵢ; DA modulates reward salience
 

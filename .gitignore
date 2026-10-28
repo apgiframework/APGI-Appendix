@@ -60,7 +60,7 @@ venv.bak/
 .kiro/steering/byterover-rules.md
 .qoder/rules/byterover-rules.md
 .augment/rules/byterover-rules.md
-*.xcodeproj/
+
 *.xcworkspace/
 DerivedData/
 build/
@@ -81,3 +81,5 @@ fastlane/test_output
 .swiftpm/
 xcuserdata/
 *.simulator/
+
+APGI-Appendix.xcodeproj/project.xcworkspace/

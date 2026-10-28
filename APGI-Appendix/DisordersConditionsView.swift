@@ -2,6 +2,7 @@ import SwiftUI
 
 struct DisordersConditionsView: View {
   private let disordersConditionsContent = """
+    Illustrative, synthetic parameter examples only. These numbers are not measured clinical ranges, diagnostic thresholds, or treatment guidance.
 
     APGI Parameter Table — Disorders & Conditions
 

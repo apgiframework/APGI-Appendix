@@ -18,21 +18,22 @@ class URLValidator: ObservableObject {
 
   // MARK: - Trusted Domains
   private let trustedDomains = [
-    "apgi-framework.org",
-    "docs.apgi-framework.org",
+    "api.apgiframework.com",
+    "apgiframework.com",
     "github.com",
     "apple.com"
   ]
 
   private let trustedPathPrefixes = [
-    "github.com": ["/apgi/"]
+    "github.com": ["/apgiframework/"]
   ]
 
   func validateURL(_ urlString: String) async -> Bool {
     guard let url = URL(string: urlString) else { return false }
 
     // Enforce HTTPS for safety
-    guard url.scheme == "https" else {
+    guard url.scheme == "https", url.user == nil, url.password == nil,
+      url.port == nil || url.port == 443 else {
       logError(
         NSError(
           domain: "URLValidator", code: -1,
@@ -45,7 +46,7 @@ class URLValidator: ObservableObject {
     guard let host = url.host else { return false }
 
     let isTrustedHost = self.trustedDomains.contains { domain in
-      host == domain || host.hasSuffix("." + domain)
+      host == domain
     }
 
     if !isTrustedHost {
@@ -136,8 +137,11 @@ struct SafeLink: View {
       }
       .buttonStyle(.link)
       .foregroundColor(.orange)
-    } else if let url = URL(string: self.urlString) {
-      Link(self.title, destination: url)
+    } else {
+      Button(self.title) {
+        self.urlValidator.openSafely(self.urlString, fallback: self.fallbackAction)
+      }
+      .buttonStyle(.link)
     }
   }
 }

@@ -309,7 +309,7 @@ struct APGICommands: Commands {
   }
 
   private func openOnlineHelp() {
-    if let url = URL(string: "https://docs.apgi-framework.org") {
+    if let url = URL(string: "https://apgiframework.com") {
       NSWorkspace.shared.open(url)
     }
   }
@@ -323,7 +323,7 @@ struct APGICommands: Commands {
   }
 
   private func reportIssue() {
-    if let url = URL(string: "https://github.com/apgi/framework/issues") {
+    if let url = URL(string: "https://github.com/apgiframework/APGI-Appendix/issues") {
       NSWorkspace.shared.open(url)
     }
   }

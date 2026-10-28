@@ -645,7 +645,7 @@ struct ConnectionLine: View {
 
 // MARK: - Custom Shapes
 
-struct DiamondShape: Shape {
+nonisolated struct DiamondShape: Shape {
   func path(in rect: CGRect) -> Path {
     Path { path in
       path.move(to: CGPoint(x: rect.midX, y: rect.minY))
@@ -657,7 +657,7 @@ struct DiamondShape: Shape {
   }
 }
 
-struct HexagonShape: Shape {
+nonisolated struct HexagonShape: Shape {
   func path(in rect: CGRect) -> Path {
     let w = rect.width
     let h = rect.height

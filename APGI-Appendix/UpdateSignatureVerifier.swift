@@ -4,7 +4,7 @@ import Foundation
 // MARK: - Update Signature Verifier
 
 /// Actor responsible for cryptographic verification of update manifests
-/// Uses Ed25519 signatures to ensure update authenticity
+/// Uses P256-ECDSA signatures to ensure update authenticity
 @globalActor
 actor UpdateSignatureActor: GlobalActor {
   static let shared = UpdateSignatureActor()
@@ -17,36 +17,13 @@ actor UpdateSignatureActor: GlobalActor {
 final class UpdateSignatureVerifier: Sendable {
   nonisolated static var shared: UpdateSignatureVerifier { UpdateSignatureActor.sharedVerifier }
 
-  // MARK: - Trusted Public Keys (Ed25519)
-  // These are the official APGI signing keys - rotate annually
-  private lazy var trustedPublicKeys: [String: P256.Signing.PublicKey] = {
-    var keys: [String: P256.Signing.PublicKey] = [:]
-    // Primary signing key (2024-2025)
-    let keyData = Data([
-      0x04, 0x6B, 0x17, 0xD1, 0xF2, 0xE1, 0x2C, 0x42, 0x47, 0xF8,
-      0xBC, 0xE6, 0xE5, 0x63, 0xA4, 0x40, 0xF2, 0x77, 0x03, 0x7D,
-      0x81, 0x2D, 0xEB, 0x33, 0xA0, 0xF4, 0xA1, 0x39, 0x45, 0xD8,
-      0x98, 0xC2, 0x96, 0x4F, 0xE3, 0x42, 0xE2, 0xFE, 0x1A, 0x7F,
-      0x9B, 0x8E, 0xE7, 0xEB, 0x4A, 0x7C, 0x0F, 0x9E, 0x16, 0x2B,
-      0xCE, 0x33, 0x57, 0x6B, 0x31, 0x5E, 0xCE, 0xCB, 0xB6, 0x40,
-      0x68, 0x37, 0xBF, 0x51, 0xF5
-    ])
-    if let key = try? P256.Signing.PublicKey(x963Representation: keyData) {
-      keys["apgi-primary-2024"] = key
-    }
-    return keys
-  }()
-
-  // MARK: - Trusted Host + Path Policy
-
-  private let trustedDownloadHosts = [
-    "apgi-framework.org",
-    "github.com"
-  ]
-
+  // No production signing key has been supplied. Updates fail closed until a
+  // reviewed release key and corresponding server manifest contract are installed.
+  private let trustedPublicKeys: [String: P256.Signing.PublicKey] = [:]
+  private let trustedDownloadHosts = ["apgiframework.com", "api.apgiframework.com"]
   private let trustedPathPatterns = [
-    "apgi-framework.org": ["/releases/", "/downloads/", "/updates/"],
-    "github.com": ["/apgi/framework/releases/"]
+    "apgiframework.com": ["/releases/", "/downloads/", "/updates/"],
+    "api.apgiframework.com": ["/releases/", "/downloads/", "/updates/"]
   ]
 
   // MARK: - Signature Verification
@@ -54,7 +31,7 @@ final class UpdateSignatureVerifier: Sendable {
   /// Verifies the signature of an update response
   /// - Parameters:
   ///   - response: The update response to verify
-  ///   - signature: Base64-encoded Ed25519 signature
+  ///   - signature: Base64-encoded P256-ECDSA signature
   ///   - keyId: The key identifier used for signing
   /// - Returns: True if signature is valid
   func verifyUpdate(_ response: UpdateResponse, signature: String, keyId: String) -> Bool {
@@ -94,6 +71,8 @@ final class UpdateSignatureVerifier: Sendable {
   /// - Returns: True if URL matches trusted policy
   func validateDownloadURL(_ urlString: String) -> Bool {
     guard let url = URL(string: urlString),
+      url.scheme == "https", url.user == nil, url.password == nil,
+      url.port == nil || url.port == 443,
       let host = url.host?.lowercased()
     else {
       logSecurityEvent("Invalid download URL format")
@@ -102,7 +81,7 @@ final class UpdateSignatureVerifier: Sendable {
 
     // Check host is trusted
     let isTrustedHost = trustedDownloadHosts.contains { trustedHost in
-      host == trustedHost || host.hasSuffix("." + trustedHost)
+      host == trustedHost
     }
 
     guard isTrustedHost else {
@@ -139,6 +118,9 @@ final class UpdateSignatureVerifier: Sendable {
     signature: String?,
     keyId: String?
   ) -> UpdateValidationResult {
+    guard response.algorithm == "P256-ECDSA" else {
+      return .invalid(reason: "Unsupported signature algorithm")
+    }
     // Require signature and keyId for all updates
     guard let signature = signature, !signature.isEmpty else {
       return .invalid(reason: "Missing required signature")
@@ -203,7 +185,7 @@ final class UpdateSignatureVerifier: Sendable {
       orderedComponents[key] = components[key]
     }
 
-    return try JSONSerialization.data(withJSONObject: orderedComponents, options: [])
+    return try JSONSerialization.data(withJSONObject: orderedComponents, options: [.sortedKeys, .withoutEscapingSlashes])
   }
 
   private func logSecurityEvent(_ message: String) {
@@ -237,5 +219,5 @@ struct SignedUpdateResponse: Codable {
   let update: UpdateResponse
   let signature: String
   let keyId: String
-  let algorithm: String  // Should be "P256-ECDSA" or "Ed25519"
+  let algorithm: String  // Should be "P256-ECDSA" or "P256-ECDSA"
 }

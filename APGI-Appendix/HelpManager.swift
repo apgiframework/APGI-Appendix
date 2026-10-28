@@ -41,7 +41,7 @@ class HelpContentManager: ObservableObject {
 
       ## Getting Started
 
-      The APGI Appendix provides comprehensive information about the Adaptive Precision-Gated Ignition Framework. Start with:
+      The APGI Appendix provides comprehensive information about the Allostatic Precision-Gated Ignition Framework. Start with:
 
       1. **Methodology** - Understand the framework approach
       2. **Glossary** - Learn key terminology
@@ -55,7 +55,7 @@ class HelpContentManager: ObservableObject {
 
       ## Need More Help?
 
-      Visit [docs.apgi-framework.org](https://docs.apgi-framework.org) for detailed information.
+      Visit [apgiframework.com](https://apgiframework.com) for detailed information.
       """
   }
 }
