@@ -31,7 +31,7 @@ The app is designed for students, educators, and clinicians who need quick, cura
 ### 2.1 System Requirements
 
 - **Platform:** macOS
-- **Minimum OS version:** macOS 14 or later
+- **Minimum OS version:** macOS 26.3 (the app target's `MACOSX_DEPLOYMENT_TARGET`)
 - **Network:** Internet connection recommended for content updates and remote features; app functions offline with cached content
 - **Storage:** ~50MB for app installation; additional space for cached remote content
 
@@ -101,7 +101,7 @@ On first launch you will see:
   - **General**: Font size (10-24pt), sidebar visibility, focus mode, animations
   - **Appearance**: Theme selection, high contrast mode
   - **Bookmarks**: Auto-save toggle, bookmark management
-  - **Network**: Remote content settings, auto-refresh intervals, cellular data controls
+  - **Network**: Remote content settings, auto-refresh intervals
   - **Logs**: Error logging and diagnostics
   - **Validation**: UserDefaults validation tools
   - **About**: Version information and framework description
@@ -359,15 +359,12 @@ The inspector provides context for the current section:
 
 ### 10.4 Device Adaptations
 
-- **iPad/Mac**
+The project targets macOS only (`SDKROOT = macosx`). There is no iPad or iPhone target.
+
+- **Mac**
   - Full three-panel interface
   - Multiple windows support
   - Rich keyboard shortcuts
-
-- **iPhone**
-  - Streamlined navigation
-  - Stack-based navigation
-  - Optimized touch interactions
 
 ---
 
@@ -468,12 +465,11 @@ Access the Settings panel to customize your experience:
 - **Bookmarks**
   - Auto-save bookmarks toggle
   - Clear all bookmarks functionality
-  - Bookmark synchronization across sessions
+  - Bookmarks persist locally between launches. Cross-device iCloud sync is not provisioned (S1-APP-07)
 
 - **Network Settings**
   - Remote content fetching controls
   - Auto-refresh interval configuration (1 hour to 1 week)
-  - Cellular data usage permissions
   - Connection diagnostics and testing
 
 - **Logs & Diagnostics**
@@ -508,7 +504,7 @@ Access the Settings panel to customize your experience:
 
 - **Platform**: macOS native application
 - **Framework**: SwiftUI with MVVM architecture
-- **Minimum macOS Version**: macOS 14.0+
+- **Minimum macOS Version**: macOS 26.3
 - **Navigation**: NavigationSplitView with three-panel layout
 - **State Management**: ObservableObject pattern with Combine publishers
 - **Networking**: NWPathMonitor for connectivity monitoring, URLSession for remote content
@@ -519,7 +515,7 @@ Access the Settings panel to customize your experience:
 - **Content Storage**: Local structured data with remote content caching
 - **Table System**: Dynamic TableParser supporting multiple formats (Markdown, CSV, TSV, JSON)
 - **Search Index**: Pre-computed search indices with real-time filtering
-- **Bookmarks**: UserDefaults persistence with auto-save functionality
+- **Bookmarks**: UserDefaults persistence with auto-save functionality. Optional private-CloudKit code exists but the entitlements provision no iCloud container, so nothing syncs
 - **Remote Content**: Cached glossary and bibliography with offline fallbacks
 - **Settings**: AppStorage preferences with validation tools
 
@@ -529,7 +525,6 @@ Access the Settings panel to customize your experience:
 - **Remote Content**: Automatic fetching from APGI API endpoints
 - **Offline Support**: Graceful degradation with cached content
 - **Retry Logic**: Exponential backoff for failed network requests
-- **Cellular Controls**: User-configurable cellular data usage
 
 ### 13.4 Performance Features
 

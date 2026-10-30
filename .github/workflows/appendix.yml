@@ -7,7 +7,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - run: pip install pyyaml
       - run: python3 scripts/check_appendix_contracts.py
+      - run: python3 -m unittest scripts/test_local_evidence.py
   macos-tests:
     runs-on: macos-26
     steps:

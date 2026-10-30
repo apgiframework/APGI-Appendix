@@ -17,9 +17,16 @@ actor UpdateSignatureActor: GlobalActor {
 final class UpdateSignatureVerifier: Sendable {
   nonisolated static var shared: UpdateSignatureVerifier { UpdateSignatureActor.sharedVerifier }
 
-  // No production signing key has been supplied. Updates fail closed until a
-  // reviewed release key and corresponding server manifest contract are installed.
-  private let trustedPublicKeys: [String: P256.Signing.PublicKey] = [:]
+  /// Production trust anchors, keyed by `keyId`. Empty until an independently reviewed
+  /// release key is added here (see docs/UPDATE_FEED_CONTRACT.md); updates fail closed.
+  nonisolated static let productionPublicKeys: [String: P256.Signing.PublicKey] = [:]
+
+  private let trustedPublicKeys: [String: P256.Signing.PublicKey]
+
+  /// Tests inject keys; the shared verifier only ever uses `productionPublicKeys`.
+  nonisolated init(trustedPublicKeys: [String: P256.Signing.PublicKey] = productionPublicKeys) {
+    self.trustedPublicKeys = trustedPublicKeys
+  }
   private let trustedDownloadHosts = ["apgiframework.com", "api.apgiframework.com"]
   private let trustedPathPatterns = [
     "apgiframework.com": ["/releases/", "/downloads/", "/updates/"],

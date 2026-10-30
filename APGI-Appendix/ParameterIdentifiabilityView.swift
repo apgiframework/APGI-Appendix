@@ -6,15 +6,30 @@ struct IdentifiabilityGateTable: Decodable {
     let id: String
     let status: String
     let description: String
+    let result: String?
   }
   let version: String
   let evidenceStatus: String
+  let source: String?
+  let d2Decision: String?
   let gates: [Gate]
 
+  /// True only for a table generated from the published gate-table.yaml.
+  var isPublished: Bool { source == "gate-table.yaml" && evidenceStatus == "published" }
+
   var renderedText: String {
-    "Gate table \(version) • \(evidenceStatus)\n\n" + gates.map {
-      "\($0.id): \($0.status) — \($0.description)"
-    }.joined(separator: "\n\n") + "\n\nθₜ is the dynamic ignition threshold. θ₀ is its baseline. gamma_sig denotes sigmoid steepness. No identifiability or recovery claim is enabled until the qualified framework contract and published gate results are available."
+    let rows = gates.map { gate -> String in
+      let outcome = gate.result.map { " Result: \($0)" } ?? ""
+      return "\(gate.id): \(gate.status) — \(gate.description)\(outcome)"
+    }.joined(separator: "\n\n")
+    let d2 = d2Decision.map { "\n\nD2 decision: \($0)" } ?? ""
+    let notation =
+      "θₜ is the dynamic ignition threshold. θ₀ is its baseline. gamma_sig denotes sigmoid steepness."
+    let caveat =
+      isPublished
+      ? "Outcomes above are those published in gate-table.yaml; this view does not extend them."
+      : "No identifiability or recovery claim is enabled until the qualified framework contract and published gate results are available."
+    return "Gate table \(version) • \(evidenceStatus)\n\n" + rows + d2 + "\n\n\(notation) \(caveat)"
   }
 
   static func load() throws -> Self {

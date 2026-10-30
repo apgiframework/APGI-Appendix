@@ -30,8 +30,11 @@ assert 'ENABLE_OUTGOING_NETWORK_CONNECTIONS = YES;' in project
 matrix = json.loads((root / 'contracts/model-compatibility.json').read_text())
 assert matrix['model_family'] == 'apgi_extended'
 assert matrix['data_origin'] == 'synthetic'
-gates = json.loads((app / 'gate-table.json').read_text())
-assert all(g['status'] == 'PENDING' for g in gates['gates'])
+import sys
+sys.path.insert(0, str(root / 'scripts'))
+import check_local_evidence
+evidence_problems = check_local_evidence.check_fixtures() + check_local_evidence.check_gate_table()
+assert not evidence_problems, evidence_problems
 assert 'Treatment Implication' not in (app / 'PsychiatricDisordersView.swift').read_text()
 print('Appendix identifier, entitlement, privacy, and evidence checks passed.')
 
