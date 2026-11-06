@@ -1,0 +1,332 @@
+{
+  "document": "APGI-Appendix Application Validation Profile",
+  "spec": "APGI-VAL-SPEC-1.2 (draft)",
+  "profile_status": "DRAFT - not approved",
+  "component": {
+    "id": "A08",
+    "name": "APGI-Appendix",
+    "responsibility": "Model simulation and reference visualization"
+  },
+  "release_owner": "pending",
+  "approvers": {
+    "release_authority": "pending",
+    "scientific_authority": "pending",
+    "specification_owner": "pending"
+  },
+  "versions": {
+    "app": "1.0",
+    "build": "1",
+    "reference_pack": "2026.10.27",
+    "gate_table": "2026.10.27-pending",
+    "bundle_identifier": "lesoto.Consciousness-Supplementary-Materials"
+  },
+  "platforms": [
+    "macOS 26.3 or later (single macOS target; no iOS/iPadOS)"
+  ],
+  "interfaces": [
+    {
+      "name": "public metadata",
+      "method": "GET",
+      "url": "https://api.apgiframework.com/v1/meta"
+    },
+    {
+      "name": "update feed",
+      "method": "GET",
+      "url": "https://api.apgiframework.com/updates.json",
+      "trust": "P256-ECDSA; production key map empty; fails closed"
+    }
+  ],
+  "data_classes": [
+    "bundled reference content (public)",
+    "synthetic simulator output (not persisted)",
+    "local bookmarks",
+    "optional private CloudKit bookmarks (not provisioned)"
+  ],
+  "participant_data": "none collected or processed",
+  "protocol_v1_2_definitions_implemented": [],
+  "protocol_v1_2_note": "The Appendix implements no registered protocol_0-7 definition. It must not present any as supported (APGI-PRO-004).",
+  "model_formulation": {
+    "family": "apgi_extended",
+    "form": "discrete update",
+    "integration": "forward Euler",
+    "dt_ms": 10,
+    "threshold": "dynamic theta_t with baseline theta_0, clamped to [0.1, 5.0]",
+    "refractory": "post-ignition term delta * prevIgnition in the theta update",
+    "equation_ids": "pending Formal Mathematical Specification [CONFIRM]"
+  },
+  "data_origin": "synthetic",
+  "evidence_status": "illustrative",
+  "requirements": [
+    {
+      "id": "PRO-001",
+      "applicability": "NOT_APPLICABLE",
+      "rationale": "Matrix section 5.2 marks this requirement not applicable to A08 (APGI-Appendix).",
+      "approver": "pending"
+    },
+    {
+      "id": "PRO-002",
+      "applicability": "NOT_APPLICABLE",
+      "rationale": "Matrix section 5.2 marks this requirement not applicable to A08 (APGI-Appendix).",
+      "approver": "pending"
+    },
+    {
+      "id": "PRO-003",
+      "applicability": "NOT_APPLICABLE",
+      "rationale": "Matrix section 5.2 marks this requirement not applicable to A08 (APGI-Appendix).",
+      "approver": "pending"
+    },
+    {
+      "id": "PRO-004",
+      "applicability": "R",
+      "status": "Partial",
+      "evidence": "This profile (draft). Declares zero Protocol v1.2 definitions implemented.",
+      "gap": "Approval by release owner / specification owner; owner of record not yet named."
+    },
+    {
+      "id": "SCI-001",
+      "applicability": "R",
+      "status": "Blocked",
+      "evidence": "APGISimulatorModule.swift computes ignition probability sigmoid(gamma_sig*(S-theta)); local sign vectors in ignition-fixtures.json.",
+      "gap": "Strict S>theta rule and S = Pi_e|z_e| + Pi_i_eff|z_i| not verified against qualified golden vectors; marker-weighted Pi_i is an unqualified extension (apgi_extended)."
+    },
+    {
+      "id": "SCI-002",
+      "applicability": "R",
+      "status": "Partial",
+      "evidence": "Declared formulation: discrete update, forward Euler, dt = 10 ms (defaultDtMs), clamped theta in [0.1, 5.0], dynamic theta_t with baseline theta_0 (contracts/release-compatibility.json). Gate view distinguishes theta_t from theta_0.",
+      "gap": "Equation IDs from the Formal Mathematical Specification [CONFIRM]; approved fixtures; updateThreshold embeds unregistered coefficients 0.2 and 0.1 in the metabolic penalty."
+    },
+    {
+      "id": "SCI-003",
+      "applicability": "R",
+      "status": "Fail",
+      "evidence": "Simulator defaultNumLevels = 3 with no L0-L4 labels; no hierarchy text in user-facing content.",
+      "gap": "Implement and document L0 10-100 ms, L1 100 ms-3 s, L2 1-30 min, L3 hours-days, L4 months-years in simulator and content. Not done here: needs scientific-authority decision on how a 10 ms simulator maps to L0-L4."
+    },
+    {
+      "id": "SCI-004",
+      "applicability": "R",
+      "status": "Blocked",
+      "evidence": "gamma_sig rename done (S1-APP-04); alpha/beta families remain in cost and learning terms.",
+      "gap": "Controlled Notation Appendix and exhaustive symbol map not available."
+    },
+    {
+      "id": "SCI-005",
+      "applicability": "R",
+      "status": "Partial",
+      "evidence": "contracts/default-parameter-provenance.json labels all 45 scientific defaults 'assumed' with no source reference; checker fails if a constant is added without an entry.",
+      "gap": "Source references and any analytically-derived / post-hoc-calibrated labels require the qualified parameter-registry.yaml. UI does not yet surface the labels."
+    },
+    {
+      "id": "SCI-006",
+      "applicability": "R",
+      "status": "Implemented",
+      "evidence": "Retired and non-canonical expansions rejected by scripts/check_appendix_contracts.py and scripts/check_validation_artifacts.py across Swift, Markdown, JSON and CITATION.cff.",
+      "gap": "Archive and remote repository metadata not verified."
+    },
+    {
+      "id": "SCI-007",
+      "applicability": "R",
+      "status": "Partial",
+      "evidence": "contracts/claim-register.json maps each content view to a draft claim group with epistemic tier 'unclassified'.",
+      "gap": "Statement-level CLM-nnn mapping and established/derived/calibrated/speculative classification need scientific-authority review. In-app tier labels not added."
+    },
+    {
+      "id": "REP-001",
+      "applicability": "NOT_APPLICABLE",
+      "rationale": "Matrix section 5.2 marks this requirement not applicable to A08 (APGI-Appendix).",
+      "approver": "pending"
+    },
+    {
+      "id": "REP-002",
+      "applicability": "NOT_APPLICABLE",
+      "rationale": "Matrix section 5.2 marks this requirement not applicable to A08 (APGI-Appendix).",
+      "approver": "pending"
+    },
+    {
+      "id": "REP-003",
+      "applicability": "NOT_APPLICABLE",
+      "rationale": "Matrix section 5.2 marks this requirement not applicable to A08 (APGI-Appendix).",
+      "approver": "pending"
+    },
+    {
+      "id": "REP-004",
+      "applicability": "NOT_APPLICABLE",
+      "rationale": "Matrix section 5.2 marks this requirement not applicable to A08 (APGI-Appendix).",
+      "approver": "pending"
+    },
+    {
+      "id": "REP-005",
+      "applicability": "NOT_APPLICABLE",
+      "rationale": "Matrix section 5.2 marks this requirement not applicable to A08 (APGI-Appendix).",
+      "approver": "pending"
+    },
+    {
+      "id": "IMP-001",
+      "applicability": "R",
+      "status": "Partial",
+      "evidence": "Tracked Xcode project, pinned Swift version, reference-pack hashes, release-compatibility.json.",
+      "gap": "No release-bound build record, artifact digests or SBOM; CI uses floating macos-26 image and Xcode selection."
+    },
+    {
+      "id": "IMP-002",
+      "applicability": "R",
+      "status": "Partial",
+      "evidence": "Entitlements audited exactly; no embedded production key; update trust fails closed.",
+      "gap": "Production signing key and configuration review pending."
+    },
+    {
+      "id": "IMP-003",
+      "applicability": "C",
+      "status": "Partial",
+      "evidence": "ErrorLogger / monitors exist in app source.",
+      "gap": "Induced-fault evidence linking signals to a release not collected (conditional requirement)."
+    },
+    {
+      "id": "DAT-001",
+      "applicability": "NOT_APPLICABLE",
+      "rationale": "Matrix section 5.2 marks this requirement not applicable to A08 (APGI-Appendix).",
+      "approver": "pending"
+    },
+    {
+      "id": "DAT-002",
+      "applicability": "NOT_APPLICABLE",
+      "rationale": "Matrix section 5.2 marks this requirement not applicable to A08 (APGI-Appendix).",
+      "approver": "pending"
+    },
+    {
+      "id": "DAT-003",
+      "applicability": "C",
+      "status": "Partial",
+      "evidence": "Data stored: local bookmarks and cached content (conditional).",
+      "gap": "No approved per-data-class retention/deletion rules."
+    },
+    {
+      "id": "DAT-004",
+      "applicability": "R",
+      "status": "Partial",
+      "evidence": "reference-pack.json records version and SHA-256 per source; fixtures and gate table labelled synthetic/illustrative.",
+      "gap": "Source, license and processing history for each displayed dataset; checksum verification at load time is not implemented in the app."
+    },
+    {
+      "id": "API-001",
+      "applicability": "C",
+      "status": "Blocked",
+      "evidence": "Client calls GET /v1/meta and the updates feed (docs/UPDATE_FEED_CONTRACT.md).",
+      "gap": "No canonical apgi-api contract snapshot/hash; server returned HTTP 500/401 at last audit."
+    },
+    {
+      "id": "API-002",
+      "applicability": "NOT_APPLICABLE",
+      "rationale": "Matrix section 5.2 marks this requirement not applicable to A08 (APGI-Appendix).",
+      "approver": "pending"
+    },
+    {
+      "id": "API-003",
+      "applicability": "R",
+      "status": "Partial",
+      "evidence": "HTTPS-only with exact-host policy; no secrets in repo; privacy manifest declares no collection.",
+      "gap": "Content scan for secrets in history and release artifacts not run."
+    },
+    {
+      "id": "API-004",
+      "applicability": "NOT_APPLICABLE",
+      "rationale": "Matrix section 5.2 marks this requirement not applicable to A08 (APGI-Appendix).",
+      "approver": "pending"
+    },
+    {
+      "id": "INT-001",
+      "applicability": "R",
+      "status": "Blocked",
+      "evidence": "Update-feed canonical JSON is documented.",
+      "gap": "Canonical apgi-api schemas and hashes not available; local model-result payload carries data_origin, evidence_status and content_pack_version but not schema/protocol/producer versions."
+    },
+    {
+      "id": "INT-002",
+      "applicability": "R",
+      "status": "Blocked",
+      "evidence": "Local tests only.",
+      "gap": "Pinned release-set integration run across components."
+    },
+    {
+      "id": "INT-003",
+      "applicability": "C",
+      "status": "Partial",
+      "evidence": "Gate view fails to an unavailable state; update client fails closed.",
+      "gap": "Failure injection for each upstream boundary not recorded."
+    },
+    {
+      "id": "INT-004",
+      "applicability": "R",
+      "status": "Blocked",
+      "evidence": "Displayed gate rows come from a pending table.",
+      "gap": "Reference output set and display-precision comparison log."
+    },
+    {
+      "id": "REL-001",
+      "applicability": "R",
+      "status": "Blocked",
+      "evidence": "CI runs contracts and macOS tests.",
+      "gap": "Approved immutable candidate record, approvers, branch protection."
+    },
+    {
+      "id": "REL-002",
+      "applicability": "R",
+      "status": "Partial",
+      "evidence": "docs/CONTRACT_DEPENDENCIES.md lists limitations; rollback/monitoring steps absent.",
+      "gap": "Release package with rollback criteria and rehearsal."
+    },
+    {
+      "id": "REL-003",
+      "applicability": "R",
+      "status": "Partial",
+      "evidence": "Change history in git; docs/APPENDIX_AUDIT.md.",
+      "gap": "Per-change validation-impact assessment and documented regression selection."
+    },
+    {
+      "id": "REL-004",
+      "applicability": "R",
+      "status": "Partial",
+      "evidence": "contracts/release-compatibility.json lists app 1.0 (build 1), reference pack 2026.10.27, gate table 2026.10.27-pending; Protocol v1.2 and schemas marked pending.",
+      "gap": "Tested pairwise combinations; supported rows stay empty by design."
+    },
+    {
+      "id": "REL-005",
+      "applicability": "R",
+      "status": "Blocked",
+      "evidence": "No archival deposit is made by this repo.",
+      "gap": "Release certificate before any deposit."
+    },
+    {
+      "id": "CON-001",
+      "applicability": "NOT_APPLICABLE",
+      "rationale": "Matrix section 5.2 marks this requirement not applicable to A08 (APGI-Appendix).",
+      "approver": "pending"
+    },
+    {
+      "id": "CON-002",
+      "applicability": "NOT_APPLICABLE",
+      "rationale": "Matrix section 5.2 marks this requirement not applicable to A08 (APGI-Appendix).",
+      "approver": "pending"
+    },
+    {
+      "id": "ACQ-001",
+      "applicability": "NOT_APPLICABLE",
+      "rationale": "Matrix section 5.2 marks this requirement not applicable to A08 (APGI-Appendix).",
+      "approver": "pending"
+    },
+    {
+      "id": "VAL-001",
+      "applicability": "NOT_APPLICABLE",
+      "rationale": "Matrix section 5.2 marks this requirement not applicable to A08 (APGI-Appendix).",
+      "approver": "pending"
+    },
+    {
+      "id": "CLI-001",
+      "applicability": "C",
+      "status": "Partial",
+      "evidence": "Accessibility audit source exists (AccessibilityAudit.swift); content labelled illustrative.",
+      "gap": "Declared accessibility level [CONFIRM] and an accessibility report. Instrument scoring and participant data are not implemented here."
+    }
+  ]
+}

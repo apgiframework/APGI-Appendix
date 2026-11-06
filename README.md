@@ -1,6 +1,6 @@
 # APGI Appendix – User Guide
 
-The APGI Appendix app provides a comprehensive, interconnected resource for understanding the Allostatic Precision-Gated Ignition framework and its applications. By exploring the theoretical foundations, mathematical models, biological implementations, cognitive integrations, and practical applications, users can build a deep understanding of this complex system and its relevance to neuroscience, psychiatry, and clinical practice.
+The APGI Appendix app provides a comprehensive, interconnected resource for understanding the Allostatic Precision-Gated Ignition framework and its applications. By exploring the theoretical foundations, mathematical models, biological implementations, cognitive integrations, and practical applications, users can build a deep understanding of this complex system and its relevance to neuroscience and psychiatry research. The app is a reference and learning tool; it is not a clinical decision aid.
 
 ---
 
@@ -16,13 +16,13 @@ The **APGI Appendix** app is an interactive reference and learning tool that bri
 - **Mathematical Framework** - Quantitative models and parameter relationships
 - **Biological Implementation** - Neural systems and neuromodulatory mechanisms
 - **Cognitive Integration** - Psychological and cognitive construct mappings
-- **Applications & Extensions** - Clinical applications and disorder analysis
+- **Applications & Extensions** - Illustrative, nonclinical disorder mappings
 - **Interactive Demonstrations** - Timeline visualizations and simulation tools
 - **Reference Materials** - Comprehensive glossary and bibliography
 
 The app features **dynamic content loading** with remote updates for glossary terms, bibliography references, and help documentation. Network connectivity is monitored in real-time with graceful offline functionality.
 
-The app is designed for students, educators, and clinicians who need quick, curated access to content related to APGI (Allostatic Precision-Gated Ignition) and neuromodulatory systems.
+The app is designed for students, educators, and researchers who need quick, curated access to content related to APGI (Allostatic Precision-Gated Ignition) and neuromodulatory systems.
 
 ---
 
@@ -228,7 +228,7 @@ The **Applications & Extensions** category shows practical applications and exte
 
 ### 8.1 Available Sections
 
-- **Psychiatric Disorders** - Clinical applications and disorder analysis
+- **Psychiatric Disorders** - Illustrative, nonclinical disorder mappings
 - **Disorders & Conditions** - Parameter table for disorders and conditions
 - **Life Stages** - APGI parameters across development
 - **Thermodynamic and Evolutionary Efficiency** - Efficiency considerations
@@ -244,12 +244,12 @@ The app features a **comprehensive table parsing system** that supports multiple
 
 ### 8.3 Psychiatric Disorders Section
 
-Clinical applications include:
+Illustrative, nonclinical mappings include:
 
 - Disorder-specific APGI parameter mappings
 - Neuromodulator associations for each condition
 - Timeline correlations with research developments
-- Clinical implications and treatment considerations
+- Research-context discussion only; treatment recommendations were removed and numeric examples are synthetic
 
 ### 8.4 Disorders & Conditions
 
@@ -428,10 +428,10 @@ The app is designed for interconnected learning:
 
 ### 11.5 Professional Use Cases
 
-- **Clinical Practice**
-  - Reference psychiatric disorder sections
+- **Clinical Education (not clinical decision support)**
+  - Reference psychiatric disorder sections as illustrative, synthetic examples
   - Study neuromodulator effects
-  - Apply theoretical frameworks to cases
+  - Do not use app output for diagnosis or treatment
 
 - **Academic Research**
   - Use bibliography for source tracking
@@ -667,3 +667,16 @@ xcodebuild test -project APGI-Appendix.xcodeproj -scheme APGI-Appendix \
 See [the current audit](docs/APPENDIX_AUDIT.md) for acceptance coverage and
 remaining upstream dependencies. Older feature descriptions above are background;
 they do not establish scientific validation or configured cloud services.
+
+## Validation records
+
+Validation-spec artifacts for component A08 live in `contracts/` and are checked in CI:
+
+- `application-validation-profile.json` - draft Application Validation Profile (APGI-PRO-004); unapproved
+- `release-compatibility.json` - compatibility matrix with no supported combination claimed (APGI-REL-004)
+- `default-parameter-provenance.json` - provenance for every simulator default; all labelled `assumed` (APGI-SCI-005)
+- `claim-register.json` - draft claim register; every entry `unclassified` (APGI-SCI-007)
+- `task-register.json` - the 43-row Appendix task register
+
+`docs/REQUIREMENTS_TRACEABILITY.md` is generated from them (`python3 scripts/generate_traceability.py`).
+Run `python3 scripts/check_validation_artifacts.py` to verify them against the source.

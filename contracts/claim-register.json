@@ -1,0 +1,167 @@
+{
+  "description": "Draft claim register for APGI-SCI-007. Each entry is a content-group claim placeholder, not a statement-level CLM-nnn mapping. Tiers must be assigned by the scientific authority; until then every entry is 'unclassified' and the app must not present it as established.",
+  "status": "draft; statement-level mapping pending",
+  "allowed_tiers": [
+    "established",
+    "derived",
+    "calibrated",
+    "speculative",
+    "unclassified"
+  ],
+  "claims": [
+    {
+      "id": "CLM-A08-001",
+      "source": "APGIEquationView.swift",
+      "scope": "all user-visible scientific statements in this file",
+      "tier": "unclassified",
+      "registered_claim": null
+    },
+    {
+      "id": "CLM-A08-002",
+      "source": "APGISimulatorModule.swift",
+      "scope": "all user-visible scientific statements in this file",
+      "tier": "unclassified",
+      "registered_claim": null
+    },
+    {
+      "id": "CLM-A08-003",
+      "source": "APGIStatementView.swift",
+      "scope": "all user-visible scientific statements in this file",
+      "tier": "unclassified",
+      "registered_claim": null
+    },
+    {
+      "id": "CLM-A08-004",
+      "source": "ApgiMappingView.swift",
+      "scope": "all user-visible scientific statements in this file",
+      "tier": "unclassified",
+      "registered_claim": null
+    },
+    {
+      "id": "CLM-A08-005",
+      "source": "ApgiToCognitiveView.swift",
+      "scope": "all user-visible scientific statements in this file",
+      "tier": "unclassified",
+      "registered_claim": null
+    },
+    {
+      "id": "CLM-A08-006",
+      "source": "ApgiToPsyStateView.swift",
+      "scope": "all user-visible scientific statements in this file",
+      "tier": "unclassified",
+      "registered_claim": null
+    },
+    {
+      "id": "CLM-A08-007",
+      "source": "BibliographyView.swift",
+      "scope": "all user-visible scientific statements in this file",
+      "tier": "unclassified",
+      "registered_claim": null
+    },
+    {
+      "id": "CLM-A08-008",
+      "source": "BiologicalImplementationView.swift",
+      "scope": "all user-visible scientific statements in this file",
+      "tier": "unclassified",
+      "registered_claim": null
+    },
+    {
+      "id": "CLM-A08-009",
+      "source": "DisordersConditionsView.swift",
+      "scope": "all user-visible scientific statements in this file",
+      "tier": "unclassified",
+      "registered_claim": null
+    },
+    {
+      "id": "CLM-A08-010",
+      "source": "EpistemicStandardsView.swift",
+      "scope": "all user-visible scientific statements in this file",
+      "tier": "unclassified",
+      "registered_claim": null
+    },
+    {
+      "id": "CLM-A08-011",
+      "source": "ExplicitNeuromodulatorsView.swift",
+      "scope": "all user-visible scientific statements in this file",
+      "tier": "unclassified",
+      "registered_claim": null
+    },
+    {
+      "id": "CLM-A08-012",
+      "source": "IgnitionTimelineView.swift",
+      "scope": "all user-visible scientific statements in this file",
+      "tier": "unclassified",
+      "registered_claim": null
+    },
+    {
+      "id": "CLM-A08-013",
+      "source": "LifeStagesView.swift",
+      "scope": "all user-visible scientific statements in this file",
+      "tier": "unclassified",
+      "registered_claim": null
+    },
+    {
+      "id": "CLM-A08-014",
+      "source": "MappingCognitiveToApgiView.swift",
+      "scope": "all user-visible scientific statements in this file",
+      "tier": "unclassified",
+      "registered_claim": null
+    },
+    {
+      "id": "CLM-A08-015",
+      "source": "MathematicalModelView.swift",
+      "scope": "all user-visible scientific statements in this file",
+      "tier": "unclassified",
+      "registered_claim": null
+    },
+    {
+      "id": "CLM-A08-016",
+      "source": "MethodologyView.swift",
+      "scope": "all user-visible scientific statements in this file",
+      "tier": "unclassified",
+      "registered_claim": null
+    },
+    {
+      "id": "CLM-A08-017",
+      "source": "NeuromodulatoryControlsView.swift",
+      "scope": "all user-visible scientific statements in this file",
+      "tier": "unclassified",
+      "registered_claim": null
+    },
+    {
+      "id": "CLM-A08-018",
+      "source": "NeuromodulatoryImplementationView.swift",
+      "scope": "all user-visible scientific statements in this file",
+      "tier": "unclassified",
+      "registered_claim": null
+    },
+    {
+      "id": "CLM-A08-019",
+      "source": "ParameterIdentifiabilityView.swift",
+      "scope": "all user-visible scientific statements in this file",
+      "tier": "unclassified",
+      "registered_claim": null
+    },
+    {
+      "id": "CLM-A08-020",
+      "source": "PsychiatricDisordersView.swift",
+      "scope": "all user-visible scientific statements in this file",
+      "tier": "unclassified",
+      "registered_claim": null
+    },
+    {
+      "id": "CLM-A08-021",
+      "source": "PsychologicalStatesView.swift",
+      "scope": "all user-visible scientific statements in this file",
+      "tier": "unclassified",
+      "registered_claim": null
+    },
+    {
+      "id": "CLM-A08-022",
+      "source": "ThermodynamicEfficiencyView.swift",
+      "scope": "all user-visible scientific statements in this file",
+      "tier": "unclassified",
+      "registered_claim": null
+    }
+  ]
+}

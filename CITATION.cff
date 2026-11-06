@@ -1,0 +1,13 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it using these metadata."
+title: "APGI-Appendix: reference app for Allostatic Precision-Gated Ignition"
+type: software
+version: "1.0"
+abstract: >-
+  macOS reference and simulation app for the Allostatic Precision-Gated Ignition
+  (APGI) framework. Simulator outputs are synthetic and illustrative; they are
+  not empirical evidence.
+authors:
+  - name: "APGI Framework"
+repository-code: "https://github.com/apgiframework/APGI-Appendix"
+url: "https://apgiframework.com"

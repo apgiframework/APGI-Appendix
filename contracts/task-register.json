@@ -1,0 +1,349 @@
+{
+  "source": "Software-APGI-Appendix.docx, All Tasks table (43 rows)",
+  "tasks": [
+    {
+      "id": "S0-IDN-11",
+      "task": "Retire APGI-Appendix off-block URLs",
+      "status": "Implemented",
+      "class": "implemented",
+      "evidence": "Retired identifiers removed; current contract checker passes.",
+      "external_dependency": null
+    },
+    {
+      "id": "S0-IDN-11.1",
+      "task": "Retire api.apgi-framework.org",
+      "status": "Implemented",
+      "class": "implemented",
+      "evidence": "Retired identifiers removed; current contract checker passes.",
+      "external_dependency": null
+    },
+    {
+      "id": "S0-IDN-11.2",
+      "task": "Retire docs.apgi-framework.org",
+      "status": "Implemented",
+      "class": "implemented",
+      "evidence": "Retired identifiers removed; current contract checker passes.",
+      "external_dependency": null
+    },
+    {
+      "id": "S0-IDN-11.3",
+      "task": "Retire apgi-framework.com/download",
+      "status": "Implemented",
+      "class": "implemented",
+      "evidence": "Retired identifiers removed; current contract checker passes.",
+      "external_dependency": null
+    },
+    {
+      "id": "S0-IDN-11.4",
+      "task": "Retire raw.githubusercontent.com/apgi/framework",
+      "status": "Implemented",
+      "class": "implemented",
+      "evidence": "Retired identifiers removed; current contract checker passes.",
+      "external_dependency": null
+    },
+    {
+      "id": "S0-IDN-12",
+      "task": "Align Appendix APGI expansion with identifier block",
+      "status": "Implemented",
+      "class": "implemented",
+      "evidence": "Canonical expansion: Allostatic Precision-Gated Ignition.",
+      "external_dependency": null
+    },
+    {
+      "id": "S1-CMP-01.3",
+      "task": "Add Appendix APGISimulatorModule.swift to the matrix",
+      "status": "Partial / blocked",
+      "class": "blocked",
+      "evidence": "Local matrix exists; qualified registry/model reconciliation remains pending.",
+      "external_dependency": "qualified mathematical-contracts.yaml / parameter-registry.yaml"
+    },
+    {
+      "id": "S1-CMP-01.3.1",
+      "task": "Map Appendix α → gamma_sig",
+      "status": "Implemented",
+      "class": "implemented",
+      "evidence": "Ignition sigmoid α maps to gamma_sig in the matrix.",
+      "external_dependency": null
+    },
+    {
+      "id": "S1-CMP-01.3.2",
+      "task": "Map marker-weighted Πᵢ → pi_i_rel_eff only if transformation matches; else apgi_extended",
+      "status": "Partial / blocked",
+      "class": "blocked",
+      "evidence": "Classified apgi_extended; equivalence to pi_i_rel_eff remains unqualified.",
+      "external_dependency": "qualified mathematical-contracts.yaml / parameter-registry.yaml"
+    },
+    {
+      "id": "S1-CMP-01.3.3",
+      "task": "Mark Appendix broadcast and maintenance cost terms scope_layer: thermodynamic",
+      "status": "Implemented",
+      "class": "implemented",
+      "evidence": "Broadcast and maintenance costs have scope_layer: thermodynamic.",
+      "external_dependency": null
+    },
+    {
+      "id": "S1-LNG-05",
+      "task": "Audit Appendix disorder sections and treatment considerations",
+      "status": "Implemented",
+      "class": "implemented",
+      "evidence": "Treatment recommendations removed; numerical disorder examples labelled illustrative, synthetic and nonclinical.",
+      "external_dependency": null
+    },
+    {
+      "id": "S1-APP-01",
+      "task": "Appendix entitlement minimisation + identifier block",
+      "status": "Partial / blocked",
+      "class": "blocked",
+      "evidence": "Entitlements, privacy and identifiers corrected; production signed-update delivery remains blocked.",
+      "external_dependency": "reviewed production public signing key and published feed"
+    },
+    {
+      "id": "S1-APP-01.1",
+      "task": "Remove unused entitlements",
+      "status": "Implemented",
+      "class": "implemented",
+      "evidence": "Four retained entitlements: sandbox, selected-file read/write, outbound network, printing.",
+      "external_dependency": null
+    },
+    {
+      "id": "S1-APP-01.1.1",
+      "task": "Remove entitlement: location",
+      "status": "Implemented",
+      "class": "implemented",
+      "evidence": "Unused entitlement absent; exact entitlement audit passes.",
+      "external_dependency": null
+    },
+    {
+      "id": "S1-APP-01.1.2",
+      "task": "Remove entitlement: address book",
+      "status": "Implemented",
+      "class": "implemented",
+      "evidence": "Unused entitlement absent; exact entitlement audit passes.",
+      "external_dependency": null
+    },
+    {
+      "id": "S1-APP-01.1.3",
+      "task": "Remove entitlement: calendars",
+      "status": "Implemented",
+      "class": "implemented",
+      "evidence": "Unused entitlement absent; exact entitlement audit passes.",
+      "external_dependency": null
+    },
+    {
+      "id": "S1-APP-01.1.4",
+      "task": "Remove entitlement: photos library",
+      "status": "Implemented",
+      "class": "implemented",
+      "evidence": "Unused entitlement absent; exact entitlement audit passes.",
+      "external_dependency": null
+    },
+    {
+      "id": "S1-APP-01.1.5",
+      "task": "Remove entitlement: camera",
+      "status": "Implemented",
+      "class": "implemented",
+      "evidence": "Unused entitlement absent; exact entitlement audit passes.",
+      "external_dependency": null
+    },
+    {
+      "id": "S1-APP-01.1.6",
+      "task": "Remove entitlement: microphone",
+      "status": "Implemented",
+      "class": "implemented",
+      "evidence": "Unused entitlement absent; exact entitlement audit passes.",
+      "external_dependency": null
+    },
+    {
+      "id": "S1-APP-01.1.7",
+      "task": "Remove entitlement: audio input",
+      "status": "Implemented",
+      "class": "implemented",
+      "evidence": "Unused entitlement absent; exact entitlement audit passes.",
+      "external_dependency": null
+    },
+    {
+      "id": "S1-APP-01.1.8",
+      "task": "Remove entitlement: USB",
+      "status": "Implemented",
+      "class": "implemented",
+      "evidence": "Unused entitlement absent; exact entitlement audit passes.",
+      "external_dependency": null
+    },
+    {
+      "id": "S1-APP-01.1.9",
+      "task": "Remove entitlement: Bluetooth",
+      "status": "Implemented",
+      "class": "implemented",
+      "evidence": "Unused entitlement absent; exact entitlement audit passes.",
+      "external_dependency": null
+    },
+    {
+      "id": "S1-APP-01.1.10",
+      "task": "Remove entitlement: network.server",
+      "status": "Implemented",
+      "class": "implemented",
+      "evidence": "Unused entitlement absent; exact entitlement audit passes.",
+      "external_dependency": null
+    },
+    {
+      "id": "S1-APP-01.2",
+      "task": "Make PrivacyInfo.xcprivacy match what the build transmits",
+      "status": "Implemented",
+      "class": "implemented",
+      "evidence": "Privacy manifest corrected; no analytics or diagnostics collection declared.",
+      "external_dependency": null
+    },
+    {
+      "id": "S1-APP-01.3",
+      "task": "Point update feed at an identifier-block domain; verification fails closed",
+      "status": "Partial / blocked",
+      "class": "blocked",
+      "evidence": "Canonical feed and fail-closed verification implemented; reviewed production key/feed contract missing.",
+      "external_dependency": "reviewed production public signing key and published feed"
+    },
+    {
+      "id": "S1-APP-01.4",
+      "task": "Render identifier block in Appendix",
+      "status": "Implemented",
+      "class": "implemented",
+      "evidence": "About displays website, API and repository identifiers.",
+      "external_dependency": null
+    },
+    {
+      "id": "S1-APP-02",
+      "task": "Appendix simulator parity against framework fixtures",
+      "status": "Partial / blocked",
+      "class": "blocked",
+      "evidence": "Local sign smoke tests pass; qualified framework fixture parity not established.",
+      "external_dependency": "qualified framework fixtures and registered tolerances"
+    },
+    {
+      "id": "S1-APP-02.1",
+      "task": "Load simulator constants and test vectors from framework fixtures",
+      "status": "Partial / blocked",
+      "class": "blocked",
+      "evidence": "Bundled local vectors load; constants remain local Swift values, not qualified framework imports.",
+      "external_dependency": "qualified framework fixtures and registered tolerances"
+    },
+    {
+      "id": "S1-APP-02.2",
+      "task": "Run Swift parity tests including the sign fixture",
+      "status": "Partial / blocked",
+      "class": "blocked",
+      "evidence": "Negative, zero and positive local sign fixtures tested; registered full parity suite pending.",
+      "external_dependency": "qualified framework fixtures and registered tolerances"
+    },
+    {
+      "id": "S1-APP-02.3",
+      "task": "Label simulator outputs data_origin: synthetic",
+      "status": "Implemented",
+      "class": "implemented",
+      "evidence": "Simulator diagnostics serialize data_origin: synthetic with evidence status and pack version.",
+      "external_dependency": null
+    },
+    {
+      "id": "S1-APP-03",
+      "task": "Render ParameterIdentifiabilityView from gate-table.yaml",
+      "status": "Partial / blocked",
+      "class": "blocked",
+      "evidence": "Bundled pending gate-table.json renders; authoritative gate-table.yaml, K7a/K7c outcomes and D2 pending.",
+      "external_dependency": "published gate-table.yaml with K7a/K7c outcomes and D2 decision"
+    },
+    {
+      "id": "S1-APP-04",
+      "task": "Rename α → gamma_sig in Appendix UI text",
+      "status": "Implemented",
+      "class": "implemented",
+      "evidence": "Sigmoid steepness labels use gamma_sig; unrelated alpha symbols retain their meanings.",
+      "external_dependency": null
+    },
+    {
+      "id": "S1-APP-05",
+      "task": "Add Xcode project or Package.swift so CI can build Appendix",
+      "status": "Implemented",
+      "class": "implemented",
+      "evidence": "Tracked Xcode project/shared scheme; contracts and native macOS test jobs passed on main.",
+      "external_dependency": null
+    },
+    {
+      "id": "S1-APP-06",
+      "task": "Ship reference content as versioned packs with evidence-status labels",
+      "status": "Implemented",
+      "class": "implemented",
+      "evidence": "Versioned reference pack 2026.10.27, hashes and evidence labels present; hash check passes.",
+      "external_dependency": null
+    },
+    {
+      "id": "S1-APP-07",
+      "task": "Keep CloudKit bookmarks in user's private iCloud database",
+      "status": "Partial / unverified",
+      "class": "blocked",
+      "evidence": "Existing cloud code uses privateCloudDatabase; current entitlements do not provision iCloud; signed multi-device test pending.",
+      "external_dependency": "iCloud container, provisioning and signed multi-device test"
+    },
+    {
+      "id": "S2-DEC-03",
+      "task": "Restrict Appendix outbound data to opt-in crash diagnostics",
+      "status": "Deferred / blocked",
+      "class": "deferred",
+      "evidence": "D13 decision S2-DEC-02 and client-diagnostics contract pending; no diagnostics upload or usage analytics added.",
+      "external_dependency": "D13 decision S2-DEC-02 and client-diagnostics contract"
+    },
+    {
+      "id": "S3-PR6-07",
+      "task": "Add Appendix fixture loading",
+      "status": "Partial / blocked",
+      "class": "blocked",
+      "evidence": "Local fixture loading implemented; qualified framework fixture integration pending.",
+      "external_dependency": "qualified framework fixtures"
+    },
+    {
+      "id": "S3-PR6-08",
+      "task": "Add Appendix parity tests",
+      "status": "Partial / blocked",
+      "class": "blocked",
+      "evidence": "Local sign tests implemented; scientific parity acceptance pending qualified fixtures/tolerances.",
+      "external_dependency": "qualified framework fixtures and registered tolerances"
+    },
+    {
+      "id": "XC-CI-09",
+      "task": "CI gates: APGI-Appendix",
+      "status": "Partial / unverified",
+      "class": "blocked",
+      "evidence": "Hosted jobs pass; required-check enforcement on protected branches not verified.",
+      "external_dependency": "protected-branch settings (repository admin)"
+    },
+    {
+      "id": "XC-CI-09.1",
+      "task": "CI gate (APGI-Appendix): numerical parity incl. sign fixture",
+      "status": "Partial / blocked",
+      "class": "blocked",
+      "evidence": "Local sign regression is in the native suite; qualified numerical parity gate pending.",
+      "external_dependency": "qualified numerical parity suite"
+    },
+    {
+      "id": "XC-CI-09.2",
+      "task": "CI gate (APGI-Appendix): gate-table render test",
+      "status": "Partial / blocked",
+      "class": "blocked",
+      "evidence": "Pending JSON gate rendering tested; published YAML/results integration pending.",
+      "external_dependency": "published gate-table.yaml"
+    },
+    {
+      "id": "XC-CI-09.3",
+      "task": "CI gate (APGI-Appendix): entitlement audit",
+      "status": "Implemented",
+      "class": "implemented",
+      "evidence": "Exact entitlement audit runs in the successful contracts job.",
+      "external_dependency": null
+    },
+    {
+      "id": "XC-CI-09.4",
+      "task": "CI gate (APGI-Appendix): identifier block",
+      "status": "Implemented",
+      "class": "implemented",
+      "evidence": "Identifier checks run in the successful contracts job.",
+      "external_dependency": null
+    }
+  ]
+}
