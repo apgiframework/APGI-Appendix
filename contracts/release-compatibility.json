@@ -1,0 +1,30 @@
+{
+  "component": "APGI-Appendix",
+  "status": "draft; no combination is claimed as tested",
+  "versioning": "semantic versioning",
+  "app": {
+    "version": "1.0",
+    "build": "1",
+    "pbxproj_marketing_version": "1.0",
+    "pbxproj_build": "1"
+  },
+  "reference_pack": "2026.10.27",
+  "gate_table": "2026.10.27-pending",
+  "protocol": {
+    "version": "1.2",
+    "definitions_implemented": []
+  },
+  "schemas": {
+    "status": "pending canonical apgi-api contracts/schemas/v1 and hashes",
+    "pinned_hashes": {}
+  },
+  "papers_or_archives": {
+    "status": "pending"
+  },
+  "reference_implementation": {
+    "status": "pending",
+    "note": "apgi-implementation / apgi-framework revisions not pinned"
+  },
+  "supported_combinations": [],
+  "model_family": "apgi_extended"
+}

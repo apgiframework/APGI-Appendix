@@ -1,0 +1,426 @@
+{
+  "description": "Provenance register for APGISimulatorConstants.swift (APGI-SCI-005). Labels: analytically_derived, post_hoc_calibrated, assumed. No source reference has been located for any scientific default, so every one is labelled 'assumed' and must not be presented as derived or calibrated until the qualified parameter-registry.yaml supplies a source.",
+  "allowed_labels": [
+    "analytically_derived",
+    "post_hoc_calibrated",
+    "assumed"
+  ],
+  "source_file": "APGI-Appendix/APGISimulatorConstants.swift",
+  "registry_status": "pending qualified parameter-registry.yaml",
+  "entries": [
+    {
+      "name": "defaultHiddenSize",
+      "value": "128",
+      "group": "Network Architecture",
+      "scope": "scientific_default",
+      "provenance": "assumed",
+      "source_reference": null
+    },
+    {
+      "name": "defaultNumLevels",
+      "value": "3",
+      "group": "Network Architecture",
+      "scope": "scientific_default",
+      "provenance": "assumed",
+      "source_reference": null
+    },
+    {
+      "name": "defaultInputSize",
+      "value": "64",
+      "group": "Network Architecture",
+      "scope": "scientific_default",
+      "provenance": "assumed",
+      "source_reference": null
+    },
+    {
+      "name": "defaultDtMs",
+      "value": "10.0",
+      "group": "Time Constants (in milliseconds)",
+      "scope": "scientific_default",
+      "provenance": "assumed",
+      "source_reference": null
+    },
+    {
+      "name": "maxWindowMs",
+      "value": "500.0",
+      "group": "Time Constants (in milliseconds)",
+      "scope": "scientific_default",
+      "provenance": "assumed",
+      "source_reference": null
+    },
+    {
+      "name": "surpriseDecayTau",
+      "value": "200.0",
+      "group": "Time Constants (in milliseconds)",
+      "scope": "scientific_default",
+      "provenance": "assumed",
+      "source_reference": null
+    },
+    {
+      "name": "maxRefractoryMs",
+      "value": "200.0",
+      "group": "Time Constants (in milliseconds)",
+      "scope": "scientific_default",
+      "provenance": "assumed",
+      "source_reference": null
+    },
+    {
+      "name": "baselineThreshold",
+      "value": "1.0",
+      "group": "Threshold Parameters",
+      "scope": "scientific_default",
+      "provenance": "assumed",
+      "source_reference": null
+    },
+    {
+      "name": "minThreshold",
+      "value": "0.1",
+      "group": "Threshold Parameters",
+      "scope": "scientific_default",
+      "provenance": "assumed",
+      "source_reference": null
+    },
+    {
+      "name": "maxThreshold",
+      "value": "5.0",
+      "group": "Threshold Parameters",
+      "scope": "scientific_default",
+      "provenance": "assumed",
+      "source_reference": null
+    },
+    {
+      "name": "thresholdRecoveryRate",
+      "value": "2.0",
+      "group": "Threshold Parameters",
+      "scope": "scientific_default",
+      "provenance": "assumed",
+      "source_reference": null
+    },
+    {
+      "name": "postIgnitionRefractory",
+      "value": "0.5",
+      "group": "Threshold Parameters",
+      "scope": "scientific_default",
+      "provenance": "assumed",
+      "source_reference": null
+    },
+    {
+      "name": "urgencyGainFactor",
+      "value": "0.2",
+      "group": "Threshold Parameters",
+      "scope": "scientific_default",
+      "provenance": "assumed",
+      "source_reference": null
+    },
+    {
+      "name": "minPrecision",
+      "value": "0.01",
+      "group": "Precision Parameters",
+      "scope": "scientific_default",
+      "provenance": "assumed",
+      "source_reference": null
+    },
+    {
+      "name": "maxPrecision",
+      "value": "10.0",
+      "group": "Precision Parameters",
+      "scope": "scientific_default",
+      "provenance": "assumed",
+      "source_reference": null
+    },
+    {
+      "name": "baselineInteroceptivePrecision",
+      "value": "0.1",
+      "group": "Precision Parameters",
+      "scope": "scientific_default",
+      "provenance": "assumed",
+      "source_reference": null
+    },
+    {
+      "name": "baselineExteroceptivePrecision",
+      "value": "0.05",
+      "group": "Precision Parameters",
+      "scope": "scientific_default",
+      "provenance": "assumed",
+      "source_reference": null
+    },
+    {
+      "name": "minEnergy",
+      "value": "0.0",
+      "group": "Energy Parameters",
+      "scope": "scientific_default",
+      "provenance": "assumed",
+      "source_reference": null
+    },
+    {
+      "name": "maxEnergy",
+      "value": "1.0",
+      "group": "Energy Parameters",
+      "scope": "scientific_default",
+      "provenance": "assumed",
+      "source_reference": null
+    },
+    {
+      "name": "defaultEnergyReserves",
+      "value": "0.8",
+      "group": "Energy Parameters",
+      "scope": "scientific_default",
+      "provenance": "assumed",
+      "source_reference": null
+    },
+    {
+      "name": "energyDepletionRate",
+      "value": "0.001",
+      "group": "Energy Parameters",
+      "scope": "scientific_default",
+      "provenance": "assumed",
+      "source_reference": null
+    },
+    {
+      "name": "minAllostaticLoad",
+      "value": "0.0",
+      "group": "Allostatic Load Parameters",
+      "scope": "scientific_default",
+      "provenance": "assumed",
+      "source_reference": null
+    },
+    {
+      "name": "maxAllostaticLoad",
+      "value": "2.0",
+      "group": "Allostatic Load Parameters",
+      "scope": "scientific_default",
+      "provenance": "assumed",
+      "source_reference": null
+    },
+    {
+      "name": "allostaticIncreaseRate",
+      "value": "0.01",
+      "group": "Allostatic Load Parameters",
+      "scope": "scientific_default",
+      "provenance": "assumed",
+      "source_reference": null
+    },
+    {
+      "name": "allostaticDecreaseRate",
+      "value": "0.5",
+      "group": "Allostatic Load Parameters",
+      "scope": "scientific_default",
+      "provenance": "assumed",
+      "source_reference": null
+    },
+    {
+      "name": "sigmoidSteepness",
+      "value": "10.0",
+      "group": "Mathematical Model Parameters",
+      "scope": "scientific_default",
+      "provenance": "assumed",
+      "source_reference": null
+    },
+    {
+      "name": "betaTransition",
+      "value": "10.0",
+      "group": "Mathematical Model Parameters",
+      "scope": "scientific_default",
+      "provenance": "assumed",
+      "source_reference": null
+    },
+    {
+      "name": "hysteresisFactor",
+      "value": "0.2",
+      "group": "Mathematical Model Parameters",
+      "scope": "scientific_default",
+      "provenance": "assumed",
+      "source_reference": null
+    },
+    {
+      "name": "somaticBiasFactor",
+      "value": "1.3",
+      "group": "Mathematical Model Parameters",
+      "scope": "scientific_default",
+      "provenance": "assumed",
+      "source_reference": null
+    },
+    {
+      "name": "metabolicWeight",
+      "value": "0.4",
+      "group": "Somatic Marker Computation Weights",
+      "scope": "scientific_default",
+      "provenance": "assumed",
+      "source_reference": null
+    },
+    {
+      "name": "cognitiveWeight",
+      "value": "0.3",
+      "group": "Somatic Marker Computation Weights",
+      "scope": "scientific_default",
+      "provenance": "assumed",
+      "source_reference": null
+    },
+    {
+      "name": "affectiveWeight",
+      "value": "0.3",
+      "group": "Somatic Marker Computation Weights",
+      "scope": "scientific_default",
+      "provenance": "assumed",
+      "source_reference": null
+    },
+    {
+      "name": "somaticMarkerScaling",
+      "value": "2.0",
+      "group": "Somatic Marker Computation Weights",
+      "scope": "scientific_default",
+      "provenance": "assumed",
+      "source_reference": null
+    },
+    {
+      "name": "alphaBroadcast",
+      "value": "1.0",
+      "group": "Cost-Benefit Parameters",
+      "scope": "scientific_default",
+      "provenance": "assumed",
+      "source_reference": null
+    },
+    {
+      "name": "betaMaintenance",
+      "value": "0.5",
+      "group": "Cost-Benefit Parameters",
+      "scope": "scientific_default",
+      "provenance": "assumed",
+      "source_reference": null
+    },
+    {
+      "name": "benefitScaling",
+      "value": "0.5",
+      "group": "Cost-Benefit Parameters",
+      "scope": "scientific_default",
+      "provenance": "assumed",
+      "source_reference": null
+    },
+    {
+      "name": "defaultHistoryLength",
+      "value": "100",
+      "group": "History and Memory",
+      "scope": "scientific_default",
+      "provenance": "assumed",
+      "source_reference": null
+    },
+    {
+      "name": "precisionHistoryMax",
+      "value": "1000",
+      "group": "History and Memory",
+      "scope": "scientific_default",
+      "provenance": "assumed",
+      "source_reference": null
+    },
+    {
+      "name": "numericalEpsilon",
+      "value": "1e-8",
+      "group": "Numerical Stability",
+      "scope": "scientific_default",
+      "provenance": "assumed",
+      "source_reference": null
+    },
+    {
+      "name": "reservoirScaling",
+      "value": "1.0",
+      "group": "Reservoir Parameters",
+      "scope": "scientific_default",
+      "provenance": "assumed",
+      "source_reference": null
+    },
+    {
+      "name": "reservoirSparsity",
+      "value": "0.1",
+      "group": "Reservoir Parameters",
+      "scope": "scientific_default",
+      "provenance": "assumed",
+      "source_reference": null
+    },
+    {
+      "name": "defaultZoomFactor",
+      "value": "1.2",
+      "group": "UI Constants",
+      "scope": "ui_layout"
+    },
+    {
+      "name": "animationDuration",
+      "value": "0.3",
+      "group": "UI Constants",
+      "scope": "ui_layout"
+    },
+    {
+      "name": "transitionScale",
+      "value": "0.95",
+      "group": "UI Constants",
+      "scope": "ui_layout"
+    },
+    {
+      "name": "standardPadding",
+      "value": "12",
+      "group": "UI Constants",
+      "scope": "ui_layout"
+    },
+    {
+      "name": "standardVerticalPadding",
+      "value": "10",
+      "group": "UI Constants",
+      "scope": "ui_layout"
+    },
+    {
+      "name": "standardVStackSpacing",
+      "value": "12",
+      "group": "UI Constants",
+      "scope": "ui_layout"
+    },
+    {
+      "name": "largeVStackSpacing",
+      "value": "20",
+      "group": "UI Constants",
+      "scope": "ui_layout"
+    },
+    {
+      "name": "smallVStackSpacing",
+      "value": "8",
+      "group": "UI Constants",
+      "scope": "ui_layout"
+    },
+    {
+      "name": "defaultLearningRate",
+      "value": "0.1",
+      "group": "UI Constants",
+      "scope": "scientific_default",
+      "provenance": "assumed",
+      "source_reference": null
+    },
+    {
+      "name": "norepinephrineVolatilityScaling",
+      "value": "2.0",
+      "group": "UI Constants",
+      "scope": "scientific_default",
+      "provenance": "assumed",
+      "source_reference": null
+    },
+    {
+      "name": "acetylcholinePrecisionScaling",
+      "value": "0.5",
+      "group": "UI Constants",
+      "scope": "scientific_default",
+      "provenance": "assumed",
+      "source_reference": null
+    },
+    {
+      "name": "neuromodulatoryBaselineOffset",
+      "value": "0.5",
+      "group": "UI Constants",
+      "scope": "scientific_default",
+      "provenance": "assumed",
+      "source_reference": null
+    },
+    {
+      "name": "standardHStackSpacing",
+      "value": "16",
+      "group": "UI Constants",
+      "scope": "ui_layout"
+    }
+  ]
+}

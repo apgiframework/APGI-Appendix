@@ -9,7 +9,9 @@ jobs:
       - uses: actions/checkout@v4
       - run: pip install pyyaml
       - run: python3 scripts/check_appendix_contracts.py
-      - run: python3 -m unittest scripts/test_local_evidence.py
+      - run: python3 -m unittest scripts/test_local_evidence.py scripts/test_validation_artifacts.py
+      - run: python3 scripts/check_validation_artifacts.py
+      - run: python3 scripts/generate_traceability.py --check
   macos-tests:
     runs-on: macos-26
     steps:
